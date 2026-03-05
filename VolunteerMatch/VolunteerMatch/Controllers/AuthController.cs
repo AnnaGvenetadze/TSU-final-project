@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using VolunteerMatch.Dtos;
 using VolunteerMatch.Exceptions;
 using VolunteerMatch.Services;
@@ -17,23 +18,27 @@ namespace VolunteerMatch.Controllers
         }
 
 
-        [HttpPost("register/volunteer")]
-        public async Task<IActionResult> RegisterVolunteer(RegisterVolunteerDto dto)
-        {
-            try
-            {
-                await _userService.RegisterVolunteerAsync(dto);
-                return Ok("მოხალისე წარმატებით დარეგისტრირდა.");
-            }
-            catch (DuplicateEmailException ex)
-            {
-                return Conflict(ex.Message);    // 409
-            }
-        }
+        //[HttpPost("register/volunteer")]
+        //public async Task<IActionResult> RegisterVolunteer([FromBody] RegisterVolunteerDto dto)
+        //{
+        //    try
+        //    {
+        //        await _userService.RegisterVolunteerAsync(dto);
+        //        return Ok("მოხალისე წარმატებით დარეგისტრირდა.");
+        //    }
+        //    catch (DuplicateEmailException ex)
+        //    {
+        //        return Conflict(ex.Message);    // 409
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
+        //    }
+        //}
 
 
         [HttpPost("register/organization")]
-        public async Task<IActionResult> RegisterOrganization(RegisterOrganizationDto dto)
+        public async Task<IActionResult> RegisterOrganization([FromBody] RegisterOrganizationDto dto)
         {
             try
             {
@@ -44,11 +49,15 @@ namespace VolunteerMatch.Controllers
             {
                 return Conflict(ex.Message);    // 409
             }
+            catch (Exception)
+            {
+                return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
+            }
         }
 
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginUserDto loginUserDto)
+        public async Task<IActionResult> Login([FromBody] LoginUserDto loginUserDto)
         {
             try
             {

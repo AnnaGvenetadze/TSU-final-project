@@ -6,6 +6,9 @@ namespace VolunteerMatch.Dtos
     {
         [Required(ErrorMessage = "იმეილი სავალდებულოა.")]
         [EmailAddress(ErrorMessage = "იმეილის ფორმატი არასწორია.")]
+        [RegularExpression(
+            @"^(?!.*\.\.)(?!.*\.$)[a-z0-9._%+\-]+@(?:[a-z0-9\-]+\.)+[a-z]{2,}$",
+            ErrorMessage = "იმეილის ფორმატი არასწორია.")]
         public string Email { get; set; } = null!;
 
         [Required(ErrorMessage = "პაროლი სავალდებულოა.")]

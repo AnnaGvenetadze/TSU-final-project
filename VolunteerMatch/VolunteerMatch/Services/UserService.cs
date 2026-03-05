@@ -4,6 +4,7 @@ using VolunteerMatch.Dtos;
 using VolunteerMatch.Exceptions;
 using VolunteerMatch.Infrastructure.Helpers;
 using VolunteerMatch.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VolunteerMatch.Services
 {
@@ -29,7 +30,7 @@ namespace VolunteerMatch.Services
             ArgumentNullException.ThrowIfNull(dto);
 
             var user = CreateUser(dto.Email, dto.Password, "მოხალისე");
-            var profile = CreateVolunteerProfile(dto, user);
+            var profile = CreateVolunteerProfile(dto);
 
             await using var tx = await _context.Database.BeginTransactionAsync();
 
@@ -46,10 +47,13 @@ namespace VolunteerMatch.Services
                 await tx.CommitAsync();
             }
             catch (DbUpdateException ex)
-                when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
             {
                 await tx.RollbackAsync();
-                throw new DuplicateEmailException();
+
+                if (DbExceptionHelper.IsUniqueConstraintViolation(ex))
+                    throw new DuplicateEmailException();
+
+                throw; // 500 - Internal server error
             }
         }
 
@@ -59,7 +63,7 @@ namespace VolunteerMatch.Services
             ArgumentNullException.ThrowIfNull(dto);
 
             var user = CreateUser(dto.Email, dto.Password, "ორგანიზაცია");
-            var organization = CreateOrganizationProfile(dto, user);
+            var profile = CreateOrganizationProfile(dto);
 
             await using var tx = await _context.Database.BeginTransactionAsync();
 
@@ -68,18 +72,20 @@ namespace VolunteerMatch.Services
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                var profile = CreateOrganizationProfile(dto, user);
-
+                profile.OrganizationId = user.UserId;
                 _context.OrganizationProfiles.Add(profile);
 
                 await _context.SaveChangesAsync();
                 await tx.CommitAsync();
             }
             catch (DbUpdateException ex)
-                when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
             {
                 await tx.RollbackAsync();
-                throw new DuplicateEmailException();
+
+                if (DbExceptionHelper.IsUniqueConstraintViolation(ex))
+                    throw new DuplicateEmailException();
+
+                throw; // 500 - Internal server error
             }
         }
 
@@ -89,7 +95,7 @@ namespace VolunteerMatch.Services
             // DTO already validated by [ApiController] -> ModelState
             ArgumentNullException.ThrowIfNull(dto);
 
-            var email = dto.Email.Trim();
+            var email = dto.Email.Trim().ToLowerInvariant();
 
             var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
             if (user is null)
@@ -111,40 +117,37 @@ namespace VolunteerMatch.Services
             // Guid.Empty უბრალოდ placeholder-ია სანამ DB ჩაწერს ნამდვილ GUID-ს.
             var user = new User
             {
-                Email = email.Trim(),
-                Role = role,
-                LastLoginAt = null
+                Email = email.Trim().ToLowerInvariant(), // User@Mail.com == user@mail.com
+                Role = role.Trim()
             };
-
             user.PasswordHash = _passwordHasher.HashPassword(user, password);
+            
             return user;
         }
 
 
-        private VolunteerProfile CreateVolunteerProfile(RegisterVolunteerDto dto, User user)
+        private VolunteerProfile CreateVolunteerProfile(RegisterVolunteerDto dto)
         {
             return new VolunteerProfile
             {
-                VolunteerId = user.UserId,
                 FirstName = dto.FirstName.Trim(),
                 LastName = dto.LastName.Trim(),
                 BirthDate = dto.BirthDate,
                 Citizenship = dto.Citizenship.Trim(),
                 Profession = dto.Profession.Trim(),
                 Languages = dto.Languages.Trim(),
-                Skills = dto.Skills,
-                Interests = dto.Interests
+                Skills = dto.Skills.Trim(),
+                Interests = dto.Interests.Trim()
             };
         }
 
 
-        private OrganizationProfile CreateOrganizationProfile(RegisterOrganizationDto dto, User user)
+        private OrganizationProfile CreateOrganizationProfile(RegisterOrganizationDto dto)
         {
             return new OrganizationProfile
             {
-                OrganizationId = user.UserId,
                 OrganizationName = dto.OrganizationName.Trim(),
-                Description = dto.Description
+                Description = dto.Description.Trim()
             };
         }
     }
