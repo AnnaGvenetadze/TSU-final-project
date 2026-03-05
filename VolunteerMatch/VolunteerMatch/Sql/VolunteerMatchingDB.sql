@@ -10,12 +10,18 @@ create table dbo.Users (
 	LastLoginAt         DATETIMEOFFSET NULL,
     CreatedAt           DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
 
-	CONSTRAINT UQ_Volunteers_Email UNIQUE (Email),
-	CONSTRAINT PK_Users PRIMARY KEY (UserId)
+	CONSTRAINT UQ_Users_Email UNIQUE (Email),
+	CONSTRAINT CK_Users_Email_NotBlank CHECK (LEN(LTRIM(RTRIM(Email))) > 0),
+	CONSTRAINT PK_Users PRIMARY KEY (UserId),
+	CONSTRAINT CK_Users_Role 
+		CHECK (LTRIM(RTRIM(Users.Role)) IN (N'მოხალისე', N'ორგანიზაცია')),
+	CONSTRAINT CK_Users_PasswordHash_NotBlank
+		CHECK (LEN(LTRIM(RTRIM(PasswordHash))) > 0)
+
 );
 
 -- Age must be calculated here and Location - it will be prefiltered with events' compatible columns
-CREATE TABLE dbo.Volunteers (
+CREATE TABLE dbo.VolunteerProfiles (
 	VolunteerId         UNIQUEIDENTIFIER NOT NULL,
     FirstName       NVARCHAR(100) NOT NULL,
     LastName        NVARCHAR(100) NOT NULL,
@@ -25,32 +31,34 @@ CREATE TABLE dbo.Volunteers (
     Languages       NVARCHAR(500) NOT NULL,
     Skills          NVARCHAR(MAX) NOT NULL,
     Interests       NVARCHAR(MAX) NOT NULL,
+	Description     NVARCHAR(MAX) NULL,
+	LinkedInUrl		NVARCHAR(300) NULL,
     ProfilePhotoUrl NVARCHAR(500) NULL,
     Technologies    NVARCHAR(500) NULL,
     Experience      NVARCHAR(MAX) NULL,
-    Location        NVARCHAR(200) NULL,
-    PreferredDays   NVARCHAR(200) NULL,
-    --AverageRating   DECIMAL(3,2) NOT NULL DEFAULT 0,
+    Location        NVARCHAR(200) NULL, --
+    PreferredDays   NVARCHAR(200) NULL, --
+    AverageRating   DECIMAL(3,2)  NULL DEFAULT 0, --
 
     CONSTRAINT PK_VolunteerProfiles PRIMARY KEY (VolunteerId),
 	CONSTRAINT FK_VolunteerProfiles_Users
 		FOREIGN KEY (VolunteerId) REFERENCES dbo.Users(UserId)
 );
 
-CREATE TABLE dbo.Organizations (
+CREATE TABLE dbo.OrganizationProfiles (
 	OrganizationId      UNIQUEIDENTIFIER NOT NULL,
     OrganizationName NVARCHAR(200) NOT NULL,
     Description      NVARCHAR(MAX) NOT NULL,
-    PhoneNumber      NVARCHAR(50) NULL,
+    PhoneNumber      NVARCHAR(50) NULL, --
     LinkedInUrl		 NVARCHAR(300) NULL,
-    --AverageRating    DECIMAL(3,2) NOT NULL DEFAULT 0,
+    AverageRating    DECIMAL(3,2) NULL DEFAULT 0, --
 
     CONSTRAINT PK_OrganizationProfiles PRIMARY KEY (OrganizationId),
     CONSTRAINT FK_OrganizationProfiles_Users
         FOREIGN KEY (OrganizationId) REFERENCES dbo.Users(UserId)
 );
 
-
+-------- აქამდე შევქმენი თეიბლები რეგისტრაცია/ლოგინი პროფილების ედითი (ივენთის დამატების გარდა) ------
 CREATE TABLE dbo.Events (
     EventId         UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
     OrganizationId  UNIQUEIDENTIFIER NOT NULL,
@@ -185,7 +193,7 @@ CREATE TABLE dbo.EventTags (
         REFERENCES dbo.Tags(TagId)
 );
 
------------------------ აქამდე შევქმენი თეიბლები ----------------------------------
+
 CREATE TABLE dbo.Permissions (
     PermissionId   UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
     PermissionName NVARCHAR(100) NOT NULL,
