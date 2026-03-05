@@ -3,16 +3,9 @@ using VolunteerMatch.Models;
 
 namespace VolunteerMatch.Dtos
 {
-    // TODO: რეგისტრაციის დთო-ებსა და თეიბლებში როლები საჭიროა ?
     public class RegisterVolunteerDto
     {
         //Users (NOT NULL in DB)
-
-        //[Required(ErrorMessage = "როლი სავალდებულოა.")]
-        //[RegularExpression("^(მოხალისე|ორგანიზაცია)$",
-        //    ErrorMessage = "ასეთი როლი არ არსებობს.")]
-        //public string Role { get; set; } = null!;
-
         [Required(ErrorMessage = "იმეილი სავალდებულოა.")]
         [EmailAddress(ErrorMessage = "იმეილის ფორმატი არასწორია.")]
         [RegularExpression(
@@ -57,9 +50,9 @@ namespace VolunteerMatch.Dtos
         [Required(ErrorMessage = "ინტერესი სავალდებულოა.")]
         public string Interests { get; set; } = null!;
 
-        // Many-to-many tags (VolunteerTags)
-        [Required(ErrorMessage = "თემატიკა სავალდებულოა.")]
-        public List<Guid> TagIds { get; set; } = new();
+        //// TODO: Many-to-many tags (VolunteerTags)
+        //[Required(ErrorMessage = "თემატიკა სავალდებულოა.")]
+        //public List<Guid> TagIds { get; set; } = new();
     }
 }
 

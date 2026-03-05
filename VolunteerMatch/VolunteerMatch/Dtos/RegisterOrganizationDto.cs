@@ -5,12 +5,6 @@ namespace VolunteerMatch.Dtos
     public class RegisterOrganizationDto
     {
         //Users (NOT NULL in DB)
-
-        //[Required(ErrorMessage = "როლი სავალდებულოა.")]
-        //[RegularExpression("^(მოხალისე|ორგანიზაცია)$",
-        //    ErrorMessage = "ასეთი როლი არ არსებობს.")]
-        //public string Role { get; set; } = null!;
-
         [Required(ErrorMessage = "იმეილი სავალდებულოა.")]
         [EmailAddress(ErrorMessage = "იმეილის ფორმატი არასწორია.")]
         [RegularExpression(

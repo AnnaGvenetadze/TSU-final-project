@@ -18,23 +18,23 @@ namespace VolunteerMatch.Controllers
         }
 
 
-        //[HttpPost("register/volunteer")]
-        //public async Task<IActionResult> RegisterVolunteer([FromBody] RegisterVolunteerDto dto)
-        //{
-        //    try
-        //    {
-        //        await _userService.RegisterVolunteerAsync(dto);
-        //        return Ok("მოხალისე წარმატებით დარეგისტრირდა.");
-        //    }
-        //    catch (DuplicateEmailException ex)
-        //    {
-        //        return Conflict(ex.Message);    // 409
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
-        //    }
-        //}
+        [HttpPost("register/volunteer")]
+        public async Task<IActionResult> RegisterVolunteer([FromBody] RegisterVolunteerDto dto)
+        {
+            try
+            {
+                await _userService.RegisterVolunteerAsync(dto);
+                return Ok("მოხალისე წარმატებით დარეგისტრირდა.");
+            }
+            catch (DuplicateEmailException ex)
+            {
+                return Conflict(ex.Message);    // 409
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
+            }
+        }
 
 
         [HttpPost("register/organization")]
@@ -67,6 +67,10 @@ namespace VolunteerMatch.Controllers
             catch (UnauthorizedAccessException)
             {
                 return Unauthorized(new { message = "არასწორი იმეილი ან პაროლი." }); // 401
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
             }
         }
     }

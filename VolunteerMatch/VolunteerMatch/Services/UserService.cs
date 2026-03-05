@@ -138,6 +138,7 @@ namespace VolunteerMatch.Services
                 Languages = dto.Languages.Trim(),
                 Skills = dto.Skills.Trim(),
                 Interests = dto.Interests.Trim()
+                // TODO: TagIds = dto.TagIds ??? როგორ შეივსოს (დროფდაუნიდან არჩეული მოდის)
             };
         }
 

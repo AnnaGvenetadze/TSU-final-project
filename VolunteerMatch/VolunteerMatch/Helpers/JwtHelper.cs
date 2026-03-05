@@ -10,14 +10,14 @@ namespace VolunteerMatch.Infrastructure.Helpers
     {
         public static string GenerateToken(User user, IConfiguration config)
         {
-            var jwtSection = config.GetSection("Jwt");
+            var jwtSection = config.GetSection("JwtSettings");
             var key = jwtSection["Key"] ?? throw new InvalidOperationException("JWT Key is missing.");
             var issuer = jwtSection["Issuer"] ?? throw new InvalidOperationException("JWT Issuer is missing.");
             var audience = jwtSection["Audience"] ?? throw new InvalidOperationException("JWT Audience is missing.");
 
             var expiresMinutesStr = jwtSection["ExpiresMinutes"] ?? "60";
             if (!int.TryParse(expiresMinutesStr, out var expiresMinutes)) expiresMinutes = 60;
-            // TODO: UserId როგორც გუიდი დარჩეს და აქ დაგენერირდეს თუ ბაზაში ?
+            
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
