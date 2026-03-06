@@ -11,11 +11,7 @@ public partial class OrganizationProfile
 
     public string Description { get; set; } = null!;
 
-    //public string? PhoneNumber { get; set; }
-
     public string? LinkedInUrl { get; set; }
-
-    //public decimal AverageRating { get; set; }
 
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 

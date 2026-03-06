@@ -6,7 +6,7 @@ create table dbo.Users (
 	UserId         UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
     Email               NVARCHAR(255) NOT NULL,
     PasswordHash        NVARCHAR(255) NOT NULL,
-    Role                NVARCHAR(20) NOT NULL, --- უნდა თუ აღარ ? ---
+    Role                NVARCHAR(20) NOT NULL,
 	LastLoginAt         DATETIMEOFFSET NULL,
     CreatedAt           DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
 
@@ -36,8 +36,6 @@ CREATE TABLE dbo.VolunteerProfiles (
     ProfilePhotoUrl NVARCHAR(500) NULL,
     Technologies    NVARCHAR(500) NULL,
     Experience      NVARCHAR(MAX) NULL,
-    Location        NVARCHAR(200) NULL, --
-    PreferredDays   NVARCHAR(200) NULL, --
     AverageRating   DECIMAL(3,2)  NULL DEFAULT 0, --
 
     CONSTRAINT PK_VolunteerProfiles PRIMARY KEY (VolunteerId),
@@ -49,9 +47,7 @@ CREATE TABLE dbo.OrganizationProfiles (
 	OrganizationId      UNIQUEIDENTIFIER NOT NULL,
     OrganizationName NVARCHAR(200) NOT NULL,
     Description      NVARCHAR(MAX) NOT NULL,
-    PhoneNumber      NVARCHAR(50) NULL, --
     LinkedInUrl		 NVARCHAR(300) NULL,
-    AverageRating    DECIMAL(3,2) NULL DEFAULT 0, --
 
     CONSTRAINT PK_OrganizationProfiles PRIMARY KEY (OrganizationId),
     CONSTRAINT FK_OrganizationProfiles_Users
@@ -149,11 +145,11 @@ CREATE TABLE dbo.MatchingSuggestions (
 --        FOREIGN KEY (AuthorVolunteerId) REFERENCES dbo.VolunteerProfiles(VolunteerId) 
 --);
 
-
+---------------------------------- ეს 2 თეიბლიც აქტიურია -----------------------------------
 CREATE TABLE dbo.Tags (
     TagId     UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
     Name      NVARCHAR(100) NOT NULL,
-    CreatedAt DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
+	-- აქ isActive არაა და თეგის წაშლა რომ არ მოგვიწიოს კარგი სია უნდა მოვიფიქროთ
 
     CONSTRAINT PK_Tags PRIMARY KEY (TagId),
     CONSTRAINT UQ_Tags_Name UNIQUE (Name)
@@ -162,8 +158,7 @@ CREATE TABLE dbo.Tags (
 
 CREATE TABLE dbo.VolunteerTags (
     VolunteerId UNIQUEIDENTIFIER NOT NULL,
-    TagId       UNIQUEIDENTIFIER NOT NULL,
-    CreatedAt   DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
+    TagId       UNIQUEIDENTIFIER NOT NULL, 
 
     CONSTRAINT PK_VolunteerTags PRIMARY KEY (VolunteerId, TagId),
 
@@ -175,12 +170,11 @@ CREATE TABLE dbo.VolunteerTags (
         FOREIGN KEY (TagId)
         REFERENCES dbo.Tags(TagId)
 );
-
+-------------------------------------------------------------------------------------------
 
 CREATE TABLE dbo.EventTags (
     EventId   UNIQUEIDENTIFIER NOT NULL,
     TagId     UNIQUEIDENTIFIER NOT NULL,
-    CreatedAt DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
 
     CONSTRAINT PK_EventTags PRIMARY KEY (EventId, TagId),
 

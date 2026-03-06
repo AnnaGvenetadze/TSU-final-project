@@ -29,12 +29,6 @@ public partial class VolunteerProfile
 
     public string? Experience { get; set; }
 
-    public string? Location { get; set; }
-
-    public string? PreferredDays { get; set; }
-
-    public decimal AverageRating { get; set; }
-
     public virtual ICollection<FavoriteEvent> FavoriteEvents { get; set; } = new List<FavoriteEvent>();
 
     public virtual ICollection<MatchingSuggestion> MatchingSuggestions { get; set; } = new List<MatchingSuggestion>();

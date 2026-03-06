@@ -1,5 +1,9 @@
 ﻿select * from Users
 select * from OrganizationProfiles
+select * from VolunteerProfiles
+
+alter table OrganizationProfiles
+drop column AverageRating -- ჩაწერილების ამოშლას მთხოვს
 
 ---------- ჩანაწერის (ექაუნთის) წაშლა
 delete from OrganizationProfiles

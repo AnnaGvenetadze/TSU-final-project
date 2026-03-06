@@ -224,13 +224,10 @@ public partial class VolunteerMatchingDbContext : DbContext
             entity.HasKey(e => e.VolunteerId);
 
             entity.Property(e => e.VolunteerId).ValueGeneratedNever();
-            entity.Property(e => e.AverageRating).HasColumnType("decimal(3, 2)");
             entity.Property(e => e.Citizenship).HasMaxLength(100);
             entity.Property(e => e.FirstName).HasMaxLength(100);
             entity.Property(e => e.Languages).HasMaxLength(500);
             entity.Property(e => e.LastName).HasMaxLength(100);
-            entity.Property(e => e.Location).HasMaxLength(200);
-            entity.Property(e => e.PreferredDays).HasMaxLength(200);
             entity.Property(e => e.Profession).HasMaxLength(200);
             entity.Property(e => e.ProfilePhotoUrl).HasMaxLength(500);
             entity.Property(e => e.Technologies).HasMaxLength(500);
