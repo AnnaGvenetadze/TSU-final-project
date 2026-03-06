@@ -66,7 +66,7 @@ public partial class VolunteerMatchingDbContext : DbContext
         {
             entity.HasKey(e => new { e.EventId, e.TagId });
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
+            //entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
 
             entity.HasOne(d => d.Event).WithMany(p => p.EventTags)
                 .HasForeignKey(d => d.EventId)
@@ -130,10 +130,10 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_OC_AuthorVolunteer");
 
-            entity.HasOne(d => d.Organization).WithMany(p => p.OrganizationComments)
-                .HasForeignKey(d => d.OrganizationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_OC_TargetOrg");
+            //entity.HasOne(d => d.Organization).WithMany(p => p.OrganizationComments)
+            //    .HasForeignKey(d => d.OrganizationId)
+            //    .OnDelete(DeleteBehavior.ClientSetNull)
+            //    .HasConstraintName("FK_OC_TargetOrg");
         });
 
         modelBuilder.Entity<OrganizationProfile>(entity =>
@@ -141,10 +141,10 @@ public partial class VolunteerMatchingDbContext : DbContext
             entity.HasKey(e => e.OrganizationId);
 
             entity.Property(e => e.OrganizationId).ValueGeneratedNever();
-            entity.Property(e => e.AverageRating).HasColumnType("decimal(3, 2)");
+            //entity.Property(e => e.AverageRating).HasColumnType("decimal(3, 2)");
             entity.Property(e => e.LinkedInUrl).HasMaxLength(300);
             entity.Property(e => e.OrganizationName).HasMaxLength(200);
-            entity.Property(e => e.PhoneNumber).HasMaxLength(50);
+            //entity.Property(e => e.PhoneNumber).HasMaxLength(50);
 
             entity.HasOne(d => d.Organization).WithOne(p => p.OrganizationProfile)
                 .HasForeignKey<OrganizationProfile>(d => d.OrganizationId)
@@ -166,7 +166,7 @@ public partial class VolunteerMatchingDbContext : DbContext
             entity.HasIndex(e => e.Name, "UQ_Tags_Name").IsUnique();
 
             entity.Property(e => e.TagId).HasDefaultValueSql("(newsequentialid())");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
+            //entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
             entity.Property(e => e.Name).HasMaxLength(100);
         });
 
@@ -208,10 +208,10 @@ public partial class VolunteerMatchingDbContext : DbContext
             entity.Property(e => e.CommentId).HasDefaultValueSql("(newsequentialid())");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
 
-            entity.HasOne(d => d.AuthorOrganization).WithMany(p => p.VolunteerComments)
-                .HasForeignKey(d => d.AuthorOrganizationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_VC_AuthorOrg");
+            //entity.HasOne(d => d.AuthorOrganization).WithMany(p => p.VolunteerComments)
+            //    .HasForeignKey(d => d.AuthorOrganizationId)
+            //    .OnDelete(DeleteBehavior.ClientSetNull)
+            //    .HasConstraintName("FK_VC_AuthorOrg");
 
             entity.HasOne(d => d.Volunteer).WithMany(p => p.VolunteerComments)
                 .HasForeignKey(d => d.VolunteerId)
@@ -245,7 +245,7 @@ public partial class VolunteerMatchingDbContext : DbContext
         {
             entity.HasKey(e => new { e.VolunteerId, e.TagId });
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
+            //entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
 
             entity.HasOne(d => d.Tag).WithMany(p => p.VolunteerTags)
                 .HasForeignKey(d => d.TagId)

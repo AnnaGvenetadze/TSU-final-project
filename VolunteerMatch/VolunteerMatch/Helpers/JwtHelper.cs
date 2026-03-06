@@ -14,11 +14,13 @@ namespace VolunteerMatch.Infrastructure.Helpers
             var key = jwtSection["Key"] ?? throw new InvalidOperationException("JWT Key is missing.");
             var issuer = jwtSection["Issuer"] ?? throw new InvalidOperationException("JWT Issuer is missing.");
             var audience = jwtSection["Audience"] ?? throw new InvalidOperationException("JWT Audience is missing.");
-            
+
+            // TODO: Consider adding more claims as needed.
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(ClaimTypes.Role, user.Role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };

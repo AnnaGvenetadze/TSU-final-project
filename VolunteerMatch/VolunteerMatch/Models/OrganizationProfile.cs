@@ -11,17 +11,17 @@ public partial class OrganizationProfile
 
     public string Description { get; set; } = null!;
 
-    public string? PhoneNumber { get; set; }
+    //public string? PhoneNumber { get; set; }
 
     public string? LinkedInUrl { get; set; }
 
-    public decimal AverageRating { get; set; }
+    //public decimal AverageRating { get; set; }
 
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 
     public virtual User Organization { get; set; } = null!;
 
-    public virtual ICollection<OrganizationComment> OrganizationComments { get; set; } = new List<OrganizationComment>();
+    //public virtual ICollection<OrganizationComment> OrganizationComments { get; set; } = new List<OrganizationComment>();
 
-    public virtual ICollection<VolunteerComment> VolunteerComments { get; set; } = new List<VolunteerComment>();
+    //public virtual ICollection<VolunteerComment> VolunteerComments { get; set; } = new List<VolunteerComment>();
 }
