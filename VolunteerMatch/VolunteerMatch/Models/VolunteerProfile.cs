@@ -33,11 +33,7 @@ public partial class VolunteerProfile
 
     public virtual ICollection<MatchingSuggestion> MatchingSuggestions { get; set; } = new List<MatchingSuggestion>();
 
-    public virtual ICollection<OrganizationComment> OrganizationComments { get; set; } = new List<OrganizationComment>();
-
     public virtual User Volunteer { get; set; } = null!;
-
-    public virtual ICollection<VolunteerComment> VolunteerComments { get; set; } = new List<VolunteerComment>();
 
     public virtual ICollection<VolunteerTag> VolunteerTags { get; set; } = new List<VolunteerTag>();
 }

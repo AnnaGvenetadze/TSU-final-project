@@ -23,19 +23,11 @@ public partial class VolunteerMatchingDbContext : DbContext
 
     public virtual DbSet<MatchingSuggestion> MatchingSuggestions { get; set; }
 
-    public virtual DbSet<OrganizationComment> OrganizationComments { get; set; }
-
     public virtual DbSet<OrganizationProfile> OrganizationProfiles { get; set; }
-
-    public virtual DbSet<Permission> Permissions { get; set; }
 
     public virtual DbSet<Tag> Tags { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-
-    public virtual DbSet<UserPermission> UserPermissions { get; set; }
-
-    public virtual DbSet<VolunteerComment> VolunteerComments { get; set; }
 
     public virtual DbSet<VolunteerProfile> VolunteerProfiles { get; set; }
 
@@ -65,8 +57,6 @@ public partial class VolunteerMatchingDbContext : DbContext
         modelBuilder.Entity<EventTag>(entity =>
         {
             entity.HasKey(e => new { e.EventId, e.TagId });
-
-            //entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
 
             entity.HasOne(d => d.Event).WithMany(p => p.EventTags)
                 .HasForeignKey(d => d.EventId)
@@ -116,35 +106,14 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .HasConstraintName("FK_MS_Volunteer");
         });
 
-        modelBuilder.Entity<OrganizationComment>(entity =>
-        {
-            entity.HasKey(e => e.CommentId);
-
-            entity.HasIndex(e => new { e.OrganizationId, e.AuthorVolunteerId }, "UQ_OrganizationComment").IsUnique();
-
-            entity.Property(e => e.CommentId).HasDefaultValueSql("(newsequentialid())");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
-
-            entity.HasOne(d => d.AuthorVolunteer).WithMany(p => p.OrganizationComments)
-                .HasForeignKey(d => d.AuthorVolunteerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_OC_AuthorVolunteer");
-
-            //entity.HasOne(d => d.Organization).WithMany(p => p.OrganizationComments)
-            //    .HasForeignKey(d => d.OrganizationId)
-            //    .OnDelete(DeleteBehavior.ClientSetNull)
-            //    .HasConstraintName("FK_OC_TargetOrg");
-        });
-
         modelBuilder.Entity<OrganizationProfile>(entity =>
         {
             entity.HasKey(e => e.OrganizationId);
 
             entity.Property(e => e.OrganizationId).ValueGeneratedNever();
-            //entity.Property(e => e.AverageRating).HasColumnType("decimal(3, 2)");
             entity.Property(e => e.LinkedInUrl).HasMaxLength(300);
             entity.Property(e => e.OrganizationName).HasMaxLength(200);
-            //entity.Property(e => e.PhoneNumber).HasMaxLength(50);
+            entity.Property(e => e.ProfilePhotoUrl).HasMaxLength(500);
 
             entity.HasOne(d => d.Organization).WithOne(p => p.OrganizationProfile)
                 .HasForeignKey<OrganizationProfile>(d => d.OrganizationId)
@@ -152,21 +121,11 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .HasConstraintName("FK_OrganizationProfiles_Users");
         });
 
-        modelBuilder.Entity<Permission>(entity =>
-        {
-            entity.HasIndex(e => e.PermissionName, "UQ_Permissions_Name").IsUnique();
-
-            entity.Property(e => e.PermissionId).HasDefaultValueSql("(newsequentialid())");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
-            entity.Property(e => e.PermissionName).HasMaxLength(100);
-        });
-
         modelBuilder.Entity<Tag>(entity =>
         {
             entity.HasIndex(e => e.Name, "UQ_Tags_Name").IsUnique();
 
             entity.Property(e => e.TagId).HasDefaultValueSql("(newsequentialid())");
-            //entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
             entity.Property(e => e.Name).HasMaxLength(100);
         });
 
@@ -179,44 +138,6 @@ public partial class VolunteerMatchingDbContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(255);
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
             entity.Property(e => e.Role).HasMaxLength(20);
-        });
-
-        modelBuilder.Entity<UserPermission>(entity =>
-        {
-            entity.HasIndex(e => new { e.UserId, e.PermissionId }, "UQ_UserPermissions").IsUnique();
-
-            entity.Property(e => e.UserPermissionId).HasDefaultValueSql("(newsequentialid())");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
-
-            entity.HasOne(d => d.Permission).WithMany(p => p.UserPermissions)
-                .HasForeignKey(d => d.PermissionId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UP_Permission");
-
-            entity.HasOne(d => d.User).WithMany(p => p.UserPermissions)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UP_User");
-        });
-
-        modelBuilder.Entity<VolunteerComment>(entity =>
-        {
-            entity.HasKey(e => e.CommentId);
-
-            entity.HasIndex(e => new { e.VolunteerId, e.AuthorOrganizationId }, "UQ_VolunteerComment").IsUnique();
-
-            entity.Property(e => e.CommentId).HasDefaultValueSql("(newsequentialid())");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
-
-            //entity.HasOne(d => d.AuthorOrganization).WithMany(p => p.VolunteerComments)
-            //    .HasForeignKey(d => d.AuthorOrganizationId)
-            //    .OnDelete(DeleteBehavior.ClientSetNull)
-            //    .HasConstraintName("FK_VC_AuthorOrg");
-
-            entity.HasOne(d => d.Volunteer).WithMany(p => p.VolunteerComments)
-                .HasForeignKey(d => d.VolunteerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_VC_Volunteer");
         });
 
         modelBuilder.Entity<VolunteerProfile>(entity =>

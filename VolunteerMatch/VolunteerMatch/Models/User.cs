@@ -19,7 +19,5 @@ public partial class User
 
     public virtual OrganizationProfile? OrganizationProfile { get; set; }
 
-    public virtual ICollection<UserPermission> UserPermissions { get; set; } = new List<UserPermission>();
-
     public virtual VolunteerProfile? VolunteerProfile { get; set; }
 }

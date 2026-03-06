@@ -9,11 +9,11 @@ namespace VolunteerMatch.Controllers
     [ApiController]
     [Route("api/organization/profile")]
     [Authorize(Roles = "ორგანიზაცია")]
-    public class OrganizationProfileController : ControllerBase
+    public class MyOrganizationController : ControllerBase
     {
-        private readonly OrganizationService _organizationService;
+        private readonly MyOrganizationService _organizationService;
 
-        public OrganizationProfileController(OrganizationService organizationService)
+        public MyOrganizationController(MyOrganizationService organizationService)
         {
             _organizationService = organizationService;
         }

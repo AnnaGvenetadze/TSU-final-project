@@ -13,6 +13,8 @@ public partial class OrganizationProfile
 
     public string? LinkedInUrl { get; set; }
 
+    public string? ProfilePhotoUrl { get; set; }
+
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 
     public virtual User Organization { get; set; } = null!;
