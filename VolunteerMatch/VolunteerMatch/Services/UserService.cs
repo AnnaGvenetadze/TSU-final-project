@@ -4,7 +4,6 @@ using VolunteerMatch.Dtos;
 using VolunteerMatch.Exceptions;
 using VolunteerMatch.Infrastructure.Helpers;
 using VolunteerMatch.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VolunteerMatch.Services
 {
@@ -53,7 +52,7 @@ namespace VolunteerMatch.Services
                 if (DbExceptionHelper.IsUniqueConstraintViolation(ex))
                     throw new DuplicateEmailException();
 
-                throw; // 500 - Internal server error
+                throw; // 500
             }
         }
 
@@ -85,14 +84,13 @@ namespace VolunteerMatch.Services
                 if (DbExceptionHelper.IsUniqueConstraintViolation(ex))
                     throw new DuplicateEmailException();
 
-                throw; // 500 - Internal server error
+                throw; // 500
             }
         }
 
 
         public async Task<string> AuthenticateUserAsync(LoginUserDto dto)
         {
-            // DTO already validated by [ApiController] -> ModelState
             ArgumentNullException.ThrowIfNull(dto);
 
             var email = dto.Email.Trim().ToLowerInvariant();
@@ -105,7 +103,7 @@ namespace VolunteerMatch.Services
             if (result == PasswordVerificationResult.Failed)
                 throw new UnauthorizedAccessException();
 
-            user.LastLoginAt = DateTimeOffset.UtcNow; // DATETIMEOFFSET column
+            user.LastLoginAt = DateTimeOffset.UtcNow;
             await _context.SaveChangesAsync();
 
             return JwtHelper.GenerateToken(user, _config);

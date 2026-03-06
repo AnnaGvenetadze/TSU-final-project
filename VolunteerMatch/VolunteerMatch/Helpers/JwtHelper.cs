@@ -14,9 +14,6 @@ namespace VolunteerMatch.Infrastructure.Helpers
             var key = jwtSection["Key"] ?? throw new InvalidOperationException("JWT Key is missing.");
             var issuer = jwtSection["Issuer"] ?? throw new InvalidOperationException("JWT Issuer is missing.");
             var audience = jwtSection["Audience"] ?? throw new InvalidOperationException("JWT Audience is missing.");
-
-            var expiresMinutesStr = jwtSection["ExpiresMinutes"] ?? "60";
-            if (!int.TryParse(expiresMinutesStr, out var expiresMinutes)) expiresMinutes = 60;
             
             var claims = new List<Claim>
             {
@@ -33,7 +30,7 @@ namespace VolunteerMatch.Infrastructure.Helpers
                 issuer: issuer,
                 audience: audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(expiresMinutes),
+                expires: DateTime.UtcNow.AddHours(3),
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);

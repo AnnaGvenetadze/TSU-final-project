@@ -1,8 +1,10 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Security.Claims;
 using System.Text;
 using VolunteerMatch.Models;
 using VolunteerMatch.Services;
@@ -14,9 +16,41 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "VolunteerMatch API",
+        Version = "v1"
+    });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "ჩაწერე ტოკენი ასე: your token value without \"\""
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 builder.Services.AddDbContext<VolunteerMatchingDbContext>(options =>
-options.UseSqlServer("DefaultConnection"));
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddAuthentication(options =>
@@ -41,7 +75,15 @@ builder.Services.AddAuthentication(options =>
         )
     };
 });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options => {
+    // policy for organization
+    options.AddPolicy("OrganizationPolicy",
+        policy => policy.RequireClaim(ClaimTypes.Role, "ორგანიზაცია"));
+
+    // policy for volunteer
+    options.AddPolicy("VolunteerPolicy",
+        policy => policy.RequireClaim(ClaimTypes.Role, "მოხალისე"));
+});
 
 var app = builder.Build();
 
@@ -54,9 +96,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
-
 app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.MapControllers();
 

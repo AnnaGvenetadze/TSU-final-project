@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace VolunteerMatch.Models;
+﻿namespace VolunteerMatch.Models;
 
 public partial class Event
 {
