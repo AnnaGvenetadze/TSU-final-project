@@ -14,7 +14,7 @@ namespace VolunteerMatch.Controllers
         {
             _organizationService = organizationService;
         }
-
+        
         [HttpGet("{organizationId:guid}/profile")]
         public async Task<IActionResult> GetProfileById(Guid organizationId)
         {

@@ -14,14 +14,21 @@ namespace VolunteerMatch.Mappings
                 .ForMember(
                     dest => dest.Email, 
                     opt => opt.MapFrom(src => src.Volunteer.Email)
-                );
-
+                );// Volunteer ველი არაა GetMyVolunteerProfileDto ამიტომ თუ მას უნდა
+                  // მისწვდეს ისეთ ფილდს რომელიც სხვა ფილდიდან გადის (Email)
+                  // GetMyVolunteerProfileDto.Email უნდა დაიმაპოს VolunteerProfile.Email-თან
+                  // გადასაკონვერტირებელი ობიექტის (src == VolunteerProfile) Volunteer ველის მეშვეობით
             CreateMap<UpdateVolunteerProfileDto, VolunteerProfile>();
 
-            CreateMap<VolunteerProfile, GetVolunteerProfileDto>()
+            CreateMap<VolunteerProfile, GetVolunteerProfileDto>();
+
+            CreateMap<VolunteerProfile, SearchVolunteerItemDto>()
                 .ForMember(
-                    dest => dest.VolunteerId,
-                    opt => opt.MapFrom(src => src.VolunteerId)
+                    dest => dest.Email,
+                    opt => opt.MapFrom(src => src.Volunteer.Email)
+                ).ForMember(// თუ src -> dest ობიექტის ფილდის სახელები განსხვავდება იმაპება
+                    dest => dest.DateOfBirth,
+                    opt => opt.MapFrom(src => src.BirthDate)
                 );
         }
     }

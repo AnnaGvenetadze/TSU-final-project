@@ -57,6 +57,7 @@ builder.Services.AddScoped<MyOrganizationService>();
 builder.Services.AddScoped<MyVolunteerService>();
 builder.Services.AddScoped<VolunteerService>();
 
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
