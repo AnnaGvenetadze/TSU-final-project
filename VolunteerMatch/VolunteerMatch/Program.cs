@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
@@ -50,11 +49,13 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 builder.Services.AddDbContext<VolunteerMatchingDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<OrganizationService>();
 builder.Services.AddScoped<MyOrganizationService>();
+builder.Services.AddScoped<MyVolunteerService>();
+builder.Services.AddScoped<VolunteerService>();
 
 builder.Services.AddAuthentication(options =>
 {

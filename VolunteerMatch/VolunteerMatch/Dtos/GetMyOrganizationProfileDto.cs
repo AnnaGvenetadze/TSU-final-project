@@ -3,12 +3,11 @@
     // TODO: ივენთებიც უნდა გავატანო პროფილის ენფოინთში ან ცალკე ენდფოინთად
     public class GetMyOrganizationProfileDto
     {
-        public Guid OrganizationId { get; set; }
-        public string OrganizationName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
+        public required string OrganizationName { get; set; }
+        public required string Email { get; set; }
         public string? LinkedInUrl { get; set; }
         public string? ProfilePhotoUrl { get; set; } // დაემატა
-        public string Description { get; set; } = string.Empty;
+        public required string Description { get; set; }
         //public List<OrganizationProfileEventDto> Events { get; set; } = new();
     }
 }

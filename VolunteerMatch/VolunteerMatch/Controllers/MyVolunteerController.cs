@@ -7,50 +7,51 @@ using VolunteerMatch.Constants;
 namespace VolunteerMatch.Controllers
 {
     [ApiController]
-    [Route("api/organization/me")]
-    [Authorize(Roles = UserRoles.Organization)]
-    public class MyOrganizationController : BaseController // for private endpoints
+    [Route("api/volunteer/me/profile")]
+    [Authorize(Roles = UserRoles.Volunteer)]
+    public class MyVolunteerProfileController : BaseController
     {
-        private readonly MyOrganizationService _myOrganizationService;
+        private readonly MyVolunteerService _myVolunteerService;
 
-        public MyOrganizationController(MyOrganizationService organizationService)
+        public MyVolunteerProfileController(MyVolunteerService myVolunteerService)
         {
-            _myOrganizationService = organizationService;
+            _myVolunteerService = myVolunteerService
+                ?? throw new ArgumentNullException(nameof(myVolunteerService));
         }
 
 
-        [HttpGet("profile")]
+        [HttpGet]
         public async Task<IActionResult> GetMyProfile()
         {
             try
             {
-                var profile = await _myOrganizationService.GetMyProfileAsync(CurrentUserId);
+                var profile = await _myVolunteerService.GetMyProfileAsync(CurrentUserId);
 
                 return Ok(profile);
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return NotFound(new { message = ex.Message });
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { message = ex.Message });
             }
             catch (Exception)
             {
-                return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
+                return StatusCode(500, new { message = "სერვერზე მოხდა შეცდომა." });
             }
         }
 
 
-        [HttpPut("profile")]
-        public async Task<IActionResult> UpdateMyProfile(UpdateOrganizationProfileDto updateDto)
+        [HttpPut]
+        public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateVolunteerProfileDto updateDto)
         {
             try
             {
-                await _myOrganizationService.UpdateMyProfileAsync(CurrentUserId, updateDto);
+                await _myVolunteerService.UpdateMyProfileAsync(CurrentUserId, updateDto);
 
-                return Ok("ორგანიზაციის პროფილი წარმატებით განახლდა.");
+                return Ok("მოხალისის პროფილი წარმატებით განახლდა.");
             }
             catch (KeyNotFoundException ex)
             {

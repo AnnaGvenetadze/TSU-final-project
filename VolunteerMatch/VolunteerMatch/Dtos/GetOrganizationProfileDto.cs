@@ -4,12 +4,12 @@
     // შეიცვლება OrganizationProfileMapping.cs
     public class GetOrganizationProfileDto
     {
-        public Guid OrganizationId { get; set; } // აქ ამის დაბრუნება რად მინდა ?
-        public string OrganizationName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string? LinkedInUrl { get; set; } 
+        public required Guid OrganizationId { get; set; }
+        public required string OrganizationName { get; set; }
+        public required string Email { get; set; }
+        public string? LinkedInUrl { get; set; }
         public string? ProfilePhotoUrl { get; set; } // დაემატა
-        public string Description { get; set; } = string.Empty;
+        public required string Description { get; set; }
         // public List<OrganizationProfileEventDto> Events { get; set; } = new();
     }
 }

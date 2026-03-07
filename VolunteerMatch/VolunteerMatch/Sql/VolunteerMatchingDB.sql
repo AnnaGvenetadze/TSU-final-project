@@ -36,6 +36,7 @@ CREATE TABLE dbo.VolunteerProfiles (
     ProfilePhotoUrl NVARCHAR(500) NULL,
     Technologies    NVARCHAR(500) NULL,
     Experience      NVARCHAR(MAX) NULL,
+	--Education		NVARCHAR(500) NULL, ------------------- უნდა დაემატოს ?
     AverageRating   DECIMAL(3,2)  NULL DEFAULT 0, --
 
     CONSTRAINT PK_VolunteerProfiles PRIMARY KEY (VolunteerId),

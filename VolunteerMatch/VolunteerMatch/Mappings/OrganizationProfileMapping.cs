@@ -17,6 +17,12 @@ namespace VolunteerMatch.Mappings
                 );
 
             CreateMap<UpdateOrganizationProfileDto, OrganizationProfile>();
+
+            CreateMap<OrganizationProfile, GetOrganizationProfileDto>()
+                .ForMember(
+                    dest => dest.OrganizationId,
+                    opt => opt.MapFrom(src => src.OrganizationId)
+                );
         }
     }
 }

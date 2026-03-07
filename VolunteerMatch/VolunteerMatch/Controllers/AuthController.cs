@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using VolunteerMatch.Dtos;
 using VolunteerMatch.Exceptions;
 using VolunteerMatch.Services;

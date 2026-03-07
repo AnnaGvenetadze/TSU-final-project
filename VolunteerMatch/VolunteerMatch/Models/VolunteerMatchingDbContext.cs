@@ -80,10 +80,10 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_FavoriteEvents_Event");
 
-            entity.HasOne(d => d.Volunteer).WithMany(p => p.FavoriteEvents)
-                .HasForeignKey(d => d.VolunteerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_FavoriteEvents_Volunteer");
+            //entity.HasOne(d => d.Volunteer).WithMany(p => p.FavoriteEvents)
+            //    .HasForeignKey(d => d.VolunteerId)
+            //    .OnDelete(DeleteBehavior.ClientSetNull)
+            //    .HasConstraintName("FK_FavoriteEvents_Volunteer");
         });
 
         modelBuilder.Entity<MatchingSuggestion>(entity =>
@@ -100,10 +100,10 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_MS_Event");
 
-            entity.HasOne(d => d.Volunteer).WithMany(p => p.MatchingSuggestions)
-                .HasForeignKey(d => d.VolunteerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_MS_Volunteer");
+            //entity.HasOne(d => d.Volunteer).WithMany(p => p.MatchingSuggestions)
+            //    .HasForeignKey(d => d.VolunteerId)
+            //    .OnDelete(DeleteBehavior.ClientSetNull)
+            //    .HasConstraintName("FK_MS_Volunteer");
         });
 
         modelBuilder.Entity<OrganizationProfile>(entity =>
@@ -151,6 +151,7 @@ public partial class VolunteerMatchingDbContext : DbContext
             entity.Property(e => e.LastName).HasMaxLength(100);
             entity.Property(e => e.Profession).HasMaxLength(200);
             entity.Property(e => e.ProfilePhotoUrl).HasMaxLength(500);
+            entity.Property(e => e.LinkedInUrl).HasMaxLength(300);
             entity.Property(e => e.Technologies).HasMaxLength(500);
 
             entity.HasOne(d => d.Volunteer).WithOne(p => p.VolunteerProfile)
@@ -168,10 +169,10 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_VolunteerTags_Tag");
 
-            entity.HasOne(d => d.Volunteer).WithMany(p => p.VolunteerTags)
-                .HasForeignKey(d => d.VolunteerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_VolunteerTags_Volunteer");
+            //entity.HasOne(d => d.Volunteer).WithMany(p => p.VolunteerTags)
+            //    .HasForeignKey(d => d.VolunteerId)
+            //    .OnDelete(DeleteBehavior.ClientSetNull)
+            //    .HasConstraintName("FK_VolunteerTags_Volunteer");
         });
 
         OnModelCreatingPartial(modelBuilder);
