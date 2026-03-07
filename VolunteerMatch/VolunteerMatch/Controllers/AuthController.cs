@@ -19,11 +19,11 @@ namespace VolunteerMatch.Controllers
 
 
         [HttpPost("register/volunteer")]
-        public async Task<IActionResult> RegisterVolunteer([FromBody] RegisterVolunteerDto dto)
+        public async Task<IActionResult> RegisterVolunteer([FromBody] CreateVolunteerDto createDto)
         {   //400 - Bad Request (model validation failed)
             try
             {
-                await _userService.RegisterVolunteerAsync(dto);
+                await _userService.RegisterVolunteerAsync(createDto);
                 return Ok("მოხალისე წარმატებით დარეგისტრირდა.");
             }
             catch (DuplicateEmailException ex)
@@ -38,11 +38,11 @@ namespace VolunteerMatch.Controllers
 
 
         [HttpPost("register/organization")]
-        public async Task<IActionResult> RegisterOrganization([FromBody] RegisterOrganizationDto dto)
+        public async Task<IActionResult> RegisterOrganization([FromBody] CreateOrganizationDto createDto)
         {   // 400 - Bad Request (model validation failed)
             try
             {
-                await _userService.RegisterOrganizationAsync(dto);
+                await _userService.RegisterOrganizationAsync(createDto);
                 return Ok("ორგანიზაცია წარმატებით დარეგისტრირდა.");
             }
             catch (DuplicateEmailException ex)
@@ -57,11 +57,11 @@ namespace VolunteerMatch.Controllers
 
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginUserDto loginUserDto)
+        public async Task<IActionResult> Login([FromBody] LoginUserDto loginDto)
         {   // 400 - Bad Request (model validation failed)
             try
             {
-                var token = await _userService.AuthenticateUserAsync(loginUserDto);
+                var token = await _userService.AuthenticateUserAsync(loginDto);
                 return Ok(new { token });
             }
             catch (UnauthorizedAccessException)
@@ -73,13 +73,5 @@ namespace VolunteerMatch.Controllers
                 return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
             }
         }
-
-
-        //[Authorize(Roles = "ორგანიზაცია")]
-        //[HttpPost("eventcreation")]
-        //public async Task<IActionResult> CreateEvent()
-        //{
-        //    return Ok("ივენთი წარმატებით შეიქმნა");
-        //}
     }
 }

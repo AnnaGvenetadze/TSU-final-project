@@ -55,6 +55,7 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<OrganizationService>();
 builder.Services.AddScoped<MyOrganizationService>();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -86,6 +87,8 @@ builder.Services.AddAuthorization(options => {
     options.AddPolicy("VolunteerPolicy",
         policy => policy.RequireClaim(ClaimTypes.Role, "მოხალისე"));
 });
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 

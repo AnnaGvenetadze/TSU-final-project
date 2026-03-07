@@ -48,10 +48,10 @@ public partial class VolunteerMatchingDbContext : DbContext
             entity.Property(e => e.Status).HasMaxLength(20);
             entity.Property(e => e.Title).HasMaxLength(200);
 
-            entity.HasOne(d => d.Organization).WithMany(p => p.Events)
-                .HasForeignKey(d => d.OrganizationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Events_Organization");
+            //entity.HasOne(d => d.Organization).WithMany(p => p.Events)
+            //    .HasForeignKey(d => d.OrganizationId)
+            //    .OnDelete(DeleteBehavior.ClientSetNull)
+            //    .HasConstraintName("FK_Events_Organization");
         });
 
         modelBuilder.Entity<EventTag>(entity =>
@@ -162,8 +162,6 @@ public partial class VolunteerMatchingDbContext : DbContext
         modelBuilder.Entity<VolunteerTag>(entity =>
         {
             entity.HasKey(e => new { e.VolunteerId, e.TagId });
-
-            //entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
 
             entity.HasOne(d => d.Tag).WithMany(p => p.VolunteerTags)
                 .HasForeignKey(d => d.TagId)

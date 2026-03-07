@@ -2,7 +2,7 @@
 
 namespace VolunteerMatch.Dtos
 {
-    public class RegisterVolunteerDto
+    public class CreateVolunteerDto
     {
         //Users (NOT NULL in DB)
         [Required(ErrorMessage = "იმეილი სავალდებულოა.")]

@@ -4,9 +4,9 @@ using VolunteerMatch.Services;
 
 namespace VolunteerMatch.Controllers
 {
-    [Route("api/organizations")]
+    [Route("api/organization")] // TODO: ორგანიზაციის დასერჩვა სახელის ან სხვა პარამეტრის მიხედვით ენფოინთ(ებ)ი
     [ApiController]
-    public class OrganizationController : ControllerBase
+    public class OrganizationController : ControllerBase // for public endpoints
     {
         private readonly OrganizationService _organizationService;
 
@@ -15,12 +15,12 @@ namespace VolunteerMatch.Controllers
             _organizationService = organizationService;
         }
 
-        [HttpGet("{organizationId:guid}")]
-        public async Task<IActionResult> GetById(Guid organizationId)
+        [HttpGet("{organizationId:guid}/profile")]
+        public async Task<IActionResult> GetProfileById(Guid organizationId)
         {
             try
             {
-                var profile = await _organizationService.GetOrganizationProfileByIdAsync(organizationId);
+                var profile = await _organizationService.GetProfileByIdAsync(organizationId);
 
                 return Ok(profile);
             }

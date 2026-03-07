@@ -1,8 +1,8 @@
 ﻿namespace VolunteerMatch.Dtos
 {
+    // TODO: ივენთებიც უნდა გავატანო პროფილის ენფოინთში ან ცალკე ენდფოინთად
     public class GetMyOrganizationProfileDto
     {
-        // TODO: ივენთებიც უნდა გავატანო პროფილის ენფოინთში ან ცალკე ენდფოინთად
         public Guid OrganizationId { get; set; }
         public string OrganizationName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;

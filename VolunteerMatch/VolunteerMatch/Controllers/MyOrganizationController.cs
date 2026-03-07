@@ -2,30 +2,31 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using VolunteerMatch.Dtos;
 using VolunteerMatch.Services;
 
 namespace VolunteerMatch.Controllers
 {
     [ApiController]
-    [Route("api/organization/profile")]
+    [Route("api/organization/me")]
     [Authorize(Roles = "ორგანიზაცია")]
-    public class MyOrganizationController : ControllerBase
+    public class MyOrganizationController : ControllerBase // for private endpoints
     {
-        private readonly MyOrganizationService _organizationService;
+        private readonly MyOrganizationService _myOrganizationService;
 
         public MyOrganizationController(MyOrganizationService organizationService)
         {
-            _organizationService = organizationService;
+            _myOrganizationService = organizationService;
         }
 
-        [HttpGet("me")]
+        [HttpGet("profile")]
         public async Task<IActionResult> GetMyProfile()
         {
             try
             {
                 var organizationId = GetCurrentUserId();
 
-                var profile = await _organizationService.GetMyProfileAsync(organizationId);
+                var profile = await _myOrganizationService.GetMyProfileAsync(organizationId);
 
                 return Ok(profile);
             }
@@ -41,6 +42,16 @@ namespace VolunteerMatch.Controllers
             {
                 return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
             }
+        }
+
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateMyProfile(UpdateOrganizationProfileDto updateDto)
+        {
+            var organizationId = GetCurrentUserId();
+
+            await _myOrganizationService.UpdateMyProfileAsync(organizationId, updateDto);
+
+            return NoContent();
         }
 
         private Guid GetCurrentUserId()

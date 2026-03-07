@@ -14,17 +14,17 @@ namespace VolunteerMatch.Services
         }
 
 
-        public async Task<GetOrganizationProfileDto> GetOrganizationProfileByIdAsync(Guid guid)
+        public async Task<GetOrganizationProfileDto> GetProfileByIdAsync(Guid guid)
         {
             var profile = await _context.OrganizationProfiles
                 .AsNoTracking()
                 .Include(p => p.Organization) // User entity (email აქედან მოდის)
-                .SingleOrDefaultAsync(p => p.OrganizationId == guid);
+                .SingleOrDefaultAsync(p => p.OrganizationId == guid); // მოდელი ბრუნდება
 
             return MapProfileDto(profile);
         }
 
-
+        // OrganizationProfile -> GetOrganizationProfileDto იმაპება
         private static GetOrganizationProfileDto MapProfileDto(OrganizationProfile? profile)
         {
             if (profile is null)

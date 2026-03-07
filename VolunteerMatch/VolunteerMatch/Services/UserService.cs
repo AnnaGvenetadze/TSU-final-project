@@ -24,12 +24,12 @@ namespace VolunteerMatch.Services
         }
 
 
-        public async Task RegisterVolunteerAsync(RegisterVolunteerDto dto)
+        public async Task RegisterVolunteerAsync(CreateVolunteerDto createDto)
         {
-            ArgumentNullException.ThrowIfNull(dto);
+            ArgumentNullException.ThrowIfNull(createDto);
 
-            var user = CreateUser(dto.Email, dto.Password, "მოხალისე");
-            var profile = CreateVolunteerProfile(dto);
+            var user = CreateUser(createDto.Email, createDto.Password, "მოხალისე");
+            var profile = CreateVolunteer(createDto);
 
             await using var tx = await _context.Database.BeginTransactionAsync();
 
@@ -57,12 +57,12 @@ namespace VolunteerMatch.Services
         }
 
 
-        public async Task RegisterOrganizationAsync(RegisterOrganizationDto dto)
+        public async Task RegisterOrganizationAsync(CreateOrganizationDto createDto)
         {
-            ArgumentNullException.ThrowIfNull(dto);
+            ArgumentNullException.ThrowIfNull(createDto);
 
-            var user = CreateUser(dto.Email, dto.Password, "ორგანიზაცია");
-            var profile = CreateOrganizationProfile(dto);
+            var user = CreateUser(createDto.Email, createDto.Password, "ორგანიზაცია");
+            var profile = CreateOrganization(createDto);
 
             await using var tx = await _context.Database.BeginTransactionAsync();
 
@@ -89,17 +89,17 @@ namespace VolunteerMatch.Services
         }
 
 
-        public async Task<string> AuthenticateUserAsync(LoginUserDto dto)
+        public async Task<string> AuthenticateUserAsync(LoginUserDto loginDto)
         {
-            ArgumentNullException.ThrowIfNull(dto);
+            ArgumentNullException.ThrowIfNull(loginDto);
 
-            var email = dto.Email.Trim().ToLowerInvariant();
+            var email = loginDto.Email.Trim().ToLowerInvariant();
 
             var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
             if (user is null)
                 throw new UnauthorizedAccessException();
 
-            var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
+            var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, loginDto.Password);
             if (result == PasswordVerificationResult.Failed)
                 throw new UnauthorizedAccessException();
 
@@ -124,29 +124,29 @@ namespace VolunteerMatch.Services
         }
 
 
-        private VolunteerProfile CreateVolunteerProfile(RegisterVolunteerDto dto)
+        private VolunteerProfile CreateVolunteer(CreateVolunteerDto createDto)
         {
             return new VolunteerProfile
             {
-                FirstName = dto.FirstName.Trim(),
-                LastName = dto.LastName.Trim(),
-                BirthDate = dto.BirthDate,
-                Citizenship = dto.Citizenship.Trim(),
-                Profession = dto.Profession.Trim(),
-                Languages = dto.Languages.Trim(),
-                Skills = dto.Skills.Trim(),
-                Interests = dto.Interests.Trim()
+                FirstName = createDto.FirstName.Trim(),
+                LastName = createDto.LastName.Trim(),
+                BirthDate = createDto.BirthDate,
+                Citizenship = createDto.Citizenship.Trim(),
+                Profession = createDto.Profession.Trim(),
+                Languages = createDto.Languages.Trim(),
+                Skills = createDto.Skills.Trim(),
+                Interests = createDto.Interests.Trim()
                 // TODO: TagIds ლისტი დააბრუნე
             };
         }
 
 
-        private OrganizationProfile CreateOrganizationProfile(RegisterOrganizationDto dto)
+        private OrganizationProfile CreateOrganization(CreateOrganizationDto createDto)
         {
             return new OrganizationProfile
             {
-                OrganizationName = dto.OrganizationName.Trim(),
-                Description = dto.Description.Trim()
+                OrganizationName = createDto.OrganizationName.Trim(),
+                Description = createDto.Description.Trim()
             };
         }
     }
