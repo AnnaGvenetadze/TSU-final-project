@@ -10,7 +10,7 @@ namespace VolunteerMatch.Mappings
         {
             ValueTransformers.Add<string>(s => s == null ? null : s.Trim());
 
-            CreateMap<OrganizationProfile, GetOrganizationProfileDto>()
+            CreateMap<OrganizationProfile, GetMyOrganizationProfileDto>()
                 .ForMember(
                     dest => dest.Email,
                     opt => opt.MapFrom(src => src.Organization.Email)
