@@ -7,7 +7,7 @@ using VolunteerMatch.Constants;
 namespace VolunteerMatch.Controllers
 {
     [ApiController]
-    [Route("api/organization/me")]
+    [Route("api/organizations/me")]
     [Authorize(Roles = UserRoles.Organization)]
     public class MyOrganizationController : BaseController // for private endpoints
     {
@@ -19,7 +19,7 @@ namespace VolunteerMatch.Controllers
         }
 
 
-        [HttpGet("profile")]
+        [HttpGet]
         public async Task<IActionResult> GetMyProfile()
         {
             try
@@ -43,7 +43,7 @@ namespace VolunteerMatch.Controllers
         }
 
 
-        [HttpPut("profile")]
+        [HttpPut]
         public async Task<IActionResult> UpdateMyProfile(UpdateOrganizationProfileDto updateDto)
         {
             try

@@ -7,13 +7,13 @@ using VolunteerMatch.Constants;
 namespace VolunteerMatch.Controllers
 {
     [ApiController]
-    [Route("api/volunteer/me/profile")]
+    [Route("api/volunteers/me")]
     [Authorize(Roles = UserRoles.Volunteer)]
-    public class MyVolunteerProfileController : BaseController
+    public class MyVolunteerController : BaseController
     {
         private readonly MyVolunteerService _myVolunteerService;
 
-        public MyVolunteerProfileController(MyVolunteerService myVolunteerService)
+        public MyVolunteerController(MyVolunteerService myVolunteerService)
         {
             _myVolunteerService = myVolunteerService
                 ?? throw new ArgumentNullException(nameof(myVolunteerService));

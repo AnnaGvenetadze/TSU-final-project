@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using VolunteerMatch.Services;
-
+using VolunteerMatch.Constants;
 
 namespace VolunteerMatch.Controllers
 {
-    [Route("api/organization")] // TODO: ორგანიზაციის დასერჩვა სახელის ან სხვა პარამეტრის მიხედვით ენფოინთ(ებ)ი
+    [Route("api/organizations")]
     [ApiController]
-    public class OrganizationController : ControllerBase // for public endpoints
+    public class OrganizationController : ControllerBase // public endpoints-ებისთვის
     {
         private readonly OrganizationService _organizationService;
 
@@ -15,7 +16,8 @@ namespace VolunteerMatch.Controllers
             _organizationService = organizationService;
         }
         
-        [HttpGet("{organizationId:guid}/profile")]
+        [HttpGet("{organizationId:guid}")]
+        [Authorize(Roles = UserRoles.Volunteer)]
         public async Task<IActionResult> GetProfileById(Guid organizationId)
         {
             try

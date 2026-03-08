@@ -1,5 +1,5 @@
 ﻿namespace VolunteerMatch.Models;
-// TODO: ლოსტები განკომენტარდება
+// TODO: ლისტები განკომენტარდება
 public partial class VolunteerProfile
 {
     public Guid VolunteerId { get; set; }

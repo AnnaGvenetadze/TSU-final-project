@@ -1,5 +1,5 @@
 ﻿namespace VolunteerMatch.Dtos
-{   // TODO: იმის მიხედვით რა ფროფერთების კონვერტაცია დაგვჭირდება
+{   // იმის მიხედვით რა ფროფერთების კონვერტაცია დაგვჭირდება
     // OrganizationProfile <-> GetOrganizationProfileDto
     // შეიცვლება OrganizationProfileMapping.cs
     public class GetOrganizationProfileDto
