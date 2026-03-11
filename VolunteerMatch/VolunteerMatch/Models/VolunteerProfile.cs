@@ -4,23 +4,23 @@ public partial class VolunteerProfile
 {
     public Guid VolunteerId { get; set; }
 
-    public string FirstName { get; set; } = null!;
+    public required string FirstName { get; set; }
 
-    public string LastName { get; set; } = null!;
+    public required string LastName { get; set; }
 
-    public DateOnly BirthDate { get; set; }
+    public required DateOnly BirthDate { get; set; }
 
-    public string Citizenship { get; set; } = null!;
+    public required string Citizenship { get; set; }
 
-    //public string? Education { get; set; }
+    public required string Profession { get; set; }
 
-    public string Profession { get; set; } = null!;
+    public required string Languages { get; set; }
 
-    public string Languages { get; set; } = null!;
+    public required string Skills { get; set; }
 
-    public string Skills { get; set; } = null!;
+    public required string Interests { get; set; }
 
-    public string Interests { get; set; } = null!;
+    public string? Education { get; set; }
 
     public string? ProfilePhotoUrl { get; set; }
 

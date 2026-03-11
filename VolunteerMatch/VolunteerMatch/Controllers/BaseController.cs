@@ -8,6 +8,10 @@ namespace VolunteerMatch.Controllers
     {
         protected Guid CurrentUserId => GetCurrentUserId();
 
+        // ამოიღებს ავტორიზებული მომხმარებლის როლს JWT claim-ებიდან.
+        // ჩვეულებრივ საჭირო არ არის, როცა გამოიყენება [Authorize(Roles = "...")],
+        // მაგრამ სასარგებლოა მაშინ, როცა ერთ endpoint-ზე რამდენიმე როლი მუშაობს
+        // და ლოგიკა უნდა განისაზღვროს მომხმარებლის როლის მიხედვით.
         protected string? CurrentUserRole => User.FindFirst(ClaimTypes.Role)?.Value;
 
         private Guid GetCurrentUserId()

@@ -9,7 +9,7 @@
         public required DateOnly DateOfBirth { get; set; }
         public required string Citizenship { get; set; }
         public string? ProfilePhotoUrl { get; set; }
-        public string? Description { get; set; } = string.Empty;
-        public string? Languages { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public string? Languages { get; set; }
     }
 }

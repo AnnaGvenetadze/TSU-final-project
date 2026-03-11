@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace VolunteerMatch.Dtos
-{
+{// TODO: Many-to-many tags (VolunteerTags)
     public class CreateVolunteerDto
     {
         //Users (NOT NULL in DB)
@@ -49,7 +49,6 @@ namespace VolunteerMatch.Dtos
         [Required(ErrorMessage = "ინტერესი სავალდებულოა.")]
         public string Interests { get; set; } = null!;
 
-        //// TODO: Many-to-many tags (VolunteerTags)
         //[Required(ErrorMessage = "თემატიკა სავალდებულოა.")]
         //public List<Guid> TagIds { get; set; } = new();
     }

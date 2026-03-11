@@ -2,6 +2,7 @@
 
 namespace VolunteerMatch.Dtos
 {
+    // TODO: იმეილი განახლდეს სხვა ადგილიდან?
     public class UpdateOrganizationProfileDto
     {
         [Required(ErrorMessage = "ორგანიზაციის სახელი სავალდებულოა.")]

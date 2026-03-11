@@ -5,7 +5,7 @@ namespace VolunteerMatch.Dtos
     // TODO: Email სხვა ადგილიდან უნდა დააფდეითდეს ?
     // TODO: თეგების, ფავორიტების და მეჩინგ საჯეშენების ლისტი (ნოთიფიკაციებში)?
     public class UpdateVolunteerProfileDto
-    {// TODO: Education column added or not ? 
+    {
         [Required(ErrorMessage = "სახელი სავალდებულოა.")]
         [StringLength(100, ErrorMessage = "სახელი ძალიან გრძელია.")]
         public string FirstName { get; set; } = null!;
@@ -20,8 +20,6 @@ namespace VolunteerMatch.Dtos
         [Required(ErrorMessage = "ქვეყნის მოქალაქეობა სავალდებულოა.")]
         [StringLength(100, ErrorMessage = "მოქალაქეობა ძალიან გრძელია.")]
         public string Citizenship { get; set; } = null!;
-
-        //public string? Education { get; set; };
 
         [Required(ErrorMessage = "პროფესია სავალდებულოა.")]
         [StringLength(200, ErrorMessage = "პროფესია ძალიან გრძელია.")]
@@ -38,6 +36,9 @@ namespace VolunteerMatch.Dtos
         [Required(ErrorMessage = "ინტერესები სავალდებულოა.")]
         [StringLength(1000, ErrorMessage = "ინტერესები ძალიან გრძელია.")]
         public string Interests { get; set; } = null!;
+
+        [StringLength(500, ErrorMessage = "განათლება ძალიან გრძელია.")]
+        public string? Education { get; set; }
 
         [Url(ErrorMessage = "ფოტოს ბმულის ფორმატი არასწორია.")]
         [StringLength(500, ErrorMessage = "ფოტოს ბმული ძალიან გრძელია.")]

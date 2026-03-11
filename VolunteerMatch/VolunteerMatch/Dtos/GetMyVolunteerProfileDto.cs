@@ -2,7 +2,7 @@
 {
     // TODO: თეგების, ფავორიტების და მეჩინგ საჯეშენების ლისტი (ნოთიფიკაციებში)?
     public class GetMyVolunteerProfileDto
-    {// TODO: Education column added or not ?
+    {
         public required string FirstName { get; set; }
 
         public required string LastName { get; set; }
@@ -12,8 +12,6 @@
         public required DateOnly BirthDate { get; set; }
 
         public required string Citizenship { get; set; }
-
-        //public string? Education { get; set; } = string.Empty;
 
         public required string Profession { get; set; }
 
@@ -27,10 +25,12 @@
 
         public string? LinkedInUrl { get; set; }
 
-        public string? Technologies { get; set; } = string.Empty;
+        public string? Education { get; set; }
 
-        public string? Experience { get; set; } = string.Empty;
+        public string? Technologies { get; set; }
 
-        public string? Description { get; set; } = string.Empty;
+        public string? Experience { get; set; }
+
+        public string? Description { get; set; }
     }
 }

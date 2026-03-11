@@ -32,7 +32,7 @@ namespace VolunteerMatch.Services
 
             return new GetOrganizationProfileDto
             {
-                OrganizationId = profile.OrganizationId, // აქ ამის დაბრუნება რად მინდა?
+                OrganizationId = profile.OrganizationId,
                 OrganizationName = profile.OrganizationName,
                 Description = profile.Description,
                 Email = profile.Organization.Email,

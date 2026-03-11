@@ -7,9 +7,9 @@ public partial class OrganizationProfile
 {   // TODO: ივენთების ფუნქციონალის შექმნის მერე ივენთების ლისტიც უნდა დაემატოს 
     public Guid OrganizationId { get; set; }
 
-    public string OrganizationName { get; set; } = null!;
+    public required string OrganizationName { get; set; }
 
-    public string Description { get; set; } = null!;
+    public required string Description { get; set; }
 
     public string? LinkedInUrl { get; set; }
 

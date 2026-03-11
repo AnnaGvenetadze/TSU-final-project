@@ -33,6 +33,9 @@ namespace VolunteerMatch.Services
         {
             ArgumentNullException.ThrowIfNull(updateDto);
 
+            if (updateDto.BirthDate >= DateOnly.FromDateTime(DateTime.UtcNow))
+                throw new ArgumentException("დაბადების თარიღი უნდა იყოს წარსულში.");
+
             var profile = await _context.VolunteerProfiles
                 .SingleOrDefaultAsync(p => p.VolunteerId == volunteerId);
 

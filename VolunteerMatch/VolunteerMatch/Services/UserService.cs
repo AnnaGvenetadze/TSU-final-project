@@ -27,7 +27,9 @@ namespace VolunteerMatch.Services
         public async Task RegisterVolunteerAsync(CreateVolunteerDto createDto)
         {
             ArgumentNullException.ThrowIfNull(createDto);
-
+            if (createDto.BirthDate >= DateOnly.FromDateTime(DateTime.UtcNow))
+                throw new ArgumentException("დაბადების თარიღი უნდა იყოს წარსულში.");
+            
             var user = CreateUser(createDto.Email, createDto.Password, "მოხალისე");
             var profile = CreateVolunteer(createDto);
 

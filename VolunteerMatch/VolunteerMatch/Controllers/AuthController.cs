@@ -27,7 +27,11 @@ namespace VolunteerMatch.Controllers
             }
             catch (DuplicateEmailException ex)
             {
-                return Conflict(ex.Message);    // 409
+                return Conflict(new { message = ex.Message });    // 409
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });  // 400
             }
             catch (Exception)
             {
