@@ -3,7 +3,7 @@
 create database VolunteerMatchDB
 
 create table dbo.Users (
-	UserId         UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
+	UserId				UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
     Email               NVARCHAR(255) NOT NULL,
     PasswordHash        NVARCHAR(255) NOT NULL,
     Role                NVARCHAR(20) NOT NULL,
@@ -22,7 +22,7 @@ create table dbo.Users (
 
 -- Age must be calculated here and Location - it will be prefiltered with events' compatible columns
 CREATE TABLE dbo.VolunteerProfiles (
-	VolunteerId         UNIQUEIDENTIFIER NOT NULL,
+	VolunteerId     UNIQUEIDENTIFIER NOT NULL,
     FirstName       NVARCHAR(100) NOT NULL,
     LastName        NVARCHAR(100) NOT NULL,
     BirthDate       DATE NOT NULL,
@@ -56,29 +56,58 @@ CREATE TABLE dbo.OrganizationProfiles (
         FOREIGN KEY (OrganizationId) REFERENCES dbo.Users(UserId)
 );
 
--------- აქამდე შევქმენი თეიბლები რეგისტრაცია/ლოგინი პროფილების ედითი (ივენთის დამატების გარდა) ------
+
 CREATE TABLE dbo.Events (
-    EventId         UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
-    OrganizationId  UNIQUEIDENTIFIER NOT NULL,
-    Title           NVARCHAR(200) NOT NULL,
-    Description     NVARCHAR(MAX) NOT NULL,
-    Requirements    NVARCHAR(MAX) NOT NULL,
-    AgeMin          TINYINT NULL,
-    AgeMax          TINYINT NULL,
-    Location		NVARCHAR(100) NOT NULL,
-    StartDate		DATETIMEOFFSET NOT NULL,
-    EndDate			DATETIMEOFFSET NOT NULL,
-    Status          NVARCHAR(20) NOT NULL,
-    IsActive        BIT NOT NULL DEFAULT 1, -- Organization deletes event
-    CreatedAt       DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
+    EventId             UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
+    OrganizationId      UNIQUEIDENTIFIER NOT NULL,
+    Title               NVARCHAR(200) NOT NULL,
+    Description         NVARCHAR(2000) NOT NULL,
+    Requirements        NVARCHAR(1000) NOT NULL,
+    Location            NVARCHAR(100) NOT NULL,
+    StartDate           DATETIMEOFFSET NOT NULL,
+    EndDate             DATETIMEOFFSET NOT NULL,
+    DailyStartTime      TIME NOT NULL,
+    DailyEndTime        TIME NOT NULL,
+    VolunteersAmount    INT NOT NULL,
+    Benefits            NVARCHAR(1000) NOT NULL,
+    --SpeakersJsons        NVARCHAR(MAX) NULL, --წაიშალა, მოსაფიქრებელია
+    MainPhotoUrl        NVARCHAR(500) NULL,
+    Photo2Url           NVARCHAR(500) NULL,
+    Photo3Url           NVARCHAR(500) NULL,
+    AdditionalInfo      NVARCHAR(1000) NULL,
+    IsActive            BIT NOT NULL DEFAULT 1,
+    CreatedAt           DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
 
     CONSTRAINT PK_Events PRIMARY KEY (EventId),
+
     CONSTRAINT FK_Events_Organization
         FOREIGN KEY (OrganizationId)
-        REFERENCES dbo.OrganizationProfiles(OrganizationId)
+        REFERENCES dbo.OrganizationProfiles(OrganizationId),
+
+    CONSTRAINT CHK_Events_EndDate_After_StartDate
+        CHECK (EndDate >= StartDate),
+
+    CONSTRAINT CHK_Events_DailyEndTime_After_DailyStartTime
+        CHECK (DailyEndTime > DailyStartTime),
+
+    CONSTRAINT CHK_Events_VolunteersAmount_Positive
+        CHECK (VolunteersAmount > 0)
 );
 
+ALTER TABLE dbo.Events
+ADD CONSTRAINT CK_Events_Benefits_NotBlank
+CHECK (LEN(LTRIM(RTRIM(Benefits))) > 0);
 
+ALTER TABLE dbo.Events
+ADD CONSTRAINT CK_Events_AdditionalInfo_NotBlank
+CHECK (AdditionalInfo IS NULL OR LEN(LTRIM(RTRIM(AdditionalInfo))) > 0);
+
+---- Optional: enforce valid JSON if present
+--ALTER TABLE dbo.Events
+--ADD CONSTRAINT CK_Events_SpeakersJson_IsJson
+--CHECK (ISJSON(SpeakersJson) = 1);-- დატესტვისთვის სტრინგად შეცვალე დადროპე ეს შეზღუდვა 
+
+------------------------------------- აქამდე შევქმენი -----------------------------------------
 CREATE TABLE dbo.FavoriteEvents (
     VolunteerId UNIQUEIDENTIFIER NOT NULL,
     EventId     UNIQUEIDENTIFIER NOT NULL,
@@ -111,7 +140,7 @@ CREATE TABLE dbo.MatchingSuggestions (
         FOREIGN KEY (EventId) REFERENCES dbo.Events(EventId)
 );
 
-----მხოლოდ ერთი კომენტი
+----მხოლოდ ერთი კომენტი -------------- სამომავლო პერსპექტივაში ----------------------------
 --CREATE TABLE dbo.VolunteerComments (
 --    CommentId            UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
 --    VolunteerId          UNIQUEIDENTIFIER NOT NULL,
@@ -188,46 +217,3 @@ CREATE TABLE dbo.EventTags (
         FOREIGN KEY (TagId)
         REFERENCES dbo.Tags(TagId)
 );
-
-
-CREATE TABLE dbo.Permissions (
-    PermissionId   UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
-    PermissionName NVARCHAR(100) NOT NULL,
-    CreatedAt      DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
-
-    CONSTRAINT PK_Permissions PRIMARY KEY (PermissionId),
-    CONSTRAINT UQ_Permissions_Name UNIQUE (PermissionName)
-);
-
-
-CREATE TABLE dbo.UserPermissions (
-    UserPermissionId UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
-    UserId           UNIQUEIDENTIFIER NOT NULL,
-    PermissionId     UNIQUEIDENTIFIER NOT NULL,
-    CreatedAt        DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
-
-    CONSTRAINT PK_UserPermissions PRIMARY KEY (UserPermissionId),
-    CONSTRAINT UQ_UserPermissions UNIQUE (UserId, PermissionId),
-    CONSTRAINT FK_UP_User
-        FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId),
-    CONSTRAINT FK_UP_Permission
-        FOREIGN KEY (PermissionId) REFERENCES dbo.Permissions(PermissionId)
-);
--------------------------- ახალი დამატებული --------------------------
-ALTER TABLE dbo.Events
-ADD SpeakersJson    NVARCHAR(MAX) NOT NULL,
-	Benefits        NVARCHAR(MAX) NOT NULL,
-    AdditionalInfo  NVARCHAR(MAX) NULL;
-
--- Optional: enforce valid JSON if present
-ALTER TABLE dbo.Events
-ADD CONSTRAINT CK_Events_SpeakersJson_IsJson
-CHECK (ISJSON(SpeakersJson) = 1);-- დატესტვისთვის სტრინგად შეცვალე დადროპე ეს შეზღუდვა 
-
-ALTER TABLE dbo.Events
-ADD CONSTRAINT CK_Events_Benefits_NotBlank
-CHECK (LEN(LTRIM(RTRIM(Benefits))) > 0);
-
-ALTER TABLE dbo.Events
-ADD CONSTRAINT CK_Events_AdditionalInfo_NotBlank
-CHECK (AdditionalInfo IS NULL OR LEN(LTRIM(RTRIM(AdditionalInfo))) > 0);

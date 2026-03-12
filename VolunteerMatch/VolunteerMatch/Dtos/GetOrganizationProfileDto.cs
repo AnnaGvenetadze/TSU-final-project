@@ -10,6 +10,5 @@
         public string? LinkedInUrl { get; set; }
         public string? ProfilePhotoUrl { get; set; } // დაემატა
         public required string Description { get; set; }
-        // public List<OrganizationProfileEventDto> Events { get; set; } = new();
     }
 }

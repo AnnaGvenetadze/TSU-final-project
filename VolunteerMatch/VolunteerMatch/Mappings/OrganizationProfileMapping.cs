@@ -3,7 +3,7 @@ using VolunteerMatch.Models;
 using VolunteerMatch.Dtos;
 
 namespace VolunteerMatch.Mappings
-{   // TODO: ივენთების ფუნქციონალის შექმნის მერე ივენთების ლისტიც უნდა დაბრუნდეს
+{
     public class OrganizationProfileMapping : Profile
     {
         public OrganizationProfileMapping()

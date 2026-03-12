@@ -36,75 +36,133 @@ public partial class VolunteerMatchingDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=LAPTOP-QARO7VF5;Database=VolunteerMatchingDB;Trusted_Connection=True;TrustServerCertificate=True");
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
+    {// აქ დავამატე ველები და შეზღუდვები
         modelBuilder.Entity<Event>(entity =>
         {
-            entity.Property(e => e.EventId).HasDefaultValueSql("(newsequentialid())");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
-            entity.Property(e => e.Location).HasMaxLength(100);
-            entity.Property(e => e.Status).HasMaxLength(20);
-            entity.Property(e => e.Title).HasMaxLength(200);
+            entity.HasKey(e => e.EventId);
 
-            //entity.HasOne(d => d.Organization).WithMany(p => p.Events)
-            //    .HasForeignKey(d => d.OrganizationId)
-            //    .OnDelete(DeleteBehavior.ClientSetNull)
-            //    .HasConstraintName("FK_Events_Organization");
+            entity.Property(e => e.EventId)
+                .HasDefaultValueSql("(newsequentialid())");
+
+            entity.Property(e => e.OrganizationId);
+
+            entity.Property(e => e.Title)
+                .HasMaxLength(200);
+
+            entity.Property(e => e.Description)
+                .HasMaxLength(2000);
+
+            entity.Property(e => e.Requirements)
+                .HasMaxLength(1000);
+
+            entity.Property(e => e.Location)
+                .HasMaxLength(100);
+
+            entity.Property(e => e.StartDate)
+                .HasColumnType("datetimeoffset");
+
+            entity.Property(e => e.EndDate)
+                .HasColumnType("datetimeoffset");
+
+            entity.Property(e => e.DailyStartTime)
+                .HasColumnType("time");
+
+            entity.Property(e => e.DailyEndTime)
+                .HasColumnType("time");
+
+            entity.Property(e => e.VolunteersAmount);
+
+            entity.Property(e => e.Benefits)
+                .HasMaxLength(1000);
+
+            //entity.Property(e => e.SpeakersJson)
+            //    .HasColumnType("nvarchar(max)");
+
+            entity.Property(e => e.MainPhotoUrl)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.Photo2Url)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.Photo3Url)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.AdditionalInfo)
+                .HasMaxLength(1000);
+
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true);
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(sysdatetimeoffset())");
+
+            entity.HasOne(e => e.Organization)
+                .WithMany(o => o.Events)
+                .HasForeignKey(e => e.OrganizationId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_Events_Organization");
+
+            entity.ToTable(t =>
+            {
+                t.HasCheckConstraint("CHK_Events_EndDate_After_StartDate", "[EndDate] >= [StartDate]");
+                t.HasCheckConstraint("CHK_Events_DailyEndTime_After_DailyStartTime", "[DailyEndTime] > [DailyStartTime]");
+                t.HasCheckConstraint("CHK_Events_VolunteersAmount_Positive", "[VolunteersAmount] > 0");
+            });
         });
 
-        modelBuilder.Entity<EventTag>(entity =>
-        {
-            entity.HasKey(e => new { e.EventId, e.TagId });
+        //modelBuilder.Entity<EventTag>(entity =>
+        //{
+        //    entity.HasKey(e => new { e.EventId, e.TagId });
 
-            entity.HasOne(d => d.Event).WithMany(p => p.EventTags)
-                .HasForeignKey(d => d.EventId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_EventTags_Event");
+        //    entity.HasOne(d => d.Event).WithMany(p => p.EventTags)
+        //        .HasForeignKey(d => d.EventId)
+        //        .OnDelete(DeleteBehavior.ClientSetNull)
+        //        .HasConstraintName("FK_EventTags_Event");
 
-            entity.HasOne(d => d.Tag).WithMany(p => p.EventTags)
-                .HasForeignKey(d => d.TagId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_EventTags_Tag");
-        });
+        //    entity.HasOne(d => d.Tag).WithMany(p => p.EventTags)
+        //        .HasForeignKey(d => d.TagId)
+        //        .OnDelete(DeleteBehavior.ClientSetNull)
+        //        .HasConstraintName("FK_EventTags_Tag");
+        //});
 
-        modelBuilder.Entity<FavoriteEvent>(entity =>
-        {
-            entity.HasKey(e => new { e.VolunteerId, e.EventId });
+        //modelBuilder.Entity<FavoriteEvent>(entity =>
+        //{
+        //    entity.HasKey(e => new { e.VolunteerId, e.EventId });
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
+        //    entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
 
-            entity.HasOne(d => d.Event).WithMany(p => p.FavoriteEvents)
-                .HasForeignKey(d => d.EventId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_FavoriteEvents_Event");
+        //    entity.HasOne(d => d.Event).WithMany(p => p.FavoriteEvents)
+        //        .HasForeignKey(d => d.EventId)
+        //        .OnDelete(DeleteBehavior.ClientSetNull)
+        //        .HasConstraintName("FK_FavoriteEvents_Event");
 
-            //entity.HasOne(d => d.Volunteer).WithMany(p => p.FavoriteEvents)
-            //    .HasForeignKey(d => d.VolunteerId)
-            //    .OnDelete(DeleteBehavior.ClientSetNull)
-            //    .HasConstraintName("FK_FavoriteEvents_Volunteer");
-        });
+        //    //entity.HasOne(d => d.Volunteer).WithMany(p => p.FavoriteEvents)
+        //    //    .HasForeignKey(d => d.VolunteerId)
+        //    //    .OnDelete(DeleteBehavior.ClientSetNull)
+        //    //    .HasConstraintName("FK_FavoriteEvents_Volunteer");
+        //});
 
-        modelBuilder.Entity<MatchingSuggestion>(entity =>
-        {
-            entity.HasKey(e => e.SuggestionId);
+        //modelBuilder.Entity<MatchingSuggestion>(entity =>
+        //{
+        //    entity.HasKey(e => e.SuggestionId);
 
-            entity.Property(e => e.SuggestionId).HasDefaultValueSql("(newsequentialid())");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
-            entity.Property(e => e.Initiator).HasMaxLength(20);
-            entity.Property(e => e.Status).HasMaxLength(30);
+        //    entity.Property(e => e.SuggestionId).HasDefaultValueSql("(newsequentialid())");
+        //    entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
+        //    entity.Property(e => e.Initiator).HasMaxLength(20);
+        //    entity.Property(e => e.Status).HasMaxLength(30);
 
-            entity.HasOne(d => d.Event).WithMany(p => p.MatchingSuggestions)
-                .HasForeignKey(d => d.EventId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_MS_Event");
+        //    entity.HasOne(d => d.Event).WithMany(p => p.MatchingSuggestions)
+        //        .HasForeignKey(d => d.EventId)
+        //        .OnDelete(DeleteBehavior.ClientSetNull)
+        //        .HasConstraintName("FK_MS_Event");
 
-            //entity.HasOne(d => d.Volunteer).WithMany(p => p.MatchingSuggestions)
-            //    .HasForeignKey(d => d.VolunteerId)
-            //    .OnDelete(DeleteBehavior.ClientSetNull)
-            //    .HasConstraintName("FK_MS_Volunteer");
-        });
+        //    //entity.HasOne(d => d.Volunteer).WithMany(p => p.MatchingSuggestions)
+        //    //    .HasForeignKey(d => d.VolunteerId)
+        //    //    .OnDelete(DeleteBehavior.ClientSetNull)
+        //    //    .HasConstraintName("FK_MS_Volunteer");
+        //});
 
         modelBuilder.Entity<OrganizationProfile>(entity =>
         {

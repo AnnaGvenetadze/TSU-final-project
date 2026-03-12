@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace VolunteerMatch.Models;
 
 public partial class OrganizationProfile
-{   // TODO: ივენთების ფუნქციონალის შექმნის მერე ივენთების ლისტიც უნდა დაემატოს 
+{
     public Guid OrganizationId { get; set; }
 
     public required string OrganizationName { get; set; }
@@ -17,5 +17,5 @@ public partial class OrganizationProfile
 
     public virtual User Organization { get; set; } = null!;
 
-    //public virtual ICollection<Event> Events { get; set; } = new List<Event>();
+    public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 }

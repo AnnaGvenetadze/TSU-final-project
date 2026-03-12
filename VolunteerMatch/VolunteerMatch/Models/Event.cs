@@ -1,5 +1,5 @@
 ﻿namespace VolunteerMatch.Models;
-
+// TODO: თემატიკა როგორ დაემატოს აქ, ცალკე?
 public partial class Event
 {
     public Guid EventId { get; set; }
@@ -12,35 +12,43 @@ public partial class Event
 
     public string Requirements { get; set; } = null!;
 
-    public byte? AgeMin { get; set; }
-
-    public byte? AgeMax { get; set; }
-
     public string Location { get; set; } = null!;
 
     public DateTimeOffset StartDate { get; set; }
 
     public DateTimeOffset EndDate { get; set; }
 
-    public string Status { get; set; } = null!;
+    public TimeOnly DailyStartTime { get; set; }
+
+    public TimeOnly DailyEndTime { get; set; }
+
+    public int VolunteersAmount { get; set; }
+
+    public string Benefits { get; set; } = null!;
+
+    //public string? SpeakersJsons { get; set; } // დასამატებელია ან ცალკე 1 თეიბლად
+
+    public string? MainPhotoUrl { get; set; }
+
+    public string? Photo2Url { get; set; }
+
+    public string? Photo3Url { get; set; }
+
+    public string? AdditionalInfo { get; set; }
 
     public bool IsActive { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; }
 
-    /// ახალი დამატებული
-    public string SpeakersJson { get; set; } = null!; // ჯსონის ობიექტების კოლექცია ერთ ველად
-
-    public string Benefits { get; set; } = null!;
-
-    public string? AdditionalInfo { get; set; }
-    ///
-
-    public virtual ICollection<EventTag> EventTags { get; set; } = new List<EventTag>();
-
-    public virtual ICollection<FavoriteEvent> FavoriteEvents { get; set; } = new List<FavoriteEvent>();
-
-    public virtual ICollection<MatchingSuggestion> MatchingSuggestions { get; set; } = new List<MatchingSuggestion>();
-
     public virtual OrganizationProfile Organization { get; set; } = null!;
+
+    // TODO: თემატიკის არჩევა როგორ მოხდეს ანუ თეგები როგორ დაემატოს?
+
+    //public virtual ICollection<EventTag> EventTags { get; set; } = new List<EventTag>();
+
+    //public virtual ICollection<FavoriteEvent> FavoriteEvents { get; set; } = new List<FavoriteEvent>();
+
+    //public virtual ICollection<MatchingSuggestion> MatchingSuggestions { get; set; } = new List<MatchingSuggestion>();
+
+    //public virtual OrganizationProfile Organization { get; set; } = null!;
 }

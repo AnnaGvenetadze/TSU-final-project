@@ -5,6 +5,9 @@ select * from VolunteerProfiles
 alter table OrganizationProfiles
 drop column AverageRating -- ჩაწერილების ამოშლას მთხოვს
 
+alter table Events
+drop column SpeakersJson
+
 alter table VolunteerProfiles -- უკვე დაემატა
 add Education NVARCHAR(500) NULL
 
