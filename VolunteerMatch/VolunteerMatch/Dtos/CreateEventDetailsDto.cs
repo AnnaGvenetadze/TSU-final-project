@@ -3,8 +3,8 @@
 namespace VolunteerMatch.Dtos
 {// TODO: აქ იმეილი ახალი უნდა ჩაიწეროს თუ წამოვიღო მიმდინარე ორგანიზაციიდან ?
  // TODO: თემატიკის არჩევა როგორ მოხდეს ანუ თეგები როგორ დაემატოს? ცალკე 1 თეიბლად?
- // TODO: სპიკერებიც დაემატება
-    public class UpdateEventDetailsDto
+ // TODO: სპიკერებიც დაემატება  
+    public class CreateEventDetailsDto
     {
         [Required(ErrorMessage = "სათაური სავალდებულოა.")]
         [StringLength(200, ErrorMessage = "სათაური არ უნდა აღემატებოდეს 200 სიმბოლოს.")]

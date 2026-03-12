@@ -37,7 +37,7 @@ CREATE TABLE dbo.VolunteerProfiles (
     Technologies    NVARCHAR(500) NULL,
     Experience      NVARCHAR(MAX) NULL,
 	Education		NVARCHAR(500) NULL,
-    AverageRating   DECIMAL(3,2)  NULL DEFAULT 0, --
+    AverageRating   DECIMAL(3,2)  NULL DEFAULT 0, -- არ გამოიყენება უბრალოდაა ჩაგდებული
 
     CONSTRAINT PK_VolunteerProfiles PRIMARY KEY (VolunteerId),
 	CONSTRAINT FK_VolunteerProfiles_Users
