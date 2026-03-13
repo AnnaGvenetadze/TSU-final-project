@@ -13,12 +13,12 @@ namespace VolunteerMatch.Dtos
         [StringLength(3000, ErrorMessage = "აღწერა ძალიან გრძელია.")]
         public string Description { get; set; } = null!;
 
-        [Url(ErrorMessage = "ფოტოს ბმულის ფორმატი არასწორია.")]
-        [StringLength(500, ErrorMessage = "ფოტოს ბმული ძალიან გრძელია.")]
+        [Url(ErrorMessage = "ბმულის ფორმატი არასწორია.")]
+        [StringLength(500, ErrorMessage = "ბმული ძალიან გრძელია.")]
         public string? ProfilePhotoUrl { get; set; }
 
-        [Url(ErrorMessage = "LinkedIn ბმულის ფორმატი არასწორია.")]
-        [StringLength(500, ErrorMessage = "LinkedIn ბმული ძალიან გრძელია.")]
+        [Url(ErrorMessage = "ბმულის ფორმატი არასწორია.")]
+        [StringLength(500, ErrorMessage = "ბმული ძალიან გრძელია.")]
         public string? LinkedInUrl { get; set; }
     }
 }

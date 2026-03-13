@@ -13,9 +13,9 @@ namespace VolunteerMatch.Controllers
     {
         private readonly MyOrganizationService _myOrganizationService;
 
-        public MyOrganizationController(MyOrganizationService organizationService)
+        public MyOrganizationController(MyOrganizationService myOrganizationService)
         {
-            _myOrganizationService = organizationService;
+            _myOrganizationService = myOrganizationService ?? throw new ArgumentNullException(nameof(myOrganizationService));
         }
 
 
@@ -27,10 +27,6 @@ namespace VolunteerMatch.Controllers
                 var profile = await _myOrganizationService.GetMyProfileAsync(CurrentUserId);
 
                 return Ok(profile);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {
@@ -52,13 +48,13 @@ namespace VolunteerMatch.Controllers
 
                 return Ok("ორგანიზაციის პროფილი წარმატებით განახლდა.");
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
+            }
+            catch(ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception)
             {

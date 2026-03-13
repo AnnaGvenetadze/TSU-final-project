@@ -1,9 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 using VolunteerMatch.Dtos;
 using VolunteerMatch.Exceptions;
+using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Helpers;
 using VolunteerMatch.Models;
+using VolunteerMatch.Validators;
+
 
 namespace VolunteerMatch.Services
 {
@@ -12,26 +16,28 @@ namespace VolunteerMatch.Services
         private readonly VolunteerMatchingDbContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IConfiguration _config;
+        private readonly IMapper _mapper;
 
         public UserService(
             VolunteerMatchingDbContext context,
             IPasswordHasher<User> passwordHasher,
-            IConfiguration config)
+            IConfiguration config,
+            IMapper mapper)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
             _config = config ?? throw new ArgumentNullException(nameof(config));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(_mapper));
         }
 
 
         public async Task RegisterVolunteerAsync(CreateVolunteerDto createDto)
         {
             ArgumentNullException.ThrowIfNull(createDto);
-            if (createDto.BirthDate >= DateOnly.FromDateTime(DateTime.UtcNow))
-                throw new ArgumentException("დაბადების თარიღი უნდა იყოს წარსულში.");
+            VolunteerProfileValidator.ValidateForCreate(createDto);
 
             var user = CreateUser(createDto.Email, createDto.Password, "მოხალისე");
-            var profile = CreateVolunteer(createDto);
+            var profile = _mapper.Map<VolunteerProfile>(createDto);
 
             await using var tx = await _context.Database.BeginTransactionAsync();
 
@@ -64,7 +70,7 @@ namespace VolunteerMatch.Services
             ArgumentNullException.ThrowIfNull(createDto);
 
             var user = CreateUser(createDto.Email, createDto.Password, "ორგანიზაცია");
-            var profile = CreateOrganization(createDto);
+            var profile = _mapper.Map<OrganizationProfile>(createDto);
 
             await using var tx = await _context.Database.BeginTransactionAsync();
 
@@ -123,33 +129,6 @@ namespace VolunteerMatch.Services
             user.PasswordHash = _passwordHasher.HashPassword(user, password);
 
             return user;
-        }
-
-
-        private VolunteerProfile CreateVolunteer(CreateVolunteerDto createDto)
-        {
-            return new VolunteerProfile
-            {
-                FirstName = createDto.FirstName.Trim(),
-                LastName = createDto.LastName.Trim(),
-                BirthDate = createDto.BirthDate,
-                Citizenship = createDto.Citizenship.Trim(),
-                Profession = createDto.Profession.Trim(),
-                Languages = createDto.Languages.Trim(),
-                Skills = createDto.Skills.Trim(),
-                Interests = createDto.Interests.Trim()
-                // TODO: TagIds ლისტი დააბრუნე
-            };
-        }
-
-
-        private OrganizationProfile CreateOrganization(CreateOrganizationDto createDto)
-        {
-            return new OrganizationProfile
-            {
-                OrganizationName = createDto.OrganizationName.Trim(),
-                Description = createDto.Description.Trim()
-            };
         }
     }
 }

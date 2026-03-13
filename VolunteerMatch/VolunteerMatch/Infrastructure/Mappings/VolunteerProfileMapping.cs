@@ -2,7 +2,7 @@
 using VolunteerMatch.Dtos;
 using VolunteerMatch.Models;
 
-namespace VolunteerMatch.Mappings
+namespace VolunteerMatch.Infrastructure.Mappings
 {
     public class VolunteerProfileMapping : Profile
     {
@@ -12,7 +12,7 @@ namespace VolunteerMatch.Mappings
 
             CreateMap<VolunteerProfile, GetMyVolunteerProfileDto>()
                 .ForMember(
-                    dest => dest.Email, 
+                    dest => dest.Email,
                     opt => opt.MapFrom(src => src.Volunteer.Email)
                 );// Volunteer ველი არაა GetMyVolunteerProfileDto ამიტომ თუ მას უნდა
                   // მისწვდეს ისეთ ფილდს რომელიც სხვა ფილდიდან გადის (Email)

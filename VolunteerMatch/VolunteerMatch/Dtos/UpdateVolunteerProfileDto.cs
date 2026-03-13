@@ -7,11 +7,11 @@ namespace VolunteerMatch.Dtos
     public class UpdateVolunteerProfileDto
     {
         [Required(ErrorMessage = "სახელი სავალდებულოა.")]
-        [StringLength(100, ErrorMessage = "სახელი ძალიან გრძელია.")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "სახელი 2-დან 100 სიმბოლომდე უნდა იყოს.")]
         public string FirstName { get; set; } = null!;
 
         [Required(ErrorMessage = "გვარი სავალდებულოა.")]
-        [StringLength(200, ErrorMessage = "გვარი ძალიან გრძელია.")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "გვარი 2-დან 100 სიმბოლომდე უნდა იყოს.")]
         public string LastName { get; set; } = null!;
 
         [Required(ErrorMessage = "დაბადების თარიღი სავალდებულოა.")]
@@ -40,12 +40,12 @@ namespace VolunteerMatch.Dtos
         [StringLength(500, ErrorMessage = "განათლება ძალიან გრძელია.")]
         public string? Education { get; set; }
 
-        [Url(ErrorMessage = "ფოტოს ბმულის ფორმატი არასწორია.")]
-        [StringLength(500, ErrorMessage = "ფოტოს ბმული ძალიან გრძელია.")]
+        [Url(ErrorMessage = "ბმულის ფორმატი არასწორია.")]
+        [StringLength(500, ErrorMessage = "ბმული ძალიან გრძელია.")]
         public string? ProfilePhotoUrl { get; set; }
 
-        [Url(ErrorMessage = "LinkedIn ბმულის ფორმატი არასწორია.")]
-        [StringLength(500, ErrorMessage = "LinkedIn ბმული ძალიან გრძელია.")]
+        [Url(ErrorMessage = "ბმულის ფორმატი არასწორია.")]
+        [StringLength(500, ErrorMessage = "ბმული ძალიან გრძელია.")]
         public string? LinkedInUrl { get; set; }
 
         [StringLength(300, ErrorMessage = "ტექნოლოგიები ძალიან გრძელია.")]

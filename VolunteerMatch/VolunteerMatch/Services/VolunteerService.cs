@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using VolunteerMatch.Models;
 using VolunteerMatch.Dtos;
+using VolunteerMatch.Infrastructure.Data;
 
 
 namespace VolunteerMatch.Services

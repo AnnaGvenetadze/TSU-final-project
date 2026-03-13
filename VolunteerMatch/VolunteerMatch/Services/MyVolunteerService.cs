@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using VolunteerMatch.Dtos;
-using VolunteerMatch.Models;
+using VolunteerMatch.Infrastructure.Data;
+using VolunteerMatch.Infrastructure.Helpers;
+using VolunteerMatch.Validators;
 
 namespace VolunteerMatch.Services
 {
@@ -18,13 +20,11 @@ namespace VolunteerMatch.Services
 
         public async Task<GetMyVolunteerProfileDto> GetMyProfileAsync(Guid volunteerId)
         {
-            var profile = await _context.VolunteerProfiles
-                .AsNoTracking()
-                .Include(p => p.Volunteer)
-                .SingleOrDefaultAsync(p => p.VolunteerId == volunteerId);
-
-            if (profile is null)
-                throw new KeyNotFoundException("მოხალისის პროფილი ვერ მოიძებნა.");
+            var profile = Guard.EnsureFound(
+                await _context.VolunteerProfiles
+                    .AsNoTracking()
+                    .Include(p => p.Volunteer)
+                    .SingleOrDefaultAsync(p => p.VolunteerId == volunteerId));
 
             return _mapper.Map<GetMyVolunteerProfileDto>(profile);
         }
@@ -32,15 +32,11 @@ namespace VolunteerMatch.Services
         public async Task UpdateMyProfileAsync(Guid volunteerId, UpdateVolunteerProfileDto updateDto)
         {
             ArgumentNullException.ThrowIfNull(updateDto);
+            VolunteerProfileValidator.ValidateForUpdate(updateDto);
 
-            if (updateDto.BirthDate >= DateOnly.FromDateTime(DateTime.UtcNow))
-                throw new ArgumentException("დაბადების თარიღი უნდა იყოს წარსულში.");
-
-            var profile = await _context.VolunteerProfiles
-                .SingleOrDefaultAsync(p => p.VolunteerId == volunteerId);
-
-            if (profile is null)
-                throw new KeyNotFoundException("მოხალისის პროფილი ვერ მოიძებნა.");
+            var profile = Guard.EnsureFound(
+                await _context.VolunteerProfiles
+                    .SingleOrDefaultAsync(p => p.VolunteerId == volunteerId));
 
             _mapper.Map(updateDto, profile);
 

@@ -1,46 +1,34 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VolunteerMatch.Dtos;
+using VolunteerMatch.Infrastructure.Data;
+using VolunteerMatch.Infrastructure.Helpers;
 using VolunteerMatch.Models;
+using AutoMapper;
 
 namespace VolunteerMatch.Services
 {
     public class OrganizationService
     {
         private readonly VolunteerMatchingDbContext _context;
+        private readonly IMapper _mapper;
 
-        public OrganizationService(VolunteerMatchingDbContext context)
+        public OrganizationService(VolunteerMatchingDbContext context, IMapper mapper)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+
         }
 
 
-        public async Task<GetOrganizationProfileDto> GetProfileByIdAsync(Guid guid)
+        public async Task<GetOrganizationProfileDto> GetProfileByIdAsync(Guid organizationId)
         {
-            var profile = await _context.OrganizationProfiles
-                .AsNoTracking()
-                .Include(p => p.Organization) // User entity (email აქედან მოდის)
-                .SingleOrDefaultAsync(p => p.OrganizationId == guid); // მოდელი ბრუნდება
+            var profile = Guard.EnsureFound(
+                 await _context.OrganizationProfiles
+                    .AsNoTracking()
+                    .Include(p => p.Organization) // p.Organization (User)-დან იმეილს
+                    .SingleOrDefaultAsync(p => p.OrganizationId == organizationId));
 
-            return MapProfileDto(profile);
-        }
-
-        // OrganizationProfile -> GetOrganizationProfileDto იმაპება
-        private static GetOrganizationProfileDto MapProfileDto(OrganizationProfile? profile)
-        {
-            if (profile is null)
-                throw new KeyNotFoundException("ორგანიზაციის პროფილი ვერ მოიძებნა.");
-
-            return new GetOrganizationProfileDto
-            {
-                OrganizationId = profile.OrganizationId,
-                OrganizationName = profile.OrganizationName,
-                Description = profile.Description,
-                Email = profile.Organization.Email,
-                LinkedInUrl = profile.LinkedInUrl,
-                ProfilePhotoUrl = profile.ProfilePhotoUrl
-                // TODO: ივენთების ფუნქციონალის შექმნის მერე ივენთების ლისტიც უნდა დაბრუნდეს
-            };
+            return _mapper.Map<GetOrganizationProfileDto>(profile);
         }
     }
-
 }

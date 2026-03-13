@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using System.Text;
+using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Models;
 using VolunteerMatch.Services;
 

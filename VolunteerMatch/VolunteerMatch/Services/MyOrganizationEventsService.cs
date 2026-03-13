@@ -2,7 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using VolunteerMatch.Dtos;
 using VolunteerMatch.Models;
-using VolunteerMatch.Infrastructure.Validators;
+using VolunteerMatch.Infrastructure.Helpers;
+using VolunteerMatch.Infrastructure.Data;
+using VolunteerMatch.Validators;
 
 namespace VolunteerMatch.Services
 {
@@ -19,6 +21,7 @@ namespace VolunteerMatch.Services
 
         public async Task<Guid> CreateEventAsync(Guid organizationId, CreateEventDetailsDto createDto)
         {
+            ArgumentNullException.ThrowIfNull(createDto, nameof(createDto));
             EventValidator.ValidateForCreate(createDto);
 
             var organizationExists = await _context.OrganizationProfiles
@@ -31,8 +34,6 @@ namespace VolunteerMatch.Services
             var newEvent = _mapper.Map<Event>(createDto);
             newEvent.OrganizationId = organizationId;
 
-            EventValidator.TrimEntityTextFields(newEvent);
-
             _context.Events.Add(newEvent);
             await _context.SaveChangesAsync();
 
@@ -42,7 +43,8 @@ namespace VolunteerMatch.Services
 
         public async Task<GetEventDetailsDto> GetMyEventByIdAsync(Guid organizationId, Guid eventId)
         {
-            var eventEntity = await _context.Events
+            var eventEntity = Guard.EnsureFound(
+                await _context.Events
                 .AsNoTracking()
                 .Include(eventModel => eventModel.Organization)
                 .ThenInclude(organizationProfile =>
@@ -50,29 +52,25 @@ namespace VolunteerMatch.Services
                 .SingleOrDefaultAsync(eventModel =>
                     eventModel.EventId == eventId &&
                     eventModel.OrganizationId == organizationId &&
-                    eventModel.IsActive);
-
-            if (eventEntity is null)
-                throw new KeyNotFoundException("აქტიური ივენთი ვერ მოიძებნა.");
+                    eventModel.IsActive)
+                );
 
             return _mapper.Map<GetEventDetailsDto>(eventEntity);
         }
 
         public async Task UpdateMyEventAsync(Guid organizationId, Guid eventId, UpdateEventDetailsDto updateDto)
         {
+            ArgumentNullException.ThrowIfNull(updateDto, nameof(updateDto));
             EventValidator.ValidateForUpdate(updateDto);
 
-            var eventEntity = await _context.Events
-                .SingleOrDefaultAsync(eventModel =>
+            var eventEntity = Guard.EnsureFound(
+                await _context.Events.SingleOrDefaultAsync(eventModel =>
                     eventModel.EventId == eventId &&
                     eventModel.OrganizationId == organizationId &&
-                    eventModel.IsActive);
-
-            if (eventEntity is null)
-                throw new KeyNotFoundException("აქტიური ივენთი ვერ მოიძებნა.");
+                    eventModel.IsActive)
+                );
 
             _mapper.Map(updateDto, eventEntity);
-            EventValidator.TrimEntityTextFields(eventEntity);
 
             await _context.SaveChangesAsync();
         }
@@ -83,7 +81,7 @@ namespace VolunteerMatch.Services
         {
             var organizationExists = await _context.OrganizationProfiles
                 .AsNoTracking()
-                .AnyAsync(organizationProfile => 
+                .AnyAsync(organizationProfile =>
                     organizationProfile.OrganizationId == organizationId);
 
             if (!organizationExists)
@@ -94,7 +92,7 @@ namespace VolunteerMatch.Services
                 .Include(eventModel => eventModel.Organization)
                 .Where(eventModel => eventModel.OrganizationId == organizationId 
                     && eventModel.IsActive)
-                .OrderByDescending(e => e.CreatedAt)
+                .OrderByDescending(eventModel => eventModel.CreatedAt)
                 .ToListAsync();
 
             return _mapper.Map<List<GetEventCardDto>>(events);
@@ -103,14 +101,12 @@ namespace VolunteerMatch.Services
 
         public async Task DeleteMyEventAsync(Guid organizationId, Guid eventId)
         {
-            var eventEntity = await _context.Events
-                .SingleOrDefaultAsync(e =>
-                    e.EventId == eventId &&
-                    e.OrganizationId == organizationId &&
-                    e.IsActive);
-
-            if (eventEntity is null)
-                throw new KeyNotFoundException("აქტიური ივენთი ვერ მოიძებნა.");
+            var eventEntity = Guard.EnsureFound(
+                await _context.Events.SingleOrDefaultAsync(eventModel =>
+                    eventModel.EventId == eventId &&
+                    eventModel.OrganizationId == organizationId &&
+                    eventModel.IsActive)
+                );
 
             eventEntity.IsActive = false;
 

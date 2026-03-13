@@ -3,17 +3,21 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using VolunteerMatch.Models;
+using VolunteerMatch.Infrastructure.Data;
+
 
 #nullable disable
 
 namespace VolunteerMatch.Migrations
 {
     [DbContext(typeof(VolunteerMatchingDbContext))]
-    partial class VolunteerMatchingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260306183947_AddProfilePhotoUrlToOrganizationProfile")]
+    partial class AddProfilePhotoUrlToOrganizationProfile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

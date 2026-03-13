@@ -37,7 +37,7 @@ CREATE TABLE dbo.VolunteerProfiles (
     Technologies    NVARCHAR(500) NULL,
     Experience      NVARCHAR(MAX) NULL,
 	Education		NVARCHAR(500) NULL,
-    AverageRating   DECIMAL(3,2)  NULL DEFAULT 0, -- არ გამოიყენება უბრალოდაა ჩაგდებული
+    AverageRating   DECIMAL(3,2)  NULL DEFAULT 0, --
 
     CONSTRAINT PK_VolunteerProfiles PRIMARY KEY (VolunteerId),
 	CONSTRAINT FK_VolunteerProfiles_Users
@@ -93,6 +93,10 @@ CREATE TABLE dbo.Events (
     CONSTRAINT CHK_Events_VolunteersAmount_Positive
         CHECK (VolunteersAmount > 0)
 );
+
+ALTER TABLE Events
+ADD CONSTRAINT DF_Events_IsActive
+DEFAULT 1 FOR IsActive;
 
 ALTER TABLE dbo.Events
 ADD CONSTRAINT CK_Events_Benefits_NotBlank

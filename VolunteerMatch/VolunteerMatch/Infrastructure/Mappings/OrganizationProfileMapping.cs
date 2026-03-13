@@ -2,13 +2,13 @@
 using VolunteerMatch.Models;
 using VolunteerMatch.Dtos;
 
-namespace VolunteerMatch.Mappings
+namespace VolunteerMatch.Infrastructure.Mappings
 {
     public class OrganizationProfileMapping : Profile
     {
         public OrganizationProfileMapping()
         {
-            ValueTransformers.Add<string>(s => s == null ? null : s.Trim());
+            ValueTransformers.Add<string>(s => s == null ? string.Empty : s.Trim());
 
             CreateMap<OrganizationProfile, GetMyOrganizationProfileDto>()
                 .ForMember(
@@ -22,6 +22,10 @@ namespace VolunteerMatch.Mappings
                 .ForMember(
                     dest => dest.OrganizationId,
                     opt => opt.MapFrom(src => src.OrganizationId)
+                )
+                .ForMember(
+                    dest => dest.Email,
+                    opt => opt.MapFrom(src => src.Organization.Email)
                 );
         }
     }

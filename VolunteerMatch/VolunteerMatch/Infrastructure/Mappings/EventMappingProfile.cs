@@ -2,14 +2,15 @@
 using VolunteerMatch.Dtos;
 using VolunteerMatch.Models;
 
-namespace VolunteerMatch.Mapping
+namespace VolunteerMatch.Infrastructure.Mappings
 {
     public class EventMappingProfile : Profile
     {
         public EventMappingProfile()
         {
-            CreateMap<CreateEventDetailsDto, Event>();
+            ValueTransformers.Add<string>(s => s == null ? string.Empty : s.Trim());
 
+            CreateMap<CreateEventDetailsDto, Event>();
             CreateMap<UpdateEventDetailsDto, Event>();
 
             CreateMap<Event, GetEventDetailsDto>()

@@ -52,6 +52,10 @@ namespace VolunteerMatch.Controllers
             {
                 return Conflict(ex.Message);    // 409
             }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });  // 400
+            }
             catch (Exception)
             {
                 return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
@@ -73,11 +77,12 @@ namespace VolunteerMatch.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    message = ex.Message,
-                    inner = ex.InnerException?.Message
-                });
+                return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
+                //return StatusCode(500, new
+                //{
+                //    message = ex.Message,
+                //    inner = ex.InnerException?.Message
+                //});
             }
         }
     }
