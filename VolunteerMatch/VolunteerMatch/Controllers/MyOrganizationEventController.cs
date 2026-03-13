@@ -1,9 +1,5 @@
-﻿// TODO: Add endpoints for creating, updating, and listing events created by the organization
-//POST api/organizations/me/events
-//PUT api/organizations/me/events/{id}
-//GET api/organizations/me/events/{id} -> კონკრეტული ივენთი დეტალურად
-//GET api/organizations/me/events -> ქარდების სია
-//GET api/organizations/me/matches/events
+﻿// Private endpoints for creating, updating, and listing events created by the organization
+// TODO: GET api/organizations/me/matches/events
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VolunteerMatch.Constants;
