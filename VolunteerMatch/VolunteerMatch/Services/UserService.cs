@@ -29,7 +29,7 @@ namespace VolunteerMatch.Services
             ArgumentNullException.ThrowIfNull(createDto);
             if (createDto.BirthDate >= DateOnly.FromDateTime(DateTime.UtcNow))
                 throw new ArgumentException("დაბადების თარიღი უნდა იყოს წარსულში.");
-            
+
             var user = CreateUser(createDto.Email, createDto.Password, "მოხალისე");
             var profile = CreateVolunteer(createDto);
 
@@ -121,7 +121,7 @@ namespace VolunteerMatch.Services
                 Role = role.Trim()
             };
             user.PasswordHash = _passwordHasher.HashPassword(user, password);
-            
+
             return user;
         }
 

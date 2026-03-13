@@ -13,7 +13,7 @@ namespace VolunteerMatch.Controllers
 
         public AuthController(UserService userService)
         {
-            _userService = userService;
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
 
@@ -71,9 +71,13 @@ namespace VolunteerMatch.Controllers
             {
                 return Unauthorized(new { message = "არასწორი იმეილი ან პაროლი." }); // 401
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    inner = ex.InnerException?.Message
+                });
             }
         }
     }
