@@ -5,9 +5,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using System.Text;
+using VolunteerMatch.Application.Services;
+using VolunteerMatch.Domain.Models;
 using VolunteerMatch.Infrastructure.Data;
-using VolunteerMatch.Models;
-using VolunteerMatch.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

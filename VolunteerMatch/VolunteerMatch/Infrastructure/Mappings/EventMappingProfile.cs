@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using VolunteerMatch.Dtos;
-using VolunteerMatch.Models;
+using VolunteerMatch.Application.Dtos;
+using VolunteerMatch.Domain.Models;
 
 namespace VolunteerMatch.Infrastructure.Mappings
 {

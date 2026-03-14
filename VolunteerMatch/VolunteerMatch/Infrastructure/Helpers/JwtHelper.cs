@@ -2,8 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using VolunteerMatch.Models;
-
+using VolunteerMatch.Domain.Models;
 
 namespace VolunteerMatch.Infrastructure.Helpers
 {

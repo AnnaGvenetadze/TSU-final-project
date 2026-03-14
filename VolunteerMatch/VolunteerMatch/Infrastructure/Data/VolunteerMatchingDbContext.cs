@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using VolunteerMatch.Models;
+using VolunteerMatch.Domain.Models;
 
 namespace VolunteerMatch.Infrastructure.Data;
 
