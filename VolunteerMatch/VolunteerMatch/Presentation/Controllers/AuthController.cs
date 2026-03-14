@@ -22,8 +22,10 @@ namespace VolunteerMatch.Presentation.Controllers
         {   //400 - Bad Request (model validation failed)
             try
             {
-                await _userService.RegisterVolunteerAsync(createDto);
-                return Ok("მოხალისე წარმატებით დარეგისტრირდა.");
+                var response = await _userService.RegisterVolunteerAsync(createDto);
+                response.Message = "მოხალისე წარმატებით დარეგისტრირდა.";
+
+                return Ok(response);
             }
             catch (DuplicateEmailException ex)
             {
@@ -45,8 +47,10 @@ namespace VolunteerMatch.Presentation.Controllers
         {   // 400 - Bad Request (model validation failed)
             try
             {
-                await _userService.RegisterOrganizationAsync(createDto);
-                return Ok("ორგანიზაცია წარმატებით დარეგისტრირდა.");
+                var response = await _userService.RegisterOrganizationAsync(createDto);
+                response.Message = "ორგანიზაცია წარმატებით დარეგისტრირდა.";
+
+                return Ok(response);
             }
             catch (DuplicateEmailException ex)
             {
@@ -68,14 +72,16 @@ namespace VolunteerMatch.Presentation.Controllers
         {   // 400 - Bad Request (model validation failed)
             try
             {
-                var token = await _userService.AuthenticateUserAsync(loginDto);
-                return Ok(new { token });
+                var response = await _userService.AuthenticateUserAsync(loginDto);
+                response.Message = "მომხმარებელი წარმატებით ავტორიზდა.";
+
+                return Ok(response);
             }
             catch (UnauthorizedAccessException)
             {
                 return Unauthorized(new { message = "არასწორი იმეილი ან პაროლი." }); // 401
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
                 //return StatusCode(500, new

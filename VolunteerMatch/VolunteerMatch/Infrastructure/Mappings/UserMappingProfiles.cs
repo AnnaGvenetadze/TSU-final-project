@@ -6,7 +6,9 @@ public class UserMappingProfile : Profile
 {
     public UserMappingProfile()
     {
-        ValueTransformers.Add<string>(s => s == null ? string.Empty : s.Trim());
+        ValueTransformers.Add<string?>(
+            s => string.IsNullOrWhiteSpace(s) ? null : s.Trim()
+        );
 
         CreateMap<CreateVolunteerDto, VolunteerProfile>();
         CreateMap<CreateOrganizationDto, OrganizationProfile>();

@@ -24,12 +24,11 @@ namespace VolunteerMatch.Application.Services
             ArgumentNullException.ThrowIfNull(createDto, nameof(createDto));
             EventValidator.ValidateForCreate(createDto);
 
-            var organizationExists = await _context.OrganizationProfiles
-                .AnyAsync(organizationProfile =>
-                    organizationProfile.OrganizationId == organizationId);
-
-            if (!organizationExists)
-                throw new KeyNotFoundException("ორგანიზაციის პროფილი ვერ მოიძებნა.");
+            Guard.EnsureFound(
+                await _context.OrganizationProfiles
+                    .AnyAsync(organizationProfile =>
+                    organizationProfile.OrganizationId == organizationId)
+            );
 
             var newEvent = _mapper.Map<Event>(createDto);
             newEvent.OrganizationId = organizationId;
@@ -79,13 +78,12 @@ namespace VolunteerMatch.Application.Services
 
         public async Task<List<GetEventCardDto>> GetMyEventsAsync(Guid organizationId)
         {
-            var organizationExists = await _context.OrganizationProfiles
+            Guard.EnsureFound(
+                await _context.OrganizationProfiles
                 .AsNoTracking()
                 .AnyAsync(organizationProfile =>
-                    organizationProfile.OrganizationId == organizationId);
-
-            if (!organizationExists)
-                throw new KeyNotFoundException("ორგანიზაციის პროფილი ვერ მოიძებნა.");
+                    organizationProfile.OrganizationId == organizationId)
+            );
 
             var events = await _context.Events
                 .AsNoTracking()

@@ -2,7 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using VolunteerMatch.Application.Dtos;
 using VolunteerMatch.Infrastructure.Data;
-
+using VolunteerMatch.Infrastructure.Validators;
+using VolunteerMatch.Infrastructure.Helpers;
 
 namespace VolunteerMatch.Application.Services
 {
@@ -19,33 +20,25 @@ namespace VolunteerMatch.Application.Services
 
         public async Task<GetVolunteerProfileDto> GetVolunteerProfileAsync(Guid volunteerId)
         {
-            var profile = await _context.VolunteerProfiles
+            var profile = Guard.EnsureFound(
+                await _context.VolunteerProfiles
                  .Include(v => v.Volunteer)
-                 .SingleOrDefaultAsync(v => v.VolunteerId == volunteerId);
-
-            if (profile == null)
-            {
-                throw new KeyNotFoundException("მოხალისის პროფილი ვერ მოიძებნა.");
-            }
+                 .SingleOrDefaultAsync(v => v.VolunteerId == volunteerId));
 
             return _mapper.Map<GetVolunteerProfileDto>(profile);
         }
 
         public async Task<List<SearchVolunteerItemDto>> SearchVolunteersAsync(string searchTerm, int take)
         {
-            if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Trim().Length < 2)
-                throw new ArgumentException("ძებნის ველი უნდა შეიცავდეს მინიმუმ 2 სიმბოლოს.");
-            if (!(take > 0 && take <= 80))
-                throw new ArgumentException("მისაცემი სია დიდია, შეამცირე მოთხოვნის რაოდენობა.");
-
-            searchTerm = searchTerm.Trim().ToLower();
+            searchTerm = SearchValidator.ValidateAndNormalize(searchTerm, take);
 
             var volunteers = await _context.VolunteerProfiles
                 .Include(v => v.Volunteer)
                 .Where(v =>
                     v.FirstName.ToLower().Contains(searchTerm) ||
                     v.LastName.ToLower().Contains(searchTerm) ||
-                    (v.FirstName + " " + v.LastName).ToLower().Contains(searchTerm))
+                    (v.FirstName + " " + v.LastName).ToLower().Contains(searchTerm) ||
+                    (v.LastName + " " + v.FirstName).ToLower().Contains(searchTerm))
                 .OrderBy(v => v.FirstName)
                 .ThenBy(v => v.LastName)
                 .Take(take)

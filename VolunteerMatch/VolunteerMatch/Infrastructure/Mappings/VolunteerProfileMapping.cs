@@ -8,7 +8,9 @@ namespace VolunteerMatch.Infrastructure.Mappings
     {
         public VolunteerProfileMapping()
         {
-            ValueTransformers.Add<string>(s => s == null ? string.Empty : s.Trim());
+            ValueTransformers.Add<string?>(
+                s => string.IsNullOrWhiteSpace(s) ? null : s.Trim()
+            );
 
             CreateMap<VolunteerProfile, GetMyVolunteerProfileDto>()
                 .ForMember(

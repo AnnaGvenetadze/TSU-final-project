@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
 using VolunteerMatch.Application.Exceptions;
 using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Helpers;
@@ -31,7 +31,7 @@ namespace VolunteerMatch.Application.Services
         }
 
 
-        public async Task RegisterVolunteerAsync(CreateVolunteerDto createDto)
+        public async Task<AuthResponseDto> RegisterVolunteerAsync(CreateVolunteerDto createDto)
         {
             ArgumentNullException.ThrowIfNull(createDto);
             VolunteerProfileValidator.ValidateForCreate(createDto);
@@ -52,6 +52,8 @@ namespace VolunteerMatch.Application.Services
                 await _context.SaveChangesAsync();
 
                 await tx.CommitAsync();
+
+                return CreateAuthResponse(user);
             }
             catch (DbUpdateException ex)
             {
@@ -65,7 +67,7 @@ namespace VolunteerMatch.Application.Services
         }
 
 
-        public async Task RegisterOrganizationAsync(CreateOrganizationDto createDto)
+        public async Task<AuthResponseDto> RegisterOrganizationAsync(CreateOrganizationDto createDto)
         {
             ArgumentNullException.ThrowIfNull(createDto);
 
@@ -84,6 +86,8 @@ namespace VolunteerMatch.Application.Services
 
                 await _context.SaveChangesAsync();
                 await tx.CommitAsync();
+
+                return CreateAuthResponse(user);
             }
             catch (DbUpdateException ex)
             {
@@ -97,7 +101,7 @@ namespace VolunteerMatch.Application.Services
         }
 
 
-        public async Task<string> AuthenticateUserAsync(LoginUserDto loginDto)
+        public async Task<AuthResponseDto> AuthenticateUserAsync(LoginUserDto loginDto)
         {
             ArgumentNullException.ThrowIfNull(loginDto);
 
@@ -114,7 +118,7 @@ namespace VolunteerMatch.Application.Services
             user.LastLoginAt = DateTimeOffset.UtcNow;
             await _context.SaveChangesAsync();
 
-            return JwtHelper.GenerateToken(user, _config);
+            return CreateAuthResponse(user);
         }
 
 
@@ -129,6 +133,19 @@ namespace VolunteerMatch.Application.Services
             user.PasswordHash = _passwordHasher.HashPassword(user, password);
 
             return user;
+        }
+
+
+        private AuthResponseDto CreateAuthResponse(User user)
+        {
+            var token = JwtHelper.GenerateToken(user, _config);
+
+            return new AuthResponseDto
+            {
+                AccessToken = token,
+                UserId = user.UserId,
+                Role = user.Role,
+            };
         }
     }
 }
