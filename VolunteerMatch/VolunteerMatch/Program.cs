@@ -58,6 +58,8 @@ builder.Services.AddScoped<MyOrganizationService>();
 builder.Services.AddScoped<MyVolunteerService>();
 builder.Services.AddScoped<VolunteerService>();
 builder.Services.AddScoped<MyOrganizationEventsService>();
+builder.Services.AddScoped<EventsService>();
+builder.Services.AddScoped<OrganizationEventsService>();
 
 
 builder.Services.AddAuthentication(options =>

@@ -1,7 +1,9 @@
 ﻿select * from Users
 select * from OrganizationProfiles
 select * from Events
+
 select * from VolunteerProfiles
+order by FirstName
 
 update Events
 set IsActive = 1

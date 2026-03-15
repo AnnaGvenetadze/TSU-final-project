@@ -40,7 +40,7 @@ namespace VolunteerMatch.Application.Services
         }
 
 
-        public async Task<GetEventDetailsDto> GetMyEventByIdAsync(Guid organizationId, Guid eventId)
+        public async Task<GetMyOrgEventDetailsDto> GetMyEventByIdAsync(Guid organizationId, Guid eventId)
         {
             var eventEntity = Guard.EnsureFound(
                 await _context.Events
@@ -54,7 +54,7 @@ namespace VolunteerMatch.Application.Services
                     eventModel.IsActive)
                 );
 
-            return _mapper.Map<GetEventDetailsDto>(eventEntity);
+            return _mapper.Map<GetMyOrgEventDetailsDto>(eventEntity);
         }
 
         public async Task UpdateMyEventAsync(Guid organizationId, Guid eventId, UpdateEventDetailsDto updateDto)
@@ -76,7 +76,7 @@ namespace VolunteerMatch.Application.Services
 
 
 
-        public async Task<List<GetEventCardDto>> GetMyEventsAsync(Guid organizationId)
+        public async Task<List<GetMyOrgEventCardDto>> GetMyEventsAsync(Guid organizationId)
         {
             Guard.EnsureFound(
                 await _context.OrganizationProfiles
@@ -93,7 +93,7 @@ namespace VolunteerMatch.Application.Services
                 .OrderByDescending(eventModel => eventModel.CreatedAt)
                 .ToListAsync();
 
-            return _mapper.Map<List<GetEventCardDto>>(events);
+            return _mapper.Map<List<GetMyOrgEventCardDto>>(events);
         }
 
 
