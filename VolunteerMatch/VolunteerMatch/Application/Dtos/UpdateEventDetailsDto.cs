@@ -2,7 +2,6 @@
 
 namespace VolunteerMatch.Application.Dtos
 {// TODO: აქ იმეილი ახალი უნდა ჩაიწეროს თუ წამოვიღო მიმდინარე ორგანიზაციიდან ?
- // TODO: თემატიკის არჩევა როგორ მოხდეს ანუ თეგები როგორ დაემატოს? ცალკე 1 თეიბლად?
  // TODO: სპიკერებიც დაემატება
     public class UpdateEventDetailsDto
     {
@@ -61,6 +60,7 @@ namespace VolunteerMatch.Application.Dtos
         [StringLength(1000, ErrorMessage = "დამატებითი ინფორმაცია ძალიან გრძელია.")]
         public string? AdditionalInfo { get; set; }
 
-        //public required List<string> Themes { get; set; } = [];
+        //[Required(ErrorMessage = "თემატიკა სავალდებულოა.")]
+        //public required List<Guid> SelectedTagIds { get; set; } = [];
     }
 }

@@ -2,7 +2,7 @@
 using VolunteerMatch.Infrastructure.Attributes;
 
 namespace VolunteerMatch.Application.Dtos
-{// TODO: Many-to-many tags (VolunteerTags)
+{
     public class CreateVolunteerDto
     {
         //Users (NOT NULL in DB)
@@ -51,8 +51,8 @@ namespace VolunteerMatch.Application.Dtos
         [MaxLength(1000, ErrorMessage = "ინტერესების ველი ძალიან გრძელია.")]
         public string Interests { get; set; } = null!;
 
-        //[Required(ErrorMessage = "თემატიკა სავალდებულოა.")]
-        //public List<Guid> TagIds { get; set; } = new();
+        [Required(ErrorMessage = "თემატიკა სავალდებულოა.")]
+        public List<Guid> SelectedTagIds { get; set; } = new();
     }
 }
 

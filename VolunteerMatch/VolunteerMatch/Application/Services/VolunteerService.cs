@@ -12,21 +12,24 @@ namespace VolunteerMatch.Application.Services
         private readonly VolunteerMatchingDbContext _context;
         private readonly IMapper _mapper;
 
-        public VolunteerService(VolunteerMatchingDbContext context, IMapper mapper)
+        public VolunteerService(VolunteerMatchingDbContext context, IMapper mapper, IVolunteerTagService volunteerTagService)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
+
 
         public async Task<GetVolunteerProfileDto> GetVolunteerProfileAsync(Guid volunteerId)
         {
             var profile = Guard.EnsureFound(
                 await _context.VolunteerProfiles
                  .Include(v => v.Volunteer)
+                 .Include(p => p.VolunteerTags)
                  .SingleOrDefaultAsync(v => v.VolunteerId == volunteerId));
 
             return _mapper.Map<GetVolunteerProfileDto>(profile);
         }
+
 
         public async Task<List<SearchVolunteerItemDto>> SearchVolunteersAsync(string searchTerm, int take)
         {

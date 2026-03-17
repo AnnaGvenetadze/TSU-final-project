@@ -35,5 +35,7 @@
         public string? Photo3Url { get; set; }
 
         public string? AdditionalInfo { get; set; }
+
+        //public List<Guid> TagIds { get; set; } = new();
     }
 }

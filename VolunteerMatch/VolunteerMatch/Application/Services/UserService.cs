@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using VolunteerMatch.Application.Dtos;
 using VolunteerMatch.Application.Exceptions;
+using VolunteerMatch.Domain.Constants;
+using VolunteerMatch.Domain.Models;
 using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Helpers;
 using VolunteerMatch.Infrastructure.Validators;
-using VolunteerMatch.Application.Dtos;
-using VolunteerMatch.Domain.Models;
 
 
 namespace VolunteerMatch.Application.Services
@@ -17,17 +18,25 @@ namespace VolunteerMatch.Application.Services
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IConfiguration _config;
         private readonly IMapper _mapper;
+        private readonly IVolunteerTagService _volunteerTagService;
+        private readonly ITagValidator _tagValidator;
 
         public UserService(
             VolunteerMatchingDbContext context,
             IPasswordHasher<User> passwordHasher,
             IConfiguration config,
-            IMapper mapper)
+            IMapper mapper,
+            IVolunteerTagService volunteerTagService,
+            ITagValidator tagValidator)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
             _config = config ?? throw new ArgumentNullException(nameof(config));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(_mapper));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _volunteerTagService = volunteerTagService ??
+                throw new ArgumentNullException(nameof(volunteerTagService));
+            _tagValidator = tagValidator ??
+                throw new ArgumentNullException(nameof(tagValidator));
         }
 
 
@@ -36,20 +45,23 @@ namespace VolunteerMatch.Application.Services
             ArgumentNullException.ThrowIfNull(createDto);
             VolunteerProfileValidator.ValidateForCreate(createDto);
 
-            var user = CreateUser(createDto.Email, createDto.Password, "მოხალისე");
+            var user = CreateUser(createDto.Email, createDto.Password, UserRoles.Volunteer);
             var profile = _mapper.Map<VolunteerProfile>(createDto);
 
             await using var tx = await _context.Database.BeginTransactionAsync();
 
             try
             {
+                await _tagValidator
+                    .ValidateSelectedTagIdsAsync(createDto.SelectedTagIds);
+
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
                 profile.VolunteerId = user.UserId;
                 _context.VolunteerProfiles.Add(profile);
-
-                await _context.SaveChangesAsync();
+                await _volunteerTagService
+                    .SaveVolunteerTags(user.UserId, createDto.SelectedTagIds);
 
                 await tx.CommitAsync();
 
@@ -64,6 +76,11 @@ namespace VolunteerMatch.Application.Services
 
                 throw; // 500
             }
+            catch
+            {
+                await tx.RollbackAsync();
+                throw;
+            }
         }
 
 
@@ -71,7 +88,7 @@ namespace VolunteerMatch.Application.Services
         {
             ArgumentNullException.ThrowIfNull(createDto);
 
-            var user = CreateUser(createDto.Email, createDto.Password, "ორგანიზაცია");
+            var user = CreateUser(createDto.Email, createDto.Password, UserRoles.Organization);
             var profile = _mapper.Map<OrganizationProfile>(createDto);
 
             await using var tx = await _context.Database.BeginTransactionAsync();

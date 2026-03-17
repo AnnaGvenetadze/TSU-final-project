@@ -26,13 +26,13 @@ public partial class VolunteerMatchingDbContext : DbContext
 
     public virtual DbSet<OrganizationProfile> OrganizationProfiles { get; set; }
 
-    //public virtual DbSet<Tag> Tags { get; set; }
+    public virtual DbSet<Tag> Tags { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<VolunteerProfile> VolunteerProfiles { get; set; }
 
-    //public virtual DbSet<VolunteerTag> VolunteerTags { get; set; }
+    public virtual DbSet<VolunteerTag> VolunteerTags { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -180,13 +180,13 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .HasConstraintName("FK_OrganizationProfiles_Users");
         });
 
-        //modelBuilder.Entity<Tag>(entity =>
-        //{
-        //    entity.HasIndex(e => e.Name, "UQ_Tags_Name").IsUnique();
+        modelBuilder.Entity<Tag>(entity =>
+        {
+            entity.HasIndex(e => e.Name, "UQ_Tags_Name").IsUnique();
 
-        //    entity.Property(e => e.TagId).HasDefaultValueSql("(newsequentialid())");
-        //    entity.Property(e => e.Name).HasMaxLength(100);
-        //});
+            entity.Property(e => e.TagId).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.Name).HasMaxLength(100);
+        });
 
         modelBuilder.Entity<User>(entity =>
         {
@@ -220,20 +220,20 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .HasConstraintName("FK_VolunteerProfiles_Users");
         });
 
-        //modelBuilder.Entity<VolunteerTag>(entity =>
-        //{
-        //    entity.HasKey(e => new { e.VolunteerId, e.TagId });
+        modelBuilder.Entity<VolunteerTag>(entity =>
+        {
+            entity.HasKey(e => new { e.VolunteerId, e.TagId });
 
-        //    entity.HasOne(d => d.Tag).WithMany(p => p.VolunteerTags)
-        //        .HasForeignKey(d => d.TagId)
-        //        .OnDelete(DeleteBehavior.ClientSetNull)
-        //        .HasConstraintName("FK_VolunteerTags_Tag");
+            entity.HasOne(d => d.Tag).WithMany(p => p.VolunteerTags)
+                .HasForeignKey(d => d.TagId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_VolunteerTags_Tag");
 
-        //    //entity.HasOne(d => d.Volunteer).WithMany(p => p.VolunteerTags)
-        //    //    .HasForeignKey(d => d.VolunteerId)
-        //    //    .OnDelete(DeleteBehavior.ClientSetNull)
-        //    //    .HasConstraintName("FK_VolunteerTags_Volunteer");
-        //});
+            entity.HasOne(d => d.Volunteer).WithMany(p => p.VolunteerTags)
+                .HasForeignKey(d => d.VolunteerId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_VolunteerTags_Volunteer");
+        });
 
         OnModelCreatingPartial(modelBuilder);
     }

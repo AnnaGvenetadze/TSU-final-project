@@ -32,6 +32,16 @@ namespace VolunteerMatch.Application.Services
 
             var newEvent = _mapper.Map<Event>(createDto);
             newEvent.OrganizationId = organizationId;
+            // TODO: test this with tags when they are implemented
+
+            //newEvent.EventTags = createDto.SelectedTagIds
+            //    .Distinct()
+            //    .Select(tagId => new EventTag
+            //    {
+            //        TagId = tagId,
+            //        Event = newEvent
+            //    })
+            //    .ToList();
 
             _context.Events.Add(newEvent);
             await _context.SaveChangesAsync();

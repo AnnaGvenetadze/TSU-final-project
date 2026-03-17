@@ -32,5 +32,7 @@
         public string? Experience { get; set; }
 
         public string? Description { get; set; }
+
+        public required List<Guid> VolunteerTagIds { get; set; } = new();
     }
 }

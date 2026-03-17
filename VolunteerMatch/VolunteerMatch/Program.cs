@@ -8,6 +8,7 @@ using System.Text;
 using VolunteerMatch.Application.Services;
 using VolunteerMatch.Domain.Models;
 using VolunteerMatch.Infrastructure.Data;
+using VolunteerMatch.Infrastructure.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +61,9 @@ builder.Services.AddScoped<VolunteerService>();
 builder.Services.AddScoped<MyOrganizationEventsService>();
 builder.Services.AddScoped<EventsService>();
 builder.Services.AddScoped<OrganizationEventsService>();
+builder.Services.AddScoped<IVolunteerTagService, VolunteerTagService>();
+builder.Services.AddScoped<ITagValidator, TagValidator>();
+builder.Services.AddScoped<TagService>();
 
 
 builder.Services.AddAuthentication(options =>
