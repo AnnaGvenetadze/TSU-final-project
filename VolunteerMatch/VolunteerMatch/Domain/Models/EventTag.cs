@@ -6,6 +6,8 @@ public partial class EventTag
 
     public Guid TagId { get; set; }
 
+    public int SortOrder { get; set; }
+
     public virtual Event Event { get; set; } = null!;
 
     public virtual Tag Tag { get; set; } = null!;

@@ -17,14 +17,16 @@ namespace VolunteerMatch.Application.Services
 
         public async Task SaveEventTagsAsync(Guid eventId, List<Guid> tagIds)
         {
+            var distinctTagIds = tagIds.Distinct().ToList();
             var eventTags = new List<EventTag>();
 
-            foreach (var tagId in tagIds.Distinct())
+            for (int i = 0; i < distinctTagIds.Count; i++)
             {
                 eventTags.Add(new EventTag
                 {
                     EventId = eventId,
-                    TagId = tagId
+                    TagId = distinctTagIds[i],
+                    SortOrder = i + 1
                 });
             }
 
@@ -41,6 +43,8 @@ namespace VolunteerMatch.Application.Services
 
             var eventTagsToAdd = BuildEventTagsToAdd(eventId, selectedTagIds, currentEventTags);
             var eventTagsToRemove = BuildEventTagsToRemove(selectedTagIds, currentEventTags);
+
+            UpdateSortOrders(selectedTagIds, currentEventTags);
 
             if (eventTagsToAdd.Count > 0)
                 _context.EventTags.AddRange(eventTagsToAdd);
@@ -71,14 +75,17 @@ namespace VolunteerMatch.Application.Services
 
             var eventTagsToAdd = new List<EventTag>();
 
-            foreach (var selectedTagId in selectedTagIds.Distinct())
+            for (int i = 0; i < selectedTagIds.Count; i++)
             {
+                var selectedTagId = selectedTagIds[i];
+
                 if (!currentTagIds.Contains(selectedTagId))
                 {
                     eventTagsToAdd.Add(new EventTag
                     {
                         EventId = eventId,
-                        TagId = selectedTagId
+                        TagId = selectedTagId,
+                        SortOrder = i + 1
                     });
                 }
             }
@@ -91,10 +98,7 @@ namespace VolunteerMatch.Application.Services
             List<Guid> selectedTagIds,
             List<EventTag> currentEventTags)
         {
-            var selectedTagIdsSet = selectedTagIds
-                .Distinct()
-                .ToHashSet();
-
+            var selectedTagIdsSet = selectedTagIds.ToHashSet();
             var eventTagsToRemove = new List<EventTag>();
 
             foreach (var eventTag in currentEventTags)
@@ -106,6 +110,25 @@ namespace VolunteerMatch.Application.Services
             }
 
             return eventTagsToRemove;
+        }
+
+
+        private void UpdateSortOrders(
+            List<Guid> selectedTagIds,
+            List<EventTag> currentEventTags)
+        {
+            for (int i = 0; i < selectedTagIds.Count; i++)
+            {
+                var selectedTagId = selectedTagIds[i];
+
+                var existingEventTag = currentEventTags
+                    .FirstOrDefault(et => et.TagId == selectedTagId);
+
+                if (existingEventTag != null)
+                {
+                    existingEventTag.SortOrder = i + 1;
+                }
+            }
         }
     }
 }
