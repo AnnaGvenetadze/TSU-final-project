@@ -1,5 +1,5 @@
 ﻿namespace VolunteerMatch.Application.Dtos
-{// TODO: Uncomment themes and map it with tag name in auto mapper
+{
     public class GetEventCardDto
     {
         public Guid EventId { get; set; }
@@ -16,7 +16,7 @@
 
         public DateTimeOffset EndDate { get; set; }
 
-        //public required List<string> Themes { get; set; } = [];
+        public required string Theme { get; set; }
 
         public string? MainPhotoUrl { get; set; }
     }
