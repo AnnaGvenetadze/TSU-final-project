@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VolunteerMatch.Infrastructure.Data;
+using VolunteerMatch.Application.Interfaces;
 
 namespace VolunteerMatch.Infrastructure.Validators
 {

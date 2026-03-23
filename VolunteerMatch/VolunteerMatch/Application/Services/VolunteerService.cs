@@ -5,6 +5,7 @@ using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Validators;
 using VolunteerMatch.Infrastructure.Helpers;
 
+
 namespace VolunteerMatch.Application.Services
 {
     public class VolunteerService
@@ -12,7 +13,7 @@ namespace VolunteerMatch.Application.Services
         private readonly VolunteerMatchingDbContext _context;
         private readonly IMapper _mapper;
 
-        public VolunteerService(VolunteerMatchingDbContext context, IMapper mapper, IVolunteerTagService volunteerTagService)
+        public VolunteerService(VolunteerMatchingDbContext context, IMapper mapper)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));

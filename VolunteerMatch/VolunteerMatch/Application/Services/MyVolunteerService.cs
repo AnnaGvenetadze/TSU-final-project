@@ -4,7 +4,7 @@ using VolunteerMatch.Application.Dtos;
 using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Helpers;
 using VolunteerMatch.Infrastructure.Validators;
-
+using VolunteerMatch.Application.Interfaces;
 
 namespace VolunteerMatch.Application.Services
 {

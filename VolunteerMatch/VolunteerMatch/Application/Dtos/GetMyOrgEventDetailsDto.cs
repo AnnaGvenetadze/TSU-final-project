@@ -42,5 +42,7 @@
         public string? AdditionalInfo { get; set; }
 
         public DateTimeOffset CreatedAt { get; set; }
+
+        public required List<Guid> EventTagIds { get; set; } = new();
     }
 }

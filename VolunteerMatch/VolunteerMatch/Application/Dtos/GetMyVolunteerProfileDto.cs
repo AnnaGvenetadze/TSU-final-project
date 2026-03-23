@@ -1,6 +1,6 @@
 ﻿namespace VolunteerMatch.Application.Dtos
 {
-    // TODO: თეგების, ფავორიტების და მეჩინგ საჯეშენების ლისტი (ნოთიფიკაციებში)?
+    // TODO: ფავორიტების და მეჩინგ საჯეშენების ლისტი (ნოთიფიკაციებში)?
     public class GetMyVolunteerProfileDto
     {
         public required string FirstName { get; set; }

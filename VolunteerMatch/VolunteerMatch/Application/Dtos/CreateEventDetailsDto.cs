@@ -56,7 +56,7 @@ namespace VolunteerMatch.Application.Dtos
         [StringLength(1000, ErrorMessage = "დამატებითი ინფორმაცია ძალიან გრძელია.")]
         public string? AdditionalInfo { get; set; }
 
-        //[Required(ErrorMessage = "თემატიკა სავალდებულოა.")]
-        //public required List<Guid> SelectedTagIds { get; set; } = [];
+        [Required(ErrorMessage = "თემატიკა სავალდებულოა.")]
+        public required List<Guid> SelectedTagIds { get; set; } = [];
     }
 }

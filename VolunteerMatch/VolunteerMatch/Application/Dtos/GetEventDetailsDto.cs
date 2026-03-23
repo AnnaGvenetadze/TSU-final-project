@@ -36,6 +36,6 @@
 
         public string? AdditionalInfo { get; set; }
 
-        //public List<Guid> TagIds { get; set; } = new();
+        public required List<Guid> EventTagIds { get; set; } = new();
     }
 }

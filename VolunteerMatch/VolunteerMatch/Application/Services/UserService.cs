@@ -8,7 +8,7 @@ using VolunteerMatch.Domain.Models;
 using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Helpers;
 using VolunteerMatch.Infrastructure.Validators;
-
+using VolunteerMatch.Application.Interfaces;
 
 namespace VolunteerMatch.Application.Services
 {
@@ -61,7 +61,7 @@ namespace VolunteerMatch.Application.Services
                 profile.VolunteerId = user.UserId;
                 _context.VolunteerProfiles.Add(profile);
                 await _volunteerTagService
-                    .SaveVolunteerTags(user.UserId, createDto.SelectedTagIds);
+                    .SaveVolunteerTagsAsync(user.UserId, createDto.SelectedTagIds);
 
                 await tx.CommitAsync();
 

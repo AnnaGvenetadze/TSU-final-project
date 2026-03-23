@@ -16,8 +16,17 @@ namespace VolunteerMatch.Infrastructure.Mappings
             CreateMap<UpdateEventDetailsDto, Event>();
 
             CreateMap<Event, GetMyOrgEventDetailsDto>()
-                .ForMember(dest => dest.OrganizationName,
-                    opt => opt.MapFrom(src => src.Organization.OrganizationName));
+                .ForMember(
+                    dest => dest.OrganizationName,
+                    opt => opt.MapFrom(src => 
+                        src.Organization.OrganizationName
+                        )
+                ).ForMember(
+                    dest => dest.EventTagIds,
+                    opt => opt.MapFrom(src =>
+                        src.EventTags.Select(et => et.TagId)
+                        )
+                );
             //.ForMember(dest => dest.Email,
             //    opt => opt.MapFrom(src => src.Organization.Organization.Email));
 
@@ -27,7 +36,14 @@ namespace VolunteerMatch.Infrastructure.Mappings
                 .ForMember(dest => dest.ShortDescription,
                     opt => opt.MapFrom(src => src.Description.Length > 120
                             ? src.Description.Substring(0, 120) + "..."
-                            : src.Description));
+                            : src.Description))
+                .ForMember(dest => dest.Theme,
+                    opt => opt.MapFrom(src =>
+                        src.EventTags
+                            .OrderBy(et => et.Tag.Name)
+                            .Select(et => et.Tag.Name)
+                            .FirstOrDefault())
+                );
 
             CreateMap<Event, GetEventDetailsDto>()
                 .ForMember(dest => dest.OrganizationName,

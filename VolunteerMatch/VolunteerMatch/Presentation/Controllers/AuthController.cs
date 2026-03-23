@@ -86,9 +86,14 @@ namespace VolunteerMatch.Presentation.Controllers
             {
                 return Unauthorized(new { message = "არასწორი იმეილი ან პაროლი." }); // 401
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
+                //return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    inner = ex.InnerException?.Message
+                });
             }
         }
     }

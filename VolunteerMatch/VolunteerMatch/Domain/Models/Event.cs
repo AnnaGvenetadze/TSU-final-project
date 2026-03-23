@@ -1,5 +1,5 @@
 ﻿namespace VolunteerMatch.Domain.Models;
-// TODO: თემატიკა როგორ დაემატოს აქ, ცალკე?
+
 public partial class Event
 {
     public Guid EventId { get; set; }
@@ -42,13 +42,9 @@ public partial class Event
 
     public virtual OrganizationProfile Organization { get; set; } = null!;
 
-    // TODO: თემატიკის არჩევა როგორ მოხდეს ანუ თეგები როგორ დაემატოს?
-
-    //public virtual ICollection<EventTag> EventTags { get; set; } = new List<EventTag>();
+    public virtual ICollection<EventTag> EventTags { get; set; } = new List<EventTag>();
 
     //public virtual ICollection<FavoriteEvent> FavoriteEvents { get; set; } = new List<FavoriteEvent>();
 
     //public virtual ICollection<MatchingSuggestion> MatchingSuggestions { get; set; } = new List<MatchingSuggestion>();
-
-    //public virtual OrganizationProfile Organization { get; set; } = null!;
 }

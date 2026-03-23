@@ -1,9 +1,7 @@
-﻿//using VolunteerMatch.Domain.Models;
+﻿namespace VolunteerMatch.Application.Interfaces;
 
-//namespace VolunteerMatch.Application.Interfaces
-//{
-//    public interface IEventTagService
-//    {
-//        List<EventTag> BuildEventTags(Guid eventId, List<Guid> tagIds);
-//    }
-//}
+public interface IEventTagService
+{
+    Task SaveEventTagsAsync(Guid volunteerId, List<Guid> tagIds);
+    Task SyncEventTagsAsync(Guid volunteerId, List<Guid> selectedTagIds);
+}

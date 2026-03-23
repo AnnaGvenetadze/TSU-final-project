@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VolunteerMatch.Domain.Models;
 using VolunteerMatch.Infrastructure.Data;
-
+using VolunteerMatch.Application.Interfaces;
 
 namespace VolunteerMatch.Application.Services
 {
@@ -15,7 +15,7 @@ namespace VolunteerMatch.Application.Services
         }
 
 
-        public async Task SaveVolunteerTags(Guid volunteerId, List<Guid> tagIds)
+        public async Task SaveVolunteerTagsAsync(Guid volunteerId, List<Guid> tagIds)
         {
             var volunteerTags = new List<VolunteerTag>();
 
@@ -27,6 +27,8 @@ namespace VolunteerMatch.Application.Services
                     TagId = tagId
                 });
             }
+            if (volunteerTags.Count > 0)
+                _context.VolunteerTags.AddRange(volunteerTags);
 
             await _context.SaveChangesAsync();
         }

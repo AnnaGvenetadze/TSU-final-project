@@ -18,7 +18,7 @@ public partial class VolunteerMatchingDbContext : DbContext
 
     public virtual DbSet<Event> Events { get; set; }
 
-    //public virtual DbSet<EventTag> EventTags { get; set; }
+    public virtual DbSet<EventTag> EventTags { get; set; }
 
     //public virtual DbSet<FavoriteEvent> FavoriteEvents { get; set; }
 
@@ -94,10 +94,12 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .HasMaxLength(1000);
 
             entity.Property(e => e.IsActive)
-                  .HasDefaultValueSql("1");
+                .HasDefaultValue(true)
+                .ValueGeneratedOnAdd();
 
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(sysdatetimeoffset())");
+                .HasDefaultValueSql("SYSDATETIMEOFFSET()")
+                .ValueGeneratedOnAdd();
 
             entity.HasOne(e => e.Organization)
                 .WithMany(o => o.Events)
@@ -113,20 +115,20 @@ public partial class VolunteerMatchingDbContext : DbContext
             });
         });
 
-        //modelBuilder.Entity<EventTag>(entity =>
-        //{
-        //    entity.HasKey(e => new { e.EventId, e.TagId });
+        modelBuilder.Entity<EventTag>(entity =>
+        {
+            entity.HasKey(e => new { e.EventId, e.TagId });
 
-        //    entity.HasOne(d => d.Event).WithMany(p => p.EventTags)
-        //        .HasForeignKey(d => d.EventId)
-        //        .OnDelete(DeleteBehavior.ClientSetNull)
-        //        .HasConstraintName("FK_EventTags_Event");
+            entity.HasOne(d => d.Event).WithMany(p => p.EventTags)
+                .HasForeignKey(d => d.EventId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_EventTags_Event");
 
-        //    entity.HasOne(d => d.Tag).WithMany(p => p.EventTags)
-        //        .HasForeignKey(d => d.TagId)
-        //        .OnDelete(DeleteBehavior.ClientSetNull)
-        //        .HasConstraintName("FK_EventTags_Tag");
-        //});
+            entity.HasOne(d => d.Tag).WithMany(p => p.EventTags)
+                .HasForeignKey(d => d.TagId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_EventTags_Tag");
+        });
 
         //modelBuilder.Entity<FavoriteEvent>(entity =>
         //{

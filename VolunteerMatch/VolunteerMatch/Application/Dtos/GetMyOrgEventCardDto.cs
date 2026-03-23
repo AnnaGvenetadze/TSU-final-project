@@ -18,7 +18,7 @@
 
         public DateTimeOffset EndDate { get; set; }
 
-        //public required List<string> Themes { get; set; } = [];
+        public required string Theme { get; set; }
 
         public string? MainPhotoUrl { get; set; }
     }

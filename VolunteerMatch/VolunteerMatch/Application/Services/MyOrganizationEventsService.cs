@@ -5,6 +5,8 @@ using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Validators;
 using VolunteerMatch.Application.Dtos;
 using VolunteerMatch.Domain.Models;
+using VolunteerMatch.Application.Interfaces;
+
 
 namespace VolunteerMatch.Application.Services
 {
@@ -12,12 +14,21 @@ namespace VolunteerMatch.Application.Services
     {
         private readonly VolunteerMatchingDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IEventTagService _eventTagService;
+        private readonly ITagValidator _tagValidator;
 
-        public MyOrganizationEventsService(VolunteerMatchingDbContext context, IMapper mapper)
+        public MyOrganizationEventsService(
+            VolunteerMatchingDbContext context,
+            IMapper mapper,
+            IEventTagService eventTagService,
+            ITagValidator tagValidator)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _eventTagService = eventTagService ?? throw new ArgumentNullException(nameof(eventTagService));
+            _tagValidator = tagValidator ?? throw new ArgumentNullException(nameof(tagValidator));
         }
+
 
         public async Task<Guid> CreateEventAsync(Guid organizationId, CreateEventDetailsDto createDto)
         {
@@ -29,24 +40,29 @@ namespace VolunteerMatch.Application.Services
                     .AnyAsync(organizationProfile =>
                     organizationProfile.OrganizationId == organizationId)
             );
-
+            await _tagValidator.ValidateSelectedTagIdsAsync(createDto.SelectedTagIds);
+            
             var newEvent = _mapper.Map<Event>(createDto);
             newEvent.OrganizationId = organizationId;
-            // TODO: test this with tags when they are implemented
 
-            //newEvent.EventTags = createDto.SelectedTagIds
-            //    .Distinct()
-            //    .Select(tagId => new EventTag
-            //    {
-            //        TagId = tagId,
-            //        Event = newEvent
-            //    })
-            //    .ToList();
+            await using var tx = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                _context.Events.Add(newEvent);
+                await _context.SaveChangesAsync();
+                await _eventTagService.SaveEventTagsAsync(
+                    newEvent.EventId, createDto.SelectedTagIds);
 
-            _context.Events.Add(newEvent);
-            await _context.SaveChangesAsync();
+                await tx.CommitAsync();
 
-            return newEvent.EventId;
+                return newEvent.EventId;
+            }
+            catch (DbUpdateException /*ex*/)
+            {
+                await tx.RollbackAsync();
+                throw;
+                //throw new Exception(ex.InnerException?.Message ?? ex.Message);
+            }
         }
 
 
@@ -56,8 +72,9 @@ namespace VolunteerMatch.Application.Services
                 await _context.Events
                 .AsNoTracking()
                 .Include(eventModel => eventModel.Organization)
-                .ThenInclude(organizationProfile =>
+                    .ThenInclude(organizationProfile =>
                         organizationProfile.Organization)
+                .Include(e => e.EventTags)
                 .SingleOrDefaultAsync(eventModel =>
                     eventModel.EventId == eventId &&
                     eventModel.OrganizationId == organizationId &&
@@ -79,9 +96,22 @@ namespace VolunteerMatch.Application.Services
                     eventModel.IsActive)
                 );
 
-            _mapper.Map(updateDto, eventEntity);
+            await _tagValidator.ValidateSelectedTagIdsAsync(updateDto.SelectedTagIds);
 
-            await _context.SaveChangesAsync();
+            await using var tx = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                _mapper.Map(updateDto, eventEntity);
+                await _context.SaveChangesAsync();
+                await _eventTagService.SyncEventTagsAsync(eventId, updateDto.SelectedTagIds);
+
+                await tx.CommitAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                await tx.RollbackAsync();
+                throw new Exception(ex.InnerException?.Message ?? ex.Message);
+            }
         }
 
 
@@ -98,6 +128,8 @@ namespace VolunteerMatch.Application.Services
             var events = await _context.Events
                 .AsNoTracking()
                 .Include(eventModel => eventModel.Organization)
+                 .Include(e => e.EventTags)
+                    .ThenInclude(et => et.Tag)
                 .Where(eventModel => eventModel.OrganizationId == organizationId
                     && eventModel.IsActive)
                 .OrderByDescending(eventModel => eventModel.CreatedAt)

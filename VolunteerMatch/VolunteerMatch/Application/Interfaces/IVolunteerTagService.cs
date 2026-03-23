@@ -1,6 +1,8 @@
-﻿public interface IVolunteerTagService
+﻿namespace VolunteerMatch.Application.Interfaces;
+
+public interface IVolunteerTagService
 {
-    Task SaveVolunteerTags(Guid volunteerId, List<Guid> tagIds);
+    Task SaveVolunteerTagsAsync(Guid volunteerId, List<Guid> tagIds);
     Task SyncVolunteerTagsAsync(Guid volunteerId, List<Guid> selectedTagIds);
 }
 

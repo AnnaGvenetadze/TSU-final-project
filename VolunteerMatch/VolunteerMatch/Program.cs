@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using System.Text;
+using VolunteerMatch.Application.Interfaces;
 using VolunteerMatch.Application.Services;
 using VolunteerMatch.Domain.Models;
 using VolunteerMatch.Infrastructure.Data;
@@ -64,6 +65,7 @@ builder.Services.AddScoped<OrganizationEventsService>();
 builder.Services.AddScoped<IVolunteerTagService, VolunteerTagService>();
 builder.Services.AddScoped<ITagValidator, TagValidator>();
 builder.Services.AddScoped<TagService>();
+builder.Services.AddScoped<IEventTagService, EventTagService>();
 
 
 builder.Services.AddAuthentication(options =>
