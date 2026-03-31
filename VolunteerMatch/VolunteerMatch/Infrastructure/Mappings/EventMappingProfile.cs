@@ -64,6 +64,9 @@ namespace VolunteerMatch.Infrastructure.Mappings
                         .Select(et => et.Tag.Name)
                         .FirstOrDefault())
                 );
+
+            CreateMap<Event, GetVolunteerEventCardDto>()
+                .IncludeBase<Event, GetEventCardDto>();
         }
     }
 }

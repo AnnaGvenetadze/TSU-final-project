@@ -20,7 +20,7 @@ public partial class VolunteerMatchingDbContext : DbContext
 
     public virtual DbSet<EventTag> EventTags { get; set; }
 
-    //public virtual DbSet<FavoriteEvent> FavoriteEvents { get; set; }
+    public virtual DbSet<FavoriteEvent> FavoriteEvents { get; set; }
 
     //public virtual DbSet<MatchingSuggestion> MatchingSuggestions { get; set; }
 
@@ -130,22 +130,22 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .HasConstraintName("FK_EventTags_Tag");
         });
 
-        //modelBuilder.Entity<FavoriteEvent>(entity =>
-        //{
-        //    entity.HasKey(e => new { e.VolunteerId, e.EventId });
+        modelBuilder.Entity<FavoriteEvent>(entity =>
+        {
+            entity.HasKey(e => new { e.VolunteerId, e.EventId });
 
-        //    entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
 
-        //    entity.HasOne(d => d.Event).WithMany(p => p.FavoriteEvents)
-        //        .HasForeignKey(d => d.EventId)
-        //        .OnDelete(DeleteBehavior.ClientSetNull)
-        //        .HasConstraintName("FK_FavoriteEvents_Event");
+            entity.HasOne(d => d.Event).WithMany(p => p.FavoriteEvents)
+                .HasForeignKey(d => d.EventId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FavoriteEvents_Event");
 
-        //    //entity.HasOne(d => d.Volunteer).WithMany(p => p.FavoriteEvents)
-        //    //    .HasForeignKey(d => d.VolunteerId)
-        //    //    .OnDelete(DeleteBehavior.ClientSetNull)
-        //    //    .HasConstraintName("FK_FavoriteEvents_Volunteer");
-        //});
+            entity.HasOne(d => d.Volunteer).WithMany(p => p.FavoriteEvents)
+                .HasForeignKey(d => d.VolunteerId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FavoriteEvents_Volunteer");
+        });
 
         //modelBuilder.Entity<MatchingSuggestion>(entity =>
         //{

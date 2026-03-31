@@ -44,7 +44,7 @@ public partial class Event
 
     public virtual ICollection<EventTag> EventTags { get; set; } = new List<EventTag>();
 
-    //public virtual ICollection<FavoriteEvent> FavoriteEvents { get; set; } = new List<FavoriteEvent>();
+    public virtual ICollection<FavoriteEvent> FavoriteEvents { get; set; } = new List<FavoriteEvent>();
 
     //public virtual ICollection<MatchingSuggestion> MatchingSuggestions { get; set; } = new List<MatchingSuggestion>();
 }

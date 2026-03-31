@@ -5,6 +5,7 @@ using VolunteerMatch.Infrastructure.Validators;
 using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Application.Dtos;
 using AutoMapper.QueryableExtensions;
+using VolunteerMatch.Domain.Models;
 
 namespace VolunteerMatch.Application.Services
 {
@@ -20,16 +21,11 @@ namespace VolunteerMatch.Application.Services
         }
 
 
-        public async Task<PagedResultDto<GetEventCardDto>> GetEventsAsync(int page, int pageSize)
+        public async Task<PagedResultDto<GetEventCardDto>> GetEventsForOrganizationAsync(int page, int pageSize)
         {
             PaginationValidator.Validate(page, pageSize);
 
-            var query = _context.Events
-                .AsNoTracking()
-                .Include(eventModel => eventModel.Organization)
-                .Where(eventModel => eventModel.IsActive)
-                .OrderByDescending(eventModel => eventModel.CreatedAt);
-
+            var query = GetActiveEventsQuery();
             var totalCount = await query.CountAsync();
             
             var events = await query
@@ -47,6 +43,34 @@ namespace VolunteerMatch.Application.Services
                         );
         }
 
+        public async Task<PagedResultDto<GetVolunteerEventCardDto>> GetEventsForVolunteerAsync(
+            Guid volunteerId, int page, int pageSize)
+        {
+            PaginationValidator.Validate(page, pageSize);
+
+            var query = GetActiveEventsQuery();
+            var totalCount = await query.CountAsync();
+
+            var events = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(eventModel => new
+                {
+                    Event = eventModel,
+                    IsFavorite = eventModel.FavoriteEvents
+                        .Any(favorite => favorite.VolunteerId == volunteerId)
+                })
+                .ToListAsync();
+
+            var items = events.Select(x =>
+            {
+                var dto = _mapper.Map<GetVolunteerEventCardDto>(x.Event);
+                dto.IsFavorite = x.IsFavorite;
+                return dto;
+            }).ToList();
+
+            return PaginationHelper.CreatePagedResult(items, page, pageSize, totalCount);
+        }
 
         public async Task<GetEventDetailsDto> GetEventByIdAsync(Guid eventId)
         {
@@ -61,6 +85,15 @@ namespace VolunteerMatch.Application.Services
             );
 
             return _mapper.Map<GetEventDetailsDto>(eventEntity);
+        }
+
+        private IQueryable<Event> GetActiveEventsQuery()
+        {
+            return _context.Events
+                .AsNoTracking()
+                .Include(eventModel => eventModel.Organization)
+                .Where(eventModel => eventModel.IsActive)
+                .OrderByDescending(eventModel => eventModel.CreatedAt);
         }
     }
 }

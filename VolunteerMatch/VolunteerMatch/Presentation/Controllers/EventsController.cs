@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using VolunteerMatch.Application.Services;
+using VolunteerMatch.Domain.Constants;
 
 namespace VolunteerMatch.Presentation.Controllers
 {
     [ApiController]
     [Route("api/events")]
-    public class EventsController : ControllerBase
+    [Authorize(Roles = $"{UserRoles.Volunteer},{UserRoles.Organization}")]
+    public class EventsController : BaseController
     {
         private readonly EventsService _eventService;
 
@@ -21,17 +24,26 @@ namespace VolunteerMatch.Presentation.Controllers
         {
             try
             {
-                var events = await _eventService.GetEventsAsync(page, pageSize);
+                if (CurrentUserRole == UserRoles.Volunteer)
+                {
+                    var volunteerEvents = await _eventService
+                        .GetEventsForVolunteerAsync(CurrentUserId, page, pageSize);
 
-                return Ok(events);
+                    return Ok(volunteerEvents);
+                }
+
+                var organizationEvents = await _eventService
+                    .GetEventsForOrganizationAsync(page, pageSize);
+
+                return Ok(organizationEvents);
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, new { message = "სერვერზე მოხდა შეცდომა." });
+                return StatusCode(500, new { message = ex.Message/*"სერვერზე მოხდა შეცდომა."*/});
             }
         }
 

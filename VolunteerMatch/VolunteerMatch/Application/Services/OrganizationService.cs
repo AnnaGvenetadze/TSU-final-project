@@ -15,7 +15,6 @@ namespace VolunteerMatch.Application.Services
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-
         }
 
 
