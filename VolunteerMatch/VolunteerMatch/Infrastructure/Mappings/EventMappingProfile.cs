@@ -67,6 +67,10 @@ namespace VolunteerMatch.Infrastructure.Mappings
 
             CreateMap<Event, GetVolunteerEventCardDto>()
                 .IncludeBase<Event, GetEventCardDto>();
+
+            CreateMap<Notification, GetNotificationDto>()
+                .ForMember(dest => dest.Event,
+                    opt => opt.MapFrom(src => src.Event));
         }
     }
 }

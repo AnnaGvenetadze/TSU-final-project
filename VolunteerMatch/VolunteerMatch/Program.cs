@@ -67,6 +67,8 @@ builder.Services.AddScoped<ITagValidator, TagValidator>();
 builder.Services.AddScoped<TagService>();
 builder.Services.AddScoped<IEventTagService, EventTagService>();
 builder.Services.AddScoped<FavoriteEventService>();
+builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
+builder.Services.AddScoped<NotificationService>();
 
 builder.Services.AddAuthentication(options =>
 {

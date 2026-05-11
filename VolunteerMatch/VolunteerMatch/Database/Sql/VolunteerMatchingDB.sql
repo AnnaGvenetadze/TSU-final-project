@@ -180,7 +180,6 @@ CREATE TABLE dbo.MatchingSuggestions (
 --        FOREIGN KEY (AuthorVolunteerId) REFERENCES dbo.VolunteerProfiles(VolunteerId) 
 --);
 
----------------------------------- ეს 2 თეიბლიც აქტიურია -----------------------------------
 CREATE TABLE dbo.Tags (
     TagId     UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
     Name      NVARCHAR(100) NOT NULL,
@@ -205,7 +204,6 @@ CREATE TABLE dbo.VolunteerTags (
         FOREIGN KEY (TagId)
         REFERENCES dbo.Tags(TagId)
 );
--------------------------------------------------------------------------------------------
 
 CREATE TABLE dbo.EventTags (
     EventId   UNIQUEIDENTIFIER NOT NULL,
@@ -220,4 +218,32 @@ CREATE TABLE dbo.EventTags (
     CONSTRAINT FK_EventTags_Tag
         FOREIGN KEY (TagId)
         REFERENCES dbo.Tags(TagId)
+); 
+
+CREATE TABLE dbo.Notifications (
+    NotificationId UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
+    UserId         UNIQUEIDENTIFIER NOT NULL,
+    EventId        UNIQUEIDENTIFIER NOT NULL,
+    Type           NVARCHAR(50) NOT NULL,
+    Message        NVARCHAR(500) NOT NULL,
+    RelatedUserId  UNIQUEIDENTIFIER NULL,
+    ExpiresAt      DATETIMEOFFSET NOT NULL,
+    CreatedAt      DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
+
+    CONSTRAINT PK_Notifications PRIMARY KEY (NotificationId),
+
+    CONSTRAINT FK_Notifications_Users
+        FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId),
+
+    CONSTRAINT FK_Notifications_Events
+        FOREIGN KEY (EventId) REFERENCES dbo.Events(EventId),
+
+    CONSTRAINT FK_Notifications_RelatedUsers
+        FOREIGN KEY (RelatedUserId) REFERENCES dbo.Users(UserId)
 );
+
+CREATE INDEX IX_Notifications_UserId_CreatedAt
+ON dbo.Notifications(UserId, CreatedAt DESC); 
+
+CREATE INDEX IX_Notifications_ExpiresAt
+ON dbo.Notifications(ExpiresAt);
