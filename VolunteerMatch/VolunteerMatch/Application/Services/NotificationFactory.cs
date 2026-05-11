@@ -1,5 +1,4 @@
 ﻿using VolunteerMatch.Application.Interfaces;
-using VolunteerMatch.Domain.Enums;
 using VolunteerMatch.Domain.Models;
 using VolunteerMatch.Infrastructure.Helpers;
 
@@ -18,7 +17,7 @@ namespace VolunteerMatch.Application.Services
             {
                 UserId = volunteerId,
                 EventId = eventEntity.EventId,
-                Type = NotificationType.MatchProposed.ToString(),
+                Type = Domain.Enums.MatchType.MatchProposed.ToString(),
                 Message = NotificationMessageBuilder.MatchProposedByOrganization(
                     organizationName,
                     eventEntity.Title),
@@ -39,7 +38,7 @@ namespace VolunteerMatch.Application.Services
             {
                 UserId = organizationId,
                 EventId = eventEntity.EventId,
-                Type = NotificationType.MatchProposed.ToString(),
+                Type = Domain.Enums.MatchType.MatchProposed.ToString(),
                 Message = NotificationMessageBuilder.MatchProposedByVolunteer(
                     volunteerName,
                     eventEntity.Title),
@@ -59,7 +58,7 @@ namespace VolunteerMatch.Application.Services
             {
                 UserId = volunteerId,
                 EventId = eventEntity.EventId,
-                Type = NotificationType.MatchAccepted.ToString(),
+                Type = Domain.Enums.MatchType.MatchAccepted.ToString(),
                 Message = NotificationMessageBuilder.MatchAcceptedByOrganization(
                     organizationName,
                     eventEntity.Title),
@@ -80,7 +79,7 @@ namespace VolunteerMatch.Application.Services
             {
                 UserId = organizationId,
                 EventId = eventEntity.EventId,
-                Type = NotificationType.MatchAccepted.ToString(),
+                Type = Domain.Enums.MatchType.MatchAccepted.ToString(),
                 Message = NotificationMessageBuilder.MatchAcceptedByVolunteer(
                     volunteerName,
                     eventEntity.Title),
