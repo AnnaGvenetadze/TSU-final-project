@@ -8,7 +8,7 @@
 
         public Guid EventId { get; set; }
 
-        public string Type { get; set; } = null!;
+        public byte Type { get; set; }
 
         public string Message { get; set; } = null!;
 

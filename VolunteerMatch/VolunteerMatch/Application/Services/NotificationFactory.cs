@@ -17,7 +17,7 @@ namespace VolunteerMatch.Application.Services
             {
                 UserId = volunteerId,
                 EventId = eventEntity.EventId,
-                Type = Domain.Enums.MatchType.MatchProposed.ToString(),
+                Type = (byte)Domain.Constants.MatchStatus.Pending,
                 Message = NotificationMessageBuilder.MatchProposedByOrganization(
                     organizationName,
                     eventEntity.Title),
@@ -38,7 +38,7 @@ namespace VolunteerMatch.Application.Services
             {
                 UserId = organizationId,
                 EventId = eventEntity.EventId,
-                Type = Domain.Enums.MatchType.MatchProposed.ToString(),
+                Type = (byte)Domain.Constants.MatchStatus.Pending,
                 Message = NotificationMessageBuilder.MatchProposedByVolunteer(
                     volunteerName,
                     eventEntity.Title),
@@ -58,7 +58,7 @@ namespace VolunteerMatch.Application.Services
             {
                 UserId = volunteerId,
                 EventId = eventEntity.EventId,
-                Type = Domain.Enums.MatchType.MatchAccepted.ToString(),
+                Type = (byte)Domain.Constants.MatchStatus.Accepted,
                 Message = NotificationMessageBuilder.MatchAcceptedByOrganization(
                     organizationName,
                     eventEntity.Title),
@@ -79,7 +79,7 @@ namespace VolunteerMatch.Application.Services
             {
                 UserId = organizationId,
                 EventId = eventEntity.EventId,
-                Type = Domain.Enums.MatchType.MatchAccepted.ToString(),
+                Type = (byte)Domain.Constants.MatchStatus.Accepted,
                 Message = NotificationMessageBuilder.MatchAcceptedByVolunteer(
                     volunteerName,
                     eventEntity.Title),

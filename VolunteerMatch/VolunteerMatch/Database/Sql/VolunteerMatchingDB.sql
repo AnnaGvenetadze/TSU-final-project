@@ -224,7 +224,7 @@ CREATE TABLE dbo.Notifications (
     NotificationId UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
     UserId         UNIQUEIDENTIFIER NOT NULL,
     EventId        UNIQUEIDENTIFIER NOT NULL,
-    Type           NVARCHAR(50) NOT NULL,
+    Type           TINYINT NOT NULL,
     Message        NVARCHAR(500) NOT NULL,
     RelatedUserId  UNIQUEIDENTIFIER NULL,
     ExpiresAt      DATETIMEOFFSET NOT NULL,
@@ -239,11 +239,57 @@ CREATE TABLE dbo.Notifications (
         FOREIGN KEY (EventId) REFERENCES dbo.Events(EventId),
 
     CONSTRAINT FK_Notifications_RelatedUsers
-        FOREIGN KEY (RelatedUserId) REFERENCES dbo.Users(UserId)
+        FOREIGN KEY (RelatedUserId) REFERENCES dbo.Users(UserId),
+
+    CONSTRAINT CK_Notifications_Type CHECK ([Type] IN (0, 1, 2, 3))
 );
 
 CREATE INDEX IX_Notifications_UserId_CreatedAt
 ON dbo.Notifications(UserId, CreatedAt DESC); 
 
 CREATE INDEX IX_Notifications_ExpiresAt
-ON dbo.Notifications(ExpiresAt);
+ON dbo.Notifications(ExpiresAt); 
+
+
+create table dbo.VolunteerEventMatches
+(
+    VolunteerEventMatchId uniqueidentifier not null default newsequentialid(),
+    VolunteerId uniqueidentifier not null,
+    EventId uniqueidentifier not null,
+
+    RequestedByRole nvarchar(30) not null,
+    Status tinyint not null,
+    MatchScore int null,
+
+    CreatedAt datetimeoffset not null default sysdatetimeoffset(),
+    RespondedAt datetimeoffset null, -- ეს აუცილებლად გახადე !!!
+    ExpiresAt datetimeoffset not null,
+
+    constraint PK_VolunteerEventMatches
+        primary key (VolunteerEventMatchId),
+
+    constraint FK_VolunteerEventMatches_Volunteers
+        foreign key (VolunteerId) references dbo.VolunteerProfiles(VolunteerId),
+
+    constraint FK_VolunteerEventMatches_Events
+        foreign key (EventId) references dbo.Events(EventId),
+
+    constraint CK_VolunteerEventMatches_RequestedByRole
+        check (RequestedByRole in (N'მოხალისე', N'ორგანიზაცია')),
+
+    constraint CK_VolunteerEventMatches_Status
+        check (Status in (0, 1, 2, 3)),
+
+    constraint CK_VolunteerEventMatches_ExpiresAt
+        check (ExpiresAt > CreatedAt),
+
+    constraint CK_VolunteerEventMatches_RespondedAt
+        check (RespondedAt is null or RespondedAt >= CreatedAt),
+
+    constraint UQ_VolunteerEventMatches_Volunteer_Event
+        unique (VolunteerId, EventId),
+
+    constraint CK_VolunteerEventMatches_MatchScore
+        check (MatchScore is null or MatchScore between 0 and 100)
+);
+

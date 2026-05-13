@@ -34,6 +34,8 @@ public partial class VolunteerMatchingDbContext : DbContext
 
     public DbSet<Notification> Notifications { get; set; }
 
+    public DbSet<VolunteerEventMatch> VolunteerEventMatches { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=LAPTOP-QARO7VF5;Database=VolunteerMatchingDB;Trusted_Connection=True;TrustServerCertificate=True");
@@ -235,6 +237,85 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .HasForeignKey(d => d.VolunteerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_VolunteerTags_Volunteer");
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.ToTable("Notifications");
+
+            entity.HasKey(n => n.NotificationId);
+
+            entity.Property(n => n.NotificationId)
+                .HasDefaultValueSql("newsequentialid()");
+
+            entity.Property(n => n.Type)
+                .HasConversion<byte>()
+                .IsRequired();
+
+            entity.Property(n => n.Message)
+                .HasMaxLength(500)
+                .IsRequired();
+
+            entity.Property(n => n.ExpiresAt)
+                .IsRequired();
+
+            entity.Property(n => n.CreatedAt)
+                .HasDefaultValueSql("sysdatetimeoffset()")
+                .IsRequired();
+
+            entity.HasOne(n => n.User)
+                .WithMany()
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(n => n.Event)
+                .WithMany()
+                .HasForeignKey(n => n.EventId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(n => n.RelatedUser)
+                .WithMany()
+                .HasForeignKey(n => n.RelatedUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        modelBuilder.Entity<VolunteerEventMatch>(entity =>
+        {
+            entity.ToTable("VolunteerEventMatches");
+
+            entity.HasKey(m => m.VolunteerEventMatchId);
+
+            entity.Property(m => m.VolunteerEventMatchId)
+                .HasDefaultValueSql("newsequentialid()");
+
+            entity.Property(m => m.RequestedByRole)
+                .HasMaxLength(30)
+                .IsRequired();
+
+            entity.Property(m => m.Status)
+                .HasConversion<byte>()
+                .IsRequired();
+
+            entity.Property(m => m.MatchScore)
+                .IsRequired(false);
+
+            entity.Property(m => m.CreatedAt)
+                .HasDefaultValueSql("sysdatetimeoffset()")
+                .IsRequired();
+
+            entity.Property(m => m.ExpiresAt)
+                .IsRequired();
+
+            entity.HasOne(m => m.Volunteer)
+                .WithMany()
+                .HasForeignKey(m => m.VolunteerId);
+
+            entity.HasOne(m => m.Event)
+                .WithMany()
+                .HasForeignKey(m => m.EventId);
+
+            entity.HasIndex(m => new { m.VolunteerId, m.EventId })
+                .IsUnique();
         });
 
         OnModelCreatingPartial(modelBuilder);
