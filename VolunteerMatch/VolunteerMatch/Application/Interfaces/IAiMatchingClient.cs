@@ -5,7 +5,7 @@ namespace VolunteerMatch.Application.Interfaces
     public interface IAiMatchingClient
     {
         Task<AiMatchResultDto> CalculateMatchAsync(
-            AiVolunteerInfoDto volunteer,
+            AiVolunteerInfoDto volunteerInfo,
             AiEventInfoDto eventInfo,
             CancellationToken cancellationToken = default);
     }

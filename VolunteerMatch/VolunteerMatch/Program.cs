@@ -8,6 +8,7 @@ using System.Text;
 using VolunteerMatch.Application.Interfaces;
 using VolunteerMatch.Application.Services;
 using VolunteerMatch.Domain.Models;
+using VolunteerMatch.Infrastructure.Ai;
 using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Validators;
 
@@ -69,6 +70,7 @@ builder.Services.AddScoped<IEventTagService, EventTagService>();
 builder.Services.AddScoped<FavoriteEventService>();
 builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IAiMatchingClient, OpenAiMatchingClient>();
 
 builder.Services.AddAuthentication(options =>
 {

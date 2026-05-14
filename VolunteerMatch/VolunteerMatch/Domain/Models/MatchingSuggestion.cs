@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// TODO: წაშალე ეს ცხრილი უკვე გაქვს სხვა
 
 namespace VolunteerMatch.Domain.Models;
 
