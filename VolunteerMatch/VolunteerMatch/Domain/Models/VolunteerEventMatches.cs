@@ -11,9 +11,8 @@ namespace VolunteerMatch.Domain.Models
 
         public string RequestedByRole { get; set; } = null!;
         public MatchStatus Status { get; set; }
-        public int? MatchScore { get; set; }
+
         public DateTimeOffset CreatedAt { get; set; }
-        public DateTimeOffset? RespondedAt { get; set; } // TODO: აუცილებლად გახადე !!!
         public DateTimeOffset ExpiresAt { get; set; }
 
         public VolunteerProfile Volunteer { get; set; } = null!;

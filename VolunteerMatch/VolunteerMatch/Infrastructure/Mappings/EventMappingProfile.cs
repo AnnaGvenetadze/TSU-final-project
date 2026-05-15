@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using VolunteerMatch.Application.Dtos;
+using VolunteerMatch.Application.Dtos.Matching;
 using VolunteerMatch.Domain.Models;
 
 namespace VolunteerMatch.Infrastructure.Mappings
@@ -67,6 +68,13 @@ namespace VolunteerMatch.Infrastructure.Mappings
 
             CreateMap<Event, GetVolunteerEventCardDto>()
                 .IncludeBase<Event, GetEventCardDto>();
+
+            CreateMap<VolunteerEventMatch, GetMatchedEventCardDto>()
+                .ForMember(dest => dest.Event,
+                    opt => opt.MapFrom(src => src.Event)
+                ).ForMember(dest => dest.IsFavorite,
+                    opt => opt.Ignore()
+                );
 
             CreateMap<Notification, GetNotificationDto>()
                 .ForMember(dest => dest.Event,

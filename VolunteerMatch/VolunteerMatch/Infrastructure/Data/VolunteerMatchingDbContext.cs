@@ -146,26 +146,6 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .HasConstraintName("FK_FavoriteEvents_Volunteer");
         });
 
-        //modelBuilder.Entity<MatchingSuggestion>(entity =>
-        //{
-        //    entity.HasKey(e => e.SuggestionId);
-
-        //    entity.Property(e => e.SuggestionId).HasDefaultValueSql("(newsequentialid())");
-        //    entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
-        //    entity.Property(e => e.Initiator).HasMaxLength(20);
-        //    entity.Property(e => e.Status).HasMaxLength(30);
-
-        //    entity.HasOne(d => d.Event).WithMany(p => p.MatchingSuggestions)
-        //        .HasForeignKey(d => d.EventId)
-        //        .OnDelete(DeleteBehavior.ClientSetNull)
-        //        .HasConstraintName("FK_MS_Event");
-
-        //    //entity.HasOne(d => d.Volunteer).WithMany(p => p.MatchingSuggestions)
-        //    //    .HasForeignKey(d => d.VolunteerId)
-        //    //    .OnDelete(DeleteBehavior.ClientSetNull)
-        //    //    .HasConstraintName("FK_MS_Volunteer");
-        //});
-
         modelBuilder.Entity<OrganizationProfile>(entity =>
         {
             entity.HasKey(e => e.OrganizationId);
@@ -293,14 +273,8 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .HasConversion<byte>()
                 .IsRequired();
 
-            entity.Property(m => m.MatchScore)
-                .IsRequired(false);
-
             entity.Property(m => m.CreatedAt)
                 .HasDefaultValueSql("sysdatetimeoffset()")
-                .IsRequired();
-
-            entity.Property(m => m.ExpiresAt)
                 .IsRequired();
 
             entity.HasOne(m => m.Volunteer)

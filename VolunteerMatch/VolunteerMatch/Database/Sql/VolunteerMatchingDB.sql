@@ -250,7 +250,7 @@ ON dbo.Notifications(UserId, CreatedAt DESC);
 CREATE INDEX IX_Notifications_ExpiresAt
 ON dbo.Notifications(ExpiresAt); 
 
-
+--------- ბაზაში წაშალე ზედმეტი ველი !!! ---------------------
 create table dbo.VolunteerEventMatches
 (
     VolunteerEventMatchId uniqueidentifier not null default newsequentialid(),
@@ -259,11 +259,7 @@ create table dbo.VolunteerEventMatches
 
     RequestedByRole nvarchar(30) not null,
     Status tinyint not null,
-    MatchScore int null,
-
     CreatedAt datetimeoffset not null default sysdatetimeoffset(),
-    RespondedAt datetimeoffset null, -- ეს აუცილებლად გახადე !!!
-    ExpiresAt datetimeoffset not null,
 
     constraint PK_VolunteerEventMatches
         primary key (VolunteerEventMatchId),
@@ -280,16 +276,7 @@ create table dbo.VolunteerEventMatches
     constraint CK_VolunteerEventMatches_Status
         check (Status in (0, 1, 2, 3)),
 
-    constraint CK_VolunteerEventMatches_ExpiresAt
-        check (ExpiresAt > CreatedAt),
-
-    constraint CK_VolunteerEventMatches_RespondedAt
-        check (RespondedAt is null or RespondedAt >= CreatedAt),
-
     constraint UQ_VolunteerEventMatches_Volunteer_Event
-        unique (VolunteerId, EventId),
-
-    constraint CK_VolunteerEventMatches_MatchScore
-        check (MatchScore is null or MatchScore between 0 and 100)
+        unique (VolunteerId, EventId)
 );
 

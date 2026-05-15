@@ -4,6 +4,8 @@
     {
         public Guid NotificationId { get; set; }
 
+        public Guid VolunteerEventMatchId { get; set; }
+
         public required string Message { get; set; }
 
         public DateTimeOffset CreatedAt { get; set; }
