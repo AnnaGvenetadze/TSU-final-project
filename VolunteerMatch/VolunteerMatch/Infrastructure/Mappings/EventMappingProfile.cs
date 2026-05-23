@@ -76,9 +76,11 @@ namespace VolunteerMatch.Infrastructure.Mappings
                     opt => opt.Ignore()
                 );
 
-            CreateMap<Notification, GetNotificationDto>()
-                .ForMember(dest => dest.Event,
-                    opt => opt.MapFrom(src => src.Event));
+            // TODO: ნოთიფიკაციების მაპერი
+
+            //CreateMap<Notification, GetNotificationDto>()
+            //    .ForMember(dest => dest.Event,
+            //        opt => opt.MapFrom(src => src.Event));
         }
     }
 }

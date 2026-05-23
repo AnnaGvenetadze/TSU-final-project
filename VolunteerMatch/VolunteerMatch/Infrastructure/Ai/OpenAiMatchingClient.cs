@@ -1,10 +1,11 @@
 ﻿using System.Text.Json;
 using OpenAI.Chat;
 using VolunteerMatch.Application.Dtos;
+using VolunteerMatch.Application.Interfaces;
 
 namespace VolunteerMatch.Infrastructure.Ai
 {
-    public class OpenAiMatchingClient // : IAiMatchingClient
+    public class OpenAiMatchingClient : IAiMatchingClient
     {
         private readonly ChatClient _chatClient;
 
@@ -96,7 +97,7 @@ namespace VolunteerMatch.Infrastructure.Ai
 You are a volunteer-event matching assistant.
 
 Your task:
-Compare the volunteer with each event using only the provided fields.
+Compare one volunteer with each event using only the provided fields.
 Return only the IDs of events that are strong matches for the volunteer.
 
 Volunteer JSON:
@@ -104,6 +105,10 @@ Volunteer JSON:
 
 Events JSON:
 {{eventsJson}}
+
+Context:
+- These events were already pre-filtered by shared volunteer interests/tags.
+- You must still be strict and return only events that are truly strong matches.
 
 Matching rules:
 - Internally score each event from 0 to 100.
@@ -116,9 +121,10 @@ Matching rules:
 Important rules:
 - Skills and event requirements are the most important factor.
 - Interests are secondary, but they should match the event main theme or tags.
+- If volunteer skills do not reasonably satisfy the event requirements, do not return that event even if interests or tags match.
 - Do not return an event only because the interests match.
-- Return an event only when the volunteer's skills reasonably fit the event requirements.
 - Do not invent skills, interests, requirements, tags, or event IDs.
+- Return only exact eventId values from the Events JSON.
 - Do not return event IDs that were not provided in Events JSON.
 - If the provided information is missing, vague, or weak, do not include that event.
 - If no events match, return an empty array.
@@ -128,7 +134,7 @@ Important rules:
 Required JSON response format:
 {
   "matchedEventIds": [
-    "event-id-here"
+    "00000000-0000-0000-0000-000000000000"
   ]
 }
 """;

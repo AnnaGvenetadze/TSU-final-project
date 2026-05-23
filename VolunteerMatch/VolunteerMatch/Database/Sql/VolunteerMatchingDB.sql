@@ -223,11 +223,10 @@ CREATE TABLE dbo.EventTags (
 CREATE TABLE dbo.Notifications (
     NotificationId UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
     UserId         UNIQUEIDENTIFIER NOT NULL,
-    EventId        UNIQUEIDENTIFIER NOT NULL,
+    VolunteerEventMatchId UNIQUEIDENTIFIER NOT NULL,
     Type           TINYINT NOT NULL,
     Message        NVARCHAR(500) NOT NULL,
-    RelatedUserId  UNIQUEIDENTIFIER NULL,
-    ExpiresAt      DATETIMEOFFSET NOT NULL,
+
     CreatedAt      DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
 
     CONSTRAINT PK_Notifications PRIMARY KEY (NotificationId),
@@ -235,22 +234,18 @@ CREATE TABLE dbo.Notifications (
     CONSTRAINT FK_Notifications_Users
         FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId),
 
-    CONSTRAINT FK_Notifications_Events
-        FOREIGN KEY (EventId) REFERENCES dbo.Events(EventId),
+    CONSTRAINT FK_Notifications_VolunteerEventMatches
+        FOREIGN KEY (VolunteerEventMatchId)
+        REFERENCES dbo.VolunteerEventMatches(VolunteerEventMatchId),
 
-    CONSTRAINT FK_Notifications_RelatedUsers
-        FOREIGN KEY (RelatedUserId) REFERENCES dbo.Users(UserId),
-
-    CONSTRAINT CK_Notifications_Type CHECK ([Type] IN (0, 1, 2, 3))
+    CONSTRAINT CK_Notifications_Type CHECK ([Type] IN (0, 1, 2, 3, 4))
 );
 
 CREATE INDEX IX_Notifications_UserId_CreatedAt
 ON dbo.Notifications(UserId, CreatedAt DESC); 
 
-CREATE INDEX IX_Notifications_ExpiresAt
-ON dbo.Notifications(ExpiresAt); 
 
---------- ბაზაში წაშალე ზედმეტი ველი !!! ---------------------
+--------- ბაზიდან წაშალე ზედმეტი ველი !!! ---------------------
 create table dbo.VolunteerEventMatches
 (
     VolunteerEventMatchId uniqueidentifier not null default newsequentialid(),

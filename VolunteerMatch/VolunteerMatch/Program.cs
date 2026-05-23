@@ -71,7 +71,7 @@ builder.Services.AddScoped<FavoriteEventService>();
 builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAiMatchingClient, OpenAiMatchingClient>();
-builder.Services.AddScoped<IMatchingService, MatchingService>();
+builder.Services.AddScoped<IVolunteerMatchingService, MyVolunteerMatchingService>();
 
 builder.Services.AddAuthentication(options =>
 {

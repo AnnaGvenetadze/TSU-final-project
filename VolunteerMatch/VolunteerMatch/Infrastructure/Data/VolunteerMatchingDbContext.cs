@@ -233,9 +233,6 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .HasMaxLength(500)
                 .IsRequired();
 
-            entity.Property(n => n.ExpiresAt)
-                .IsRequired();
-
             entity.Property(n => n.CreatedAt)
                 .HasDefaultValueSql("sysdatetimeoffset()")
                 .IsRequired();
@@ -245,14 +242,9 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            entity.HasOne(n => n.Event)
+            entity.HasOne(n => n.VolunteerEventMatch)
                 .WithMany()
-                .HasForeignKey(n => n.EventId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasOne(n => n.RelatedUser)
-                .WithMany()
-                .HasForeignKey(n => n.RelatedUserId)
+                .HasForeignKey(n => n.VolunteerEventMatchId)
                 .OnDelete(DeleteBehavior.NoAction);
         });
 
