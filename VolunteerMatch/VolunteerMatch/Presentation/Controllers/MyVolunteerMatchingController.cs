@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VolunteerMatch.Application.Exceptions;
 using VolunteerMatch.Application.Interfaces;
 using VolunteerMatch.Domain.Constants;
 
@@ -22,11 +23,11 @@ namespace VolunteerMatch.Presentation.Controllers
         {
             try
             {
-                await _matchingService.GenerateMyMatchesAsync(
+                var result = await _matchingService.GenerateMyMatchesAsync(
                     CurrentUserId,
                     cancellationToken);
 
-                return Ok(new { message = "მეჩები წარმატებით დაგენერირდა." });
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {
@@ -35,6 +36,10 @@ namespace VolunteerMatch.Presentation.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
+            }
+            catch (AiMatchingException ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
             }
             catch
             {

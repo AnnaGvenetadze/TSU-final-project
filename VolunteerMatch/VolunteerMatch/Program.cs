@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Serilog;
+using Serilog.Events;
+using System.Text;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Security.Claims;
-using System.Text;
 using VolunteerMatch.Application.Interfaces;
 using VolunteerMatch.Application.Services;
 using VolunteerMatch.Domain.Models;
@@ -12,10 +14,23 @@ using VolunteerMatch.Infrastructure.Ai;
 using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Validators;
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+    .WriteTo.Console()
+    .WriteTo.File(
+        path: "C:/Temp/VolunteerMatchLogs/log-.txt",
+        rollingInterval: RollingInterval.Day,
+        encoding: Encoding.UTF8,
+        shared: true)
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Host.UseSerilog();
 
+// Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -68,10 +83,11 @@ builder.Services.AddScoped<ITagValidator, TagValidator>();
 builder.Services.AddScoped<TagService>();
 builder.Services.AddScoped<IEventTagService, EventTagService>();
 builder.Services.AddScoped<FavoriteEventService>();
-builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
-builder.Services.AddScoped<INotificationService, NotificationService>();
+//builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
+//builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAiMatchingClient, OpenAiMatchingClient>();
 builder.Services.AddScoped<IVolunteerMatchingService, MyVolunteerMatchingService>();
+builder.Services.AddScoped<IAiMatchingLogger, AiMatchingLogger>();
 
 builder.Services.AddAuthentication(options =>
 {

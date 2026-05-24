@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using OpenAI.Chat;
 using VolunteerMatch.Application.Dtos;
+using VolunteerMatch.Application.Exceptions;
 using VolunteerMatch.Application.Interfaces;
 
 namespace VolunteerMatch.Infrastructure.Ai
@@ -8,6 +9,7 @@ namespace VolunteerMatch.Infrastructure.Ai
     public class OpenAiMatchingClient : IAiMatchingClient
     {
         private readonly ChatClient _chatClient;
+        private readonly ILogger<OpenAiMatchingClient> _logger;
 
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
@@ -15,14 +17,19 @@ namespace VolunteerMatch.Infrastructure.Ai
             PropertyNameCaseInsensitive = true
         };
 
-        public OpenAiMatchingClient(IConfiguration configuration)
+        public OpenAiMatchingClient(
+            IConfiguration configuration,
+            ILogger<OpenAiMatchingClient> logger)
         {
+            _logger = logger;
+
             var apiKey = configuration["OpenAI:ApiKey"];
             var model = configuration["OpenAI:Model"] ?? "gpt-4o-mini";
 
             if (string.IsNullOrWhiteSpace(apiKey))
             {
-                throw new InvalidOperationException("OpenAI API key is not configured.");
+                throw new AiMatchingException(
+                    "OpenAI API გასაღები არაა კონფიგურირებული.");
             }
 
             _chatClient = new ChatClient(model: model, apiKey: apiKey);
@@ -32,66 +39,138 @@ namespace VolunteerMatch.Infrastructure.Ai
             AiBatchRequestDto request,
             CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(request.Volunteer);
-            ArgumentNullException.ThrowIfNull(request.Events);
+            ValidateRequest(request);
+
             if (request.Events.Count == 0)
             {
                 return new AiBatchResponseDto();
-            } 
-                
+            }
 
             var prompt = CreatePromptForVolunteer(request);
+
+            var responseContent = await SendRequestAsync(
+                prompt,
+                cancellationToken);
+
+            var result = DeserializeResponse(responseContent);
+
+            EnsureValidMatchedEventIds(result, request.Events);
+
+            return result;
+        }
+
+        private static void ValidateRequest(AiBatchRequestDto request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(request.Volunteer);
+            ArgumentNullException.ThrowIfNull(request.Events);
+        }
+
+        private async Task<string?> SendRequestAsync(
+            string prompt,
+            CancellationToken cancellationToken)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(prompt);
+
             var messages = new List<ChatMessage>
-                {
-                    new SystemChatMessage(
-                        "You are a volunteer-event matching assistant. " +
-                        "Return only valid JSON. Do not include markdown, explanation, comments, or extra text."),
+            {
+                new SystemChatMessage(
+                    "You are a volunteer-event matching assistant. Return only valid JSON. Do not include markdown, explanation, comments, or extra text."),
+                new UserChatMessage(prompt)
+            };
 
-                    new UserChatMessage(prompt)
-                };
-            var response = await _chatClient.CompleteChatAsync(
-                messages,
-                cancellationToken: cancellationToken);
+            try
+            {
+                var response = await _chatClient.CompleteChatAsync(
+                    messages,
+                    cancellationToken: cancellationToken);
 
-            var content = response.Value.Content[0].Text;
+                return response.Value.Content.FirstOrDefault()?.Text;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new AiMatchingException(
+                    "AI მეჩინგის მოთხოვნის გაგზავნისას მოხდა შეცდომა.", ex);
+            }
+        }
 
+        private static AiBatchResponseDto DeserializeResponse(string? content)
+        {
             if (string.IsNullOrWhiteSpace(content))
             {
-                return new AiBatchResponseDto();
+                throw new AiMatchingException("AI მეჩინგის პასუხი ცარიელია.");
             }
 
-            var result = JsonSerializer.Deserialize<AiBatchResponseDto>(
-                content,
-                JsonOptions);
-
-            if (result is null)
+            try
             {
-                return new AiBatchResponseDto();
+                var result = JsonSerializer.Deserialize<AiBatchResponseDto>(
+                    content,
+                    JsonOptions);
+
+                if (result is null)
+                {
+                    throw new AiMatchingException(
+                        "AI მეჩინგის პასუხი არასწორი ფორმატით დაბრუნდა.");
+                }
+
+                return result;
+            }
+            catch (JsonException ex)
+            {
+                throw new AiMatchingException(
+                    "AI მეჩინგის პასუხი ვერ დაიპარსა.", ex);
+            }
+        }
+
+        // AI-ის დაბრუნებული matchedEventIds ნამდვილად იყო თუ არა
+        // request-ში გაგზავნილ Events სიაში.
+        // თუ AI-მ გამოგონილი ID დააბრუნა, პროგრამას არ ვაგდებთ;
+        // ვლოგავთ warning-ს და ვტოვებთ მხოლოდ ნამდვილ IDs-ს.
+        private void EnsureValidMatchedEventIds(
+            AiBatchResponseDto result,
+            List<AiEventInfoDto> providedEvents)
+        {
+            if (result.MatchedEventIds is null)
+            {
+                throw new AiMatchingException(
+                    "AI მეჩინგის პასუხში matchedEventIds ველი არასწორია.");
             }
 
-            result.MatchedEventIds ??= new List<Guid>();
-
-            var providedEventIds = request.Events
+            var providedEventIds = providedEvents
                 .Select(e => e.EventId)
                 .ToHashSet();
+
+            var invalidEventIds = result.MatchedEventIds
+                .Where(eventId => !providedEventIds.Contains(eventId))
+                .Distinct()
+                .ToList();
+
+            if (invalidEventIds.Count != 0)
+            {
+                _logger.LogWarning(
+                    "AI-მ დააბრუნა ისეთი EventId-ები, რომლებიც მოთხოვნაში არ იყო გაგზავნილი. InvalidEventIds: {InvalidEventIds}",
+                    string.Join(", ", invalidEventIds));
+            }
 
             result.MatchedEventIds = result.MatchedEventIds
                 .Where(providedEventIds.Contains)
                 .Distinct()
                 .ToList();
-
-            return result;
         }
 
         private static string CreatePromptForVolunteer(AiBatchRequestDto request)
         {
             ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(request.Volunteer);
-            ArgumentNullException.ThrowIfNull(request.Events);
 
-            var volunteerJson = JsonSerializer.Serialize(request.Volunteer, JsonOptions);
-            var eventsJson = JsonSerializer.Serialize(request.Events, JsonOptions);
+            var volunteerJson = JsonSerializer.Serialize(
+                request.Volunteer, JsonOptions);
+
+            var eventsJson = JsonSerializer.Serialize(
+                request.Events, JsonOptions);
 
             return $$"""
 You are a volunteer-event matching assistant.

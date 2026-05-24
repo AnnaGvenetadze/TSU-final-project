@@ -3,6 +3,7 @@ using VolunteerMatch.Application.Dtos;
 using VolunteerMatch.Application.Interfaces;
 using VolunteerMatch.Domain.Constants;
 using VolunteerMatch.Domain.Models;
+using VolunteerMatch.Infrastructure.Ai;
 using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Helpers;
 
@@ -14,54 +15,134 @@ namespace VolunteerMatch.Application.Services
 
         private readonly VolunteerMatchingDbContext _context;
         private readonly IAiMatchingClient _aiMatchingClient;
+        private readonly IAiMatchingLogger _aiMatchingLogger;
 
         public MyVolunteerMatchingService(
             VolunteerMatchingDbContext context,
-            IAiMatchingClient aiMatchingClient)
+            IAiMatchingClient aiMatchingClient,
+            IAiMatchingLogger aiMatchinglogger)
         {
             _context = context;
             _aiMatchingClient = aiMatchingClient;
+            _aiMatchingLogger = aiMatchinglogger;
         }
 
-        public async Task GenerateMyMatchesAsync(
+        public async Task<CreateMatchesResultDto> GenerateMyMatchesAsync(
             Guid volunteerId,
             CancellationToken cancellationToken = default)
         {
-            var (volunteer, volunteerTagIds) = 
+            var matchingData = await GetPrefilteredMatchingDataAsync(
+                volunteerId,
+                cancellationToken);
+
+            // ტესტირებისას დაგჭირდება
+            // თუ მიხვდი საბოლოოდ რომ სწორია დააკომენტე
+            _aiMatchingLogger.LogPrefilteredData(
+                matchingData.Volunteer,
+                matchingData.CandidateEvents);
+
+            if (matchingData.CandidateEvents.Count == 0)
+            {
+                return new CreateMatchesResultDto
+                {
+                    CreatedMatchesCount = 0,
+                    Message = "ამ ეტაპზე თქვენს ინტერესებზე მორგებული აქტიური ღონისძიებები ვერ მოიძებნა."
+                };
+            }
+
+            var matchedEvents = await GetAiMatchedEventsAsync(
+                matchingData.Volunteer,
+                matchingData.CandidateEvents,
+                cancellationToken);
+
+            if (matchedEvents.Count == 0)
+            {
+                return new CreateMatchesResultDto
+                {
+                    CreatedMatchesCount = 0,
+                    Message = "ხელოვნურმა ინტელექტმა შესაბამისი ღონისძიებები ვერ შეარჩია."
+                };
+            }
+
+            var matches = CreateRecommendedMatches(
+                volunteerId,
+                matchedEvents);
+
+            _context.VolunteerEventMatches.AddRange(matches);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return new CreateMatchesResultDto
+            {
+                CreatedMatchesCount = matches.Count,
+                Message = $"{matches.Count} რეკომენდებული ღონისძიებები წარმატებით მოიძებნა."
+            };
+        }
+
+        private sealed record VolunteerMatchingData(
+            VolunteerProfile Volunteer,
+            List<Event> CandidateEvents);
+
+        private async Task<VolunteerMatchingData> GetPrefilteredMatchingDataAsync(
+            Guid volunteerId,
+            CancellationToken cancellationToken)
+        {
+            var (volunteer, volunteerTagIds) =
                 await GetVolunteerMatchingInfoAsync(
-                    volunteerId,cancellationToken);
+                    volunteerId,
+                    cancellationToken);
 
-            var candidateEvents = 
+            var candidateEvents =
                 await GetCandidateEventsAsync(
-                    volunteerId, volunteerTagIds, cancellationToken);
+                    volunteerId,
+                    volunteerTagIds,
+                    cancellationToken);
 
-            if (!candidateEvents.Any())
-                return;
-            
-            var aiRequest = CreateAiBatchRequest(volunteer, candidateEvents);
-            var aiResponse = 
+            return new VolunteerMatchingData(
+                volunteer,
+                candidateEvents);
+        }
+
+        private async Task<List<Event>> GetAiMatchedEventsAsync(
+            VolunteerProfile volunteer,
+            List<Event> candidateEvents,
+            CancellationToken cancellationToken)
+        {
+            var aiRequest = CreateAiBatchRequest(
+                volunteer,
+                candidateEvents);
+
+            _aiMatchingLogger.LogAiRequest(aiRequest);
+
+            var aiResponse =
                 await _aiMatchingClient.GetMatchedEventIdsForVolunteerAsync(
                     aiRequest,
                     cancellationToken);
 
-            var matchedEvents = candidateEvents
-                .Where(e => aiResponse.MatchedEventIds.Contains(e.EventId))
+            _aiMatchingLogger.LogAiResponse(aiResponse);
+
+            var matchedEventIds = aiResponse.MatchedEventIds
+                .ToHashSet();
+
+            return candidateEvents
+                .Where(e => matchedEventIds.Contains(e.EventId))
                 .ToList();
-
-            var matches = matchedEvents
-                .Select(e => CreateRecommendedMatch(volunteerId, e))
-                .ToList();
-
-            _context.VolunteerEventMatches.AddRange(matches);
-
-            await _context.SaveChangesAsync(cancellationToken);
         }
 
-        private async Task<(VolunteerProfile Volunteer, List<Guid> TagIds)> 
+        private static List<VolunteerEventMatch> CreateRecommendedMatches(
+            Guid volunteerId,
+            List<Event> matchedEvents)
+        {
+            return matchedEvents
+                .Select(e => CreateRecommendedMatch(volunteerId, e))
+                .ToList();
+        }
+
+        private async Task<(VolunteerProfile Volunteer, List<Guid> TagIds)>
             GetVolunteerMatchingInfoAsync(Guid volunteerId, CancellationToken cancellationToken)
         {
             var volunteer = await _context.VolunteerProfiles
                 .Include(v => v.VolunteerTags)
+                    .ThenInclude(vt => vt.Tag)
                 .FirstOrDefaultAsync(
                     v => v.VolunteerId == volunteerId,
                     cancellationToken);
@@ -72,7 +153,7 @@ namespace VolunteerMatch.Application.Services
                 .Select(vt => vt.TagId)
                 .ToList();
 
-            if (!tagIds.Any())
+            if (tagIds.Count == 0)
             {
                 throw new ArgumentException("მეჩინგისთვის ჯერ აირჩიეთ ინტერესები.");
             }
