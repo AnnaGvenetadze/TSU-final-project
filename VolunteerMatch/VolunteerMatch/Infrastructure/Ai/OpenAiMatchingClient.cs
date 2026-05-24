@@ -93,6 +93,10 @@ namespace VolunteerMatch.Infrastructure.Ai
             }
             catch (Exception ex)
             {
+                _logger.LogError(
+                    ex,
+                    "OpenAI request failed while generating volunteer matches.");
+
                 throw new AiMatchingException(
                     "AI მეჩინგის მოთხოვნის გაგზავნისას მოხდა შეცდომა.", ex);
             }

@@ -35,11 +35,12 @@ namespace VolunteerMatch.Application.Services
                 volunteerId,
                 cancellationToken);
 
-            // ტესტირებისას დაგჭირდება
-            // თუ მიხვდი საბოლოოდ რომ სწორია დააკომენტე
+            // ტესტირებისთვის
             _aiMatchingLogger.LogPrefilteredData(
                 matchingData.Volunteer,
                 matchingData.CandidateEvents);
+
+            Console.WriteLine("LogPrefilteredData finished");
 
             if (matchingData.CandidateEvents.Count == 0)
             {
@@ -161,6 +162,7 @@ namespace VolunteerMatch.Application.Services
             return (volunteer, tagIds);
         }
 
+        // TODO: რეალურ გარემოში განაკომენტარე როცა იგივე ივენთების დამეჩვის შეზღუდვა დაგჭირდება
         private async Task<List<Event>> GetCandidateEventsAsync(
             Guid volunteerId,
             List<Guid> volunteerTagIds,
@@ -172,8 +174,8 @@ namespace VolunteerMatch.Application.Services
                 .Where(e => e.IsActive)
                 .Where(e => e.EndDate >= DateTimeOffset.UtcNow)
                 .Where(e => e.EventTags.Any(et => volunteerTagIds.Contains(et.TagId)))
-                .Where(e => !_context.VolunteerEventMatches
-                    .Any(m => m.VolunteerId == volunteerId && m.EventId == e.EventId))
+                //.Where(e => !_context.VolunteerEventMatches
+                //    .Any(m => m.VolunteerId == volunteerId && m.EventId == e.EventId))
                 .OrderByDescending(e => e.CreatedAt)
                 .Take(CandidateEventsLimit)
                 .ToListAsync(cancellationToken);

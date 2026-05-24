@@ -13,7 +13,9 @@ namespace VolunteerMatch.Infrastructure.Mappings
                 s => string.IsNullOrWhiteSpace(s) ? null : s.Trim()
             );
 
-            CreateMap<CreateEventDetailsDto, Event>();
+            CreateMap<CreateEventDetailsDto, Event>()
+                .ForMember(dest => dest.IsActive,
+                    opt => opt.MapFrom(_ => true));
             CreateMap<UpdateEventDetailsDto, Event>();
 
             CreateMap<Event, GetMyOrgEventDetailsDto>()
