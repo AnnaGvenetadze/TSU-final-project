@@ -75,7 +75,7 @@ namespace VolunteerMatch.Application.Services
             return new CreateMatchesResultDto
             {
                 CreatedMatchesCount = matches.Count,
-                Message = $"{matches.Count} რეკომენდებული ღონისძიებები წარმატებით მოიძებნა."
+                Message = $"{matches.Count} რეკომენდებული ღონისძიება წარმატებით მოიძებნა."
             };
         }
 
@@ -162,7 +162,6 @@ namespace VolunteerMatch.Application.Services
             return (volunteer, tagIds);
         }
 
-        // TODO: რეალურ გარემოში განაკომენტარე როცა იგივე ივენთების დამეჩვის შეზღუდვა დაგჭირდება
         private async Task<List<Event>> GetCandidateEventsAsync(
             Guid volunteerId,
             List<Guid> volunteerTagIds,
@@ -174,8 +173,10 @@ namespace VolunteerMatch.Application.Services
                 .Where(e => e.IsActive)
                 .Where(e => e.EndDate >= DateTimeOffset.UtcNow)
                 .Where(e => e.EventTags.Any(et => volunteerTagIds.Contains(et.TagId)))
-                //.Where(e => !_context.VolunteerEventMatches
-                //    .Any(m => m.VolunteerId == volunteerId && m.EventId == e.EventId))
+                /* იგივე ივენთები რომ არ გაიგზავნოს რომ დაბრუნებისას მეჩების 
+                 * ცხრილში ბაზიდან უნიკალურმა ქონსთრეინთმა არ დაბაგოს ჩასმა */ 
+                .Where(e => !_context.VolunteerEventMatches
+                    .Any(m => m.VolunteerId == volunteerId && m.EventId == e.EventId))
                 .OrderByDescending(e => e.CreatedAt)
                 .Take(CandidateEventsLimit)
                 .ToListAsync(cancellationToken);
