@@ -1,11 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using VolunteerMatch.Application.Dtos;
+using VolunteerMatch.Application.Dtos.Matching;
 using VolunteerMatch.Application.Interfaces;
 using VolunteerMatch.Domain.Constants;
 using VolunteerMatch.Domain.Models;
 using VolunteerMatch.Infrastructure.Ai;
 using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Helpers;
+using VolunteerMatch.Infrastructure.Validators;
 
 namespace VolunteerMatch.Application.Services
 {
@@ -16,15 +19,18 @@ namespace VolunteerMatch.Application.Services
         private readonly VolunteerMatchingDbContext _context;
         private readonly IAiMatchingClient _aiMatchingClient;
         private readonly IAiMatchingLogger _aiMatchingLogger;
+        private readonly IMapper _mapper;
 
         public MyVolunteerMatchingService(
             VolunteerMatchingDbContext context,
             IAiMatchingClient aiMatchingClient,
-            IAiMatchingLogger aiMatchinglogger)
+            IAiMatchingLogger aiMatchinglogger,
+            IMapper mapper)
         {
             _context = context;
             _aiMatchingClient = aiMatchingClient;
             _aiMatchingLogger = aiMatchinglogger;
+            _mapper = mapper;
         }
 
         public async Task<CreateMatchesResultDto> GenerateMyMatchesAsync(
@@ -79,6 +85,53 @@ namespace VolunteerMatch.Application.Services
             };
         }
 
+        public async Task<PagedResultDto<GetMatchedEventCardDto>> GetMyMatchesAsync(
+            Guid currentUserId,
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken = default)
+        {
+            PaginationValidator.Validate(page, pageSize);
+
+            var volunteerExists = await _context.VolunteerProfiles
+                .AnyAsync(v => v.VolunteerId == currentUserId, cancellationToken);
+
+            Guard.EnsureFound(volunteerExists);
+
+            var query = _context.VolunteerEventMatches
+                .AsNoTracking()
+                .Include(match => match.Event)
+                    .ThenInclude(eventModel => eventModel.Organization)
+                .Include(match => match.Event)
+                    .ThenInclude(eventModel => eventModel.EventTags)
+                        .ThenInclude(eventTag => eventTag.Tag)
+                .Where(match => match.VolunteerId == currentUserId)
+                .Where(match => match.Status == MatchStatus.Recommended)
+                .Where(match => match.Event.IsActive)
+                .Where(match => match.Event.EndDate >= DateTimeOffset.UtcNow)
+                .OrderByDescending(match => match.CreatedAt);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var matches = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            var items = _mapper.Map<List<GetMatchedEventCardDto>>(matches);
+
+            await SetFavoriteStatusesAsync(
+                currentUserId,
+                items,
+                cancellationToken);
+
+            return PaginationHelper.CreatePagedResult(
+                items,
+                page,
+                pageSize,
+                totalCount);
+        }
+
         private sealed record VolunteerMatchingData(
             VolunteerProfile Volunteer,
             List<Event> CandidateEvents);
@@ -127,6 +180,36 @@ namespace VolunteerMatch.Application.Services
             return candidateEvents
                 .Where(e => matchedEventIds.Contains(e.EventId))
                 .ToList();
+        }
+        
+        private async Task SetFavoriteStatusesAsync(
+            Guid volunteerId,
+            List<GetMatchedEventCardDto> matchedEvents,
+            CancellationToken cancellationToken)
+        {
+            if (matchedEvents.Count == 0)
+            {
+                return;
+            }
+
+            var eventIds = matchedEvents
+                .Select(match => match.Event.EventId)
+                .ToList();
+
+            var favoriteEventIds = await _context.FavoriteEvents
+                .AsNoTracking()
+                .Where(favorite => favorite.VolunteerId == volunteerId)
+                .Where(favorite => eventIds.Contains(favorite.EventId))
+                .Select(favorite => favorite.EventId)
+                .ToListAsync(cancellationToken);
+
+            var favoriteEventIdsSet = favoriteEventIds.ToHashSet();
+
+            foreach (var matchedEvent in matchedEvents)
+            {
+                matchedEvent.IsFavorite =
+                    favoriteEventIdsSet.Contains(matchedEvent.Event.EventId);
+            }
         }
 
         private static List<VolunteerEventMatch> CreateRecommendedMatches(

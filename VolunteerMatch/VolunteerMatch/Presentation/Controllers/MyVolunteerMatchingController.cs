@@ -46,5 +46,36 @@ namespace VolunteerMatch.Presentation.Controllers
                 return StatusCode(500, new { message = "სერვერზე მოხდა შეცდომა." });
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMyMatches(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 6,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var result = await _matchingService.GetMyMatchesAsync(
+                    CurrentUserId,
+                    page,
+                    pageSize,
+                    cancellationToken);
+
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch
+            {
+                return StatusCode(500, new { message = "სერვერზე მოხდა შეცდომა." });
+            }
+        }
+
     }
 }

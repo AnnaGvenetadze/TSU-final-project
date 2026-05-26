@@ -24,7 +24,7 @@ namespace VolunteerMatch.Infrastructure.Ai
             _logger = logger;
 
             var apiKey = configuration["OpenAI:ApiKey"];
-            var model = configuration["OpenAI:Model"] ?? "gpt-4o-mini";
+            var model = configuration["OpenAI:Model"] ?? "gpt-5.4-mini";
 
             if (string.IsNullOrWhiteSpace(apiKey))
             {
@@ -187,7 +187,7 @@ You are a volunteer-event matching assistant.
 
 Your task:
 Compare one volunteer with each event using only the provided fields.
-Return the IDs of every event that is a strong match for the volunteer.
+Return event IDs of every event that is a strong match for the volunteer.
 
 Volunteer JSON:
 {{volunteerJson}}
@@ -224,6 +224,9 @@ Scoring priorities:
 - If requirements and skills conflict, requirements must win over tags and interests.
 - Shared tags can increase confidence only after skill fit is confirmed.
 - Shared tags must never compensate for missing required skills.
+- Generic skills such as teamwork, communication, responsibility, motivation, or willingness to help are supportive only.
+- A generic skill alone must not make an event a strong match.
+- For a strong match, the volunteer should satisfy the event's main required skill area, not only generic supporting skills.
 
 Skill matching guidance:
 - Treat a skill as matching a requirement when the requirement asks for the same skill, a close synonym, or a practical task that clearly uses that skill.
@@ -240,11 +243,14 @@ Rejection rules:
 - If the event requires research methodology, statistics, academic writing, data analysis, design tools, programming, medical knowledge, legal knowledge, or other specialized expertise, reject it unless those skills are explicitly present in Volunteer Skills.
 - If the requirements are vague, generic, or only say that any help/free time is enough, do not treat it as a strong match.
 - If the requirements do not clearly need the volunteer's skills, do not return the event.
+- If the event's main requirement is event organization, registration, participant coordination, technical support, design, research, programming, legal work, or another specific work area, the volunteer must explicitly have that specific skill or a very close equivalent.
+- Do not return an event where the only matching skill is generic teamwork or communication.
 - Do not invent skills, interests, requirements, tags, or event IDs.
 
 Event ID rules:
 - Return only exact eventId values from the Events JSON.
 - Do not return event IDs that were not provided in Events JSON.
+- Do not return event titles in matchedEventIds.
 - If no events match, return an empty array.
 
 Output rules:
