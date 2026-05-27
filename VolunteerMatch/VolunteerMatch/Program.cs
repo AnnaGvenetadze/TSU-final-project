@@ -93,6 +93,8 @@ builder.Services.AddScoped<MatchingQueryHelper>();
 builder.Services.AddScoped<FavoritesHelper>();
 builder.Services.AddScoped<MatchSaveHelper>();
 builder.Services.AddScoped<MatchCleanupHelper>();
+builder.Services.AddScoped<IOrganizationMatchingService, MyOrganizationMatchingService>();
+
 
 builder.Services.AddAuthentication(options =>
 {
