@@ -14,41 +14,60 @@ namespace VolunteerMatch.Application.Services
 {
     public class MyVolunteerMatchingService : IVolunteerMatchingService
     {
-        private const int CandidateEventsLimit = 20;
-
         private readonly VolunteerMatchingDbContext _context;
         private readonly IAiMatchingClient _aiMatchingClient;
         private readonly IAiMatchingLogger _aiMatchingLogger;
         private readonly IMapper _mapper;
+        private readonly MatchingQueryHelper _matchingQueryHelper;
+        private readonly FavoritesHelper _favoritesHelper;
+        private readonly MatchSaveHelper _matchSaveHelper;
+        private readonly MatchCleanupHelper _matchCleanupHelper;
 
         public MyVolunteerMatchingService(
             VolunteerMatchingDbContext context,
             IAiMatchingClient aiMatchingClient,
-            IAiMatchingLogger aiMatchinglogger,
-            IMapper mapper)
+            IAiMatchingLogger aiMatchingLogger,
+            IMapper mapper,
+            MatchingQueryHelper matchingQueryHelper,
+            FavoritesHelper favoritesHelper,
+            MatchSaveHelper matchSaveHelper,
+            MatchCleanupHelper matchCleanupHelper)
         {
             _context = context;
             _aiMatchingClient = aiMatchingClient;
-            _aiMatchingLogger = aiMatchinglogger;
+            _aiMatchingLogger = aiMatchingLogger;
             _mapper = mapper;
+            _matchingQueryHelper = matchingQueryHelper;
+            _favoritesHelper = favoritesHelper;
+            _matchSaveHelper = matchSaveHelper;
+            _matchCleanupHelper = matchCleanupHelper;
         }
+
+
 
         public async Task<CreateMatchesResultDto> GenerateMyMatchesAsync(
             Guid volunteerId,
             CancellationToken cancellationToken = default)
         {
-            var matchingData = await GetPrefilteredMatchingDataAsync(
-                volunteerId,
+            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(
                 cancellationToken);
 
-            // ტესტირებისთვის
+            var (volunteer, volunteerTagIds) =
+                await _matchingQueryHelper.GetVolunteerMatchingInfoAsync(
+                    volunteerId,
+                    cancellationToken);
+
+            var candidateEvents =
+                await _matchingQueryHelper.GetCandidateEventsForVolunteerAsync(
+                    volunteerId,
+                    volunteerTagIds,
+                    cancellationToken);
+
             _aiMatchingLogger.LogPrefilteredData(
-                matchingData.Volunteer,
-                matchingData.CandidateEvents);
+                volunteer,
+                candidateEvents);
 
-            Console.WriteLine("LogPrefilteredData finished");
-
-            if (matchingData.CandidateEvents.Count == 0)
+            if (candidateEvents.Count == 0)
             {
                 return new CreateMatchesResultDto
                 {
@@ -58,8 +77,8 @@ namespace VolunteerMatch.Application.Services
             }
 
             var matchedEvents = await GetAiMatchedEventsAsync(
-                matchingData.Volunteer,
-                matchingData.CandidateEvents,
+                volunteer,
+                candidateEvents,
                 cancellationToken);
 
             if (matchedEvents.Count == 0)
@@ -71,19 +90,30 @@ namespace VolunteerMatch.Application.Services
                 };
             }
 
-            var matches = CreateRecommendedMatches(
+            var matches = VolunteerMatchingFactory.CreateRecommendedMatches(
                 volunteerId,
                 matchedEvents);
+            var savedMatches = await _matchSaveHelper.SaveOnlyNewMatchesAsync(
+                matches,
+                cancellationToken);
 
-            _context.VolunteerEventMatches.AddRange(matches);
-            await _context.SaveChangesAsync(cancellationToken);
+            if (savedMatches.Count == 0)
+            {
+                return new CreateMatchesResultDto
+                {
+                    CreatedMatchesCount = 0,
+                    Message = "ახალი რეკომენდებული ღონისძიებები ვერ მოიძებნა."
+                };
+            }
 
             return new CreateMatchesResultDto
             {
-                CreatedMatchesCount = matches.Count,
-                Message = $"{matches.Count} რეკომენდებული ღონისძიება წარმატებით მოიძებნა."
+                CreatedMatchesCount = savedMatches.Count,
+                Message = $"{savedMatches.Count} რეკომენდებული ღონისძიება წარმატებით მოიძებნა."
             };
         }
+
+
 
         public async Task<PagedResultDto<GetMatchedEventCardDto>> GetMyMatchesAsync(
             Guid currentUserId,
@@ -91,25 +121,20 @@ namespace VolunteerMatch.Application.Services
             int pageSize,
             CancellationToken cancellationToken = default)
         {
+            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(
+                    cancellationToken);
+
             PaginationValidator.Validate(page, pageSize);
+            Guard.EnsureFound(
+                await _context.VolunteerProfiles
+                    .AsNoTracking()
+                    .AnyAsync(
+                        volunteer => volunteer.VolunteerId == currentUserId,
+                        cancellationToken)
+            );
 
-            var volunteerExists = await _context.VolunteerProfiles
-                .AnyAsync(v => v.VolunteerId == currentUserId, cancellationToken);
-
-            Guard.EnsureFound(volunteerExists);
-
-            var query = _context.VolunteerEventMatches
-                .AsNoTracking()
-                .Include(match => match.Event)
-                    .ThenInclude(eventModel => eventModel.Organization)
-                .Include(match => match.Event)
-                    .ThenInclude(eventModel => eventModel.EventTags)
-                        .ThenInclude(eventTag => eventTag.Tag)
-                .Where(match => match.VolunteerId == currentUserId)
-                .Where(match => match.Status == MatchStatus.Recommended)
-                .Where(match => match.Event.IsActive)
-                .Where(match => match.Event.EndDate >= DateTimeOffset.UtcNow)
-                .OrderByDescending(match => match.CreatedAt);
+            var query = _matchingQueryHelper.GetRecommendedEventMatchesQuery(
+                currentUserId);
 
             var totalCount = await query.CountAsync(cancellationToken);
 
@@ -120,7 +145,7 @@ namespace VolunteerMatch.Application.Services
 
             var items = _mapper.Map<List<GetMatchedEventCardDto>>(matches);
 
-            await SetFavoriteStatusesAsync(
+            await _favoritesHelper.SetFavoriteMatchedEventsAsync(
                 currentUserId,
                 items,
                 cancellationToken);
@@ -132,36 +157,114 @@ namespace VolunteerMatch.Application.Services
                 totalCount);
         }
 
-        private sealed record VolunteerMatchingData(
-            VolunteerProfile Volunteer,
-            List<Event> CandidateEvents);
 
-        private async Task<VolunteerMatchingData> GetPrefilteredMatchingDataAsync(
+
+        public async Task RequestMyMatchAsync(
             Guid volunteerId,
-            CancellationToken cancellationToken)
+            Guid matchId,
+            CancellationToken cancellationToken = default)
         {
-            var (volunteer, volunteerTagIds) =
-                await GetVolunteerMatchingInfoAsync(
-                    volunteerId,
+            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(
+                cancellationToken);
+
+            var match = await _context.VolunteerEventMatches
+                .FirstOrDefaultAsync(
+                    match =>
+                        match.VolunteerEventMatchId == matchId &&
+                        match.VolunteerId == volunteerId,
                     cancellationToken);
 
-            var candidateEvents =
-                await GetCandidateEventsAsync(
-                    volunteerId,
-                    volunteerTagIds,
-                    cancellationToken);
+            match = Guard.EnsureFound(match);
+            if (match.Status != MatchStatus.Recommended)
+            {
+                throw new ArgumentException("მოთხოვნის გაგზავნა შესაძლებელია მხოლოდ რეკომენდებულ ღონისძიებაზე.");
+            }
 
-            return new VolunteerMatchingData(
-                volunteer,
-                candidateEvents);
+            match.Status = MatchStatus.Pending;
+            match.RequestedByRole = UserRoles.Volunteer;
+            await _context.SaveChangesAsync(cancellationToken);
         }
+
+
+
+        public async Task RejectMyMatchAsync(
+            Guid volunteerId,
+            Guid matchId,
+            CancellationToken cancellationToken = default)
+        {
+            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(
+                cancellationToken);
+
+            var match = await _context.VolunteerEventMatches
+                .FirstOrDefaultAsync(
+                    match =>
+                        match.VolunteerEventMatchId == matchId &&
+                        match.VolunteerId == volunteerId,
+                    cancellationToken);
+
+            match = Guard.EnsureFound(match);
+            if (match.Status != MatchStatus.Recommended)
+            {
+                throw new ArgumentException("უარყოფა შესაძლებელია მხოლოდ რეკომენდებული ღონისძიების.");
+            }
+
+            match.Status = MatchStatus.Rejected;
+            match.RequestedByRole = UserRoles.Volunteer;
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+
+
+        public async Task<PagedResultDto<GetMatchedEventCardDto>> 
+            GetMyMatchRequestsAsync(
+                Guid volunteerId,
+                int page,
+                int pageSize,
+                CancellationToken cancellationToken = default)
+        {
+            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(
+                cancellationToken);
+
+            PaginationValidator.Validate(page, pageSize);
+            Guard.EnsureFound(
+                await _context.VolunteerProfiles
+                    .AsNoTracking()
+                    .AnyAsync(
+                        volunteer => volunteer.VolunteerId == volunteerId,
+                        cancellationToken)
+            );
+
+            var query = _matchingQueryHelper.GetMyMatchRequestsQuery(
+                volunteerId);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+            var matches = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            var items = _mapper.Map<List<GetMatchedEventCardDto>>(matches);
+
+            await _favoritesHelper.SetFavoriteMatchedEventsAsync(
+                volunteerId,
+                items,
+                cancellationToken);
+
+            return PaginationHelper.CreatePagedResult(
+                items,
+                page,
+                pageSize,
+                totalCount);
+        }
+
+
 
         private async Task<List<Event>> GetAiMatchedEventsAsync(
             VolunteerProfile volunteer,
             List<Event> candidateEvents,
             CancellationToken cancellationToken)
         {
-            var aiRequest = CreateAiBatchRequest(
+            var aiRequest = VolunteerMatchingFactory.CreateAiBatchRequest(
                 volunteer,
                 candidateEvents);
 
@@ -178,138 +281,8 @@ namespace VolunteerMatch.Application.Services
                 .ToHashSet();
 
             return candidateEvents
-                .Where(e => matchedEventIds.Contains(e.EventId))
+                .Where(eventItem => matchedEventIds.Contains(eventItem.EventId))
                 .ToList();
-        }
-        
-        private async Task SetFavoriteStatusesAsync(
-            Guid volunteerId,
-            List<GetMatchedEventCardDto> matchedEvents,
-            CancellationToken cancellationToken)
-        {
-            if (matchedEvents.Count == 0)
-            {
-                return;
-            }
-
-            var eventIds = matchedEvents
-                .Select(match => match.Event.EventId)
-                .ToList();
-
-            var favoriteEventIds = await _context.FavoriteEvents
-                .AsNoTracking()
-                .Where(favorite => favorite.VolunteerId == volunteerId)
-                .Where(favorite => eventIds.Contains(favorite.EventId))
-                .Select(favorite => favorite.EventId)
-                .ToListAsync(cancellationToken);
-
-            var favoriteEventIdsSet = favoriteEventIds.ToHashSet();
-
-            foreach (var matchedEvent in matchedEvents)
-            {
-                matchedEvent.IsFavorite =
-                    favoriteEventIdsSet.Contains(matchedEvent.Event.EventId);
-            }
-        }
-
-        private static List<VolunteerEventMatch> CreateRecommendedMatches(
-            Guid volunteerId,
-            List<Event> matchedEvents)
-        {
-            return matchedEvents
-                .Select(e => CreateRecommendedMatch(volunteerId, e))
-                .ToList();
-        }
-
-        private async Task<(VolunteerProfile Volunteer, List<Guid> TagIds)>
-            GetVolunteerMatchingInfoAsync(Guid volunteerId, CancellationToken cancellationToken)
-        {
-            var volunteer = await _context.VolunteerProfiles
-                .Include(v => v.VolunteerTags)
-                    .ThenInclude(vt => vt.Tag)
-                .FirstOrDefaultAsync(
-                    v => v.VolunteerId == volunteerId,
-                    cancellationToken);
-
-            volunteer = Guard.EnsureFound(volunteer);
-
-            var tagIds = volunteer.VolunteerTags
-                .Select(vt => vt.TagId)
-                .ToList();
-
-            if (tagIds.Count == 0)
-            {
-                throw new ArgumentException("მეჩინგისთვის ჯერ აირჩიეთ ინტერესები.");
-            }
-
-            return (volunteer, tagIds);
-        }
-
-        private async Task<List<Event>> GetCandidateEventsAsync(
-            Guid volunteerId,
-            List<Guid> volunteerTagIds,
-            CancellationToken cancellationToken)
-        {
-            return await _context.Events
-                .Include(e => e.EventTags)
-                    .ThenInclude(et => et.Tag)
-                .Where(e => e.IsActive)
-                .Where(e => e.EndDate >= DateTimeOffset.UtcNow)
-                .Where(e => e.EventTags.Any(et => volunteerTagIds.Contains(et.TagId)))
-                /* იგივე ივენთები რომ არ გაიგზავნოს რომ დაბრუნებისას მეჩების 
-                 * ცხრილში ბაზიდან უნიკალურმა ქონსთრეინთმა არ დაბაგოს ჩასმა */ 
-                .Where(e => !_context.VolunteerEventMatches
-                    .Any(m => m.VolunteerId == volunteerId && m.EventId == e.EventId))
-                .OrderByDescending(e => e.CreatedAt)
-                .Take(CandidateEventsLimit)
-                .ToListAsync(cancellationToken);
-        }
-
-        private static AiBatchRequestDto CreateAiBatchRequest(
-            VolunteerProfile volunteer,
-            List<Event> candidateEvents)
-        {
-            return new AiBatchRequestDto
-            {
-                Volunteer = new AiVolunteerInfoDto
-                {
-                    Skills = volunteer.Skills,
-                    Interests = volunteer.Interests
-                },
-
-                Events = candidateEvents
-                    .Select(CreateAiEventInfo)
-                    .ToList()
-            };
-        }
-
-        private static AiEventInfoDto CreateAiEventInfo(Event eventItem)
-        {
-            var orderedTags = eventItem.EventTags
-                .OrderBy(et => et.SortOrder)
-                .Select(et => et.Tag.Name)
-                .ToList();
-
-            return new AiEventInfoDto
-            {
-                EventId = eventItem.EventId,
-                Requirements = eventItem.Requirements,
-                MainTheme = orderedTags.FirstOrDefault() ?? string.Empty,
-                Tags = orderedTags
-            };
-        }
-
-        private static VolunteerEventMatch CreateRecommendedMatch(
-            Guid volunteerId,
-            Event eventItem)
-        {
-            return new VolunteerEventMatch
-            {
-                VolunteerId = volunteerId,
-                EventId = eventItem.EventId,
-                RequestedByRole = UserRoles.Volunteer,
-                Status = MatchStatus.Recommended
-            };
         }
     }
 }

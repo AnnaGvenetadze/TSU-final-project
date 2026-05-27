@@ -13,6 +13,7 @@ namespace VolunteerMatch.Infrastructure.Ai
             _logger = logger;
         }
 
+
         public void LogPrefilteredData(
             VolunteerProfile volunteer,
             List<Event> candidateEvents)
@@ -49,6 +50,7 @@ namespace VolunteerMatch.Infrastructure.Ai
             }
         }
 
+
         public void LogAiRequest(AiBatchRequestDto request)
         {
             _logger.LogInformation(
@@ -69,6 +71,7 @@ namespace VolunteerMatch.Infrastructure.Ai
                 );
             }
         }
+
 
         public void LogAiResponse(AiBatchResponseDto response)
         {

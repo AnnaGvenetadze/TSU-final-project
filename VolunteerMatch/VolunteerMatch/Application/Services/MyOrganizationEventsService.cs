@@ -16,17 +16,20 @@ namespace VolunteerMatch.Application.Services
         private readonly IMapper _mapper;
         private readonly IEventTagService _eventTagService;
         private readonly ITagValidator _tagValidator;
+        private readonly MatchCleanupHelper _matchCleanupHelper;
 
         public MyOrganizationEventsService(
             VolunteerMatchingDbContext context,
             IMapper mapper,
             IEventTagService eventTagService,
-            ITagValidator tagValidator)
+            ITagValidator tagValidator,
+            MatchCleanupHelper matchCleanupHelper)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _eventTagService = eventTagService ?? throw new ArgumentNullException(nameof(eventTagService));
             _tagValidator = tagValidator ?? throw new ArgumentNullException(nameof(tagValidator));
+            _matchCleanupHelper = matchCleanupHelper ?? throw new ArgumentNullException(nameof(matchCleanupHelper));
         }
 
 
@@ -150,6 +153,7 @@ namespace VolunteerMatch.Application.Services
 
             eventEntity.IsActive = false;
 
+            await _matchCleanupHelper.DeleteMatchesForEventIdAsync(eventId);
             await _context.SaveChangesAsync();
         }
     }

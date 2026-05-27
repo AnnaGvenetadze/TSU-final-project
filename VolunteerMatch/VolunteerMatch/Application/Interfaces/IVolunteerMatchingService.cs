@@ -14,5 +14,21 @@ namespace VolunteerMatch.Application.Interfaces
            int page,
            int pageSize,
            CancellationToken cancellationToken = default);
+
+        Task RequestMyMatchAsync(
+            Guid volunteerId,
+            Guid matchId,
+            CancellationToken cancellationToken = default);
+
+        Task RejectMyMatchAsync(
+            Guid volunteerId,
+            Guid matchId,
+            CancellationToken cancellationToken = default);
+
+        Task<PagedResultDto<GetMatchedEventCardDto>> GetMyMatchRequestsAsync(
+            Guid volunteerId,
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken = default);
     }
 }

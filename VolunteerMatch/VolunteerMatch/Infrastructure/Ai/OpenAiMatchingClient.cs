@@ -17,6 +17,7 @@ namespace VolunteerMatch.Infrastructure.Ai
             PropertyNameCaseInsensitive = true
         };
 
+
         public OpenAiMatchingClient(
             IConfiguration configuration,
             ILogger<OpenAiMatchingClient> logger)
@@ -34,6 +35,8 @@ namespace VolunteerMatch.Infrastructure.Ai
 
             _chatClient = new ChatClient(model: model, apiKey: apiKey);
         }
+
+
 
         public async Task<AiBatchResponseDto> GetMatchedEventIdsForVolunteerAsync(
             AiBatchRequestDto request,
@@ -59,12 +62,16 @@ namespace VolunteerMatch.Infrastructure.Ai
             return result;
         }
 
+
+
         private static void ValidateRequest(AiBatchRequestDto request)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(request.Volunteer);
             ArgumentNullException.ThrowIfNull(request.Events);
         }
+
+
 
         private async Task<string?> SendRequestAsync(
             string prompt,
@@ -108,6 +115,8 @@ namespace VolunteerMatch.Infrastructure.Ai
             }
         }
 
+
+
         private static AiBatchResponseDto DeserializeResponse(string? content)
         {
             if (string.IsNullOrWhiteSpace(content))
@@ -135,6 +144,7 @@ namespace VolunteerMatch.Infrastructure.Ai
                     "AI მეჩინგის პასუხი ვერ დაიპარსა.", ex);
             }
         }
+
 
         // AI-ის დაბრუნებული matchedEventIds ნამდვილად იყო თუ არა
         // request-ში გაგზავნილ Events სიაში.
@@ -172,6 +182,8 @@ namespace VolunteerMatch.Infrastructure.Ai
                 .ToList();
         }
 
+
+
         private static string CreatePromptForVolunteer(AiBatchRequestDto request)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -206,6 +218,7 @@ Matching rules:
 - Evaluate each event independently against the volunteer.
 - Do not compare events to each other.
 - Do not select an event just because it is better than the other provided events.
+- Do not select an event only because it is the only remaining candidate.
 - The score of an event must be based only on that event's fit with the volunteer, not on the quality of the other events in the list.
 - The score of an event should stay consistent whether the event is evaluated alone or together with other events.
 - If an event would score below 70 by itself, do not return it even if all other events are weaker.

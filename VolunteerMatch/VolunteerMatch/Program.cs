@@ -13,6 +13,7 @@ using VolunteerMatch.Domain.Models;
 using VolunteerMatch.Infrastructure.Ai;
 using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Validators;
+using VolunteerMatch.Infrastructure.Helpers;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -88,6 +89,10 @@ builder.Services.AddScoped<FavoriteEventService>();
 builder.Services.AddScoped<IAiMatchingClient, OpenAiMatchingClient>();
 builder.Services.AddScoped<IVolunteerMatchingService, MyVolunteerMatchingService>();
 builder.Services.AddScoped<IAiMatchingLogger, AiMatchingLogger>();
+builder.Services.AddScoped<MatchingQueryHelper>();
+builder.Services.AddScoped<FavoritesHelper>();
+builder.Services.AddScoped<MatchSaveHelper>();
+builder.Services.AddScoped<MatchCleanupHelper>();
 
 builder.Services.AddAuthentication(options =>
 {
