@@ -20,10 +20,38 @@ namespace VolunteerMatch.Application.Services
         }
 
 
-
         public async Task AcceptVolunteerMatchRequestAsync(
             Guid organizationId,
             Guid matchId,
+            CancellationToken cancellationToken = default)
+        {
+            await RespondToVolunteerMatchRequestAsync(
+                organizationId,
+                matchId,
+                MatchStatus.Accepted,
+                cancellationToken);
+        }
+
+
+
+        public async Task DeclineVolunteerMatchRequestAsync(
+            Guid organizationId,
+            Guid matchId,
+            CancellationToken cancellationToken = default)
+        {
+            await RespondToVolunteerMatchRequestAsync(
+                organizationId,
+                matchId,
+                MatchStatus.Rejected,
+                cancellationToken);
+        }
+
+
+
+        private async Task RespondToVolunteerMatchRequestAsync(
+            Guid organizationId,
+            Guid matchId,
+            MatchStatus newStatus,
             CancellationToken cancellationToken = default)
         {
             await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(
@@ -41,15 +69,12 @@ namespace VolunteerMatch.Application.Services
             if (match.Status != MatchStatus.Pending ||
                 match.RequestedByRole != UserRoles.Volunteer)
             {
-                throw new ArgumentException("დადასტურება შესაძლებელია მხოლოდ მოხალისისგან შემოსულ მოთხოვნაზე.");
+                throw new ArgumentException(
+                    "მოქმედება შესაძლებელია მხოლოდ მოხალისისგან შემოსულ მოთხოვნაზე.");
             }
 
-            match.Status = MatchStatus.Accepted;
+            match.Status = newStatus;
             await _context.SaveChangesAsync(cancellationToken);
-        } 
-
-
-
-
+        }
     }
 }

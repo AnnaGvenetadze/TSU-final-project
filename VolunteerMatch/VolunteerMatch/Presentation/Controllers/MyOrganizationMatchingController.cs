@@ -47,5 +47,35 @@ namespace VolunteerMatch.Presentation.Controllers
                 return StatusCode(500, new { message = "სერვერზე მოხდა შეცდომა." });
             }
         }
+
+
+
+        [HttpPost("{matchId:guid}/decline")]
+        public async Task<IActionResult> DeclineVolunteerMatchRequest(
+    Guid matchId,
+    CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _matchingService.DeclineVolunteerMatchRequestAsync(
+                    CurrentUserId,
+                    matchId,
+                    cancellationToken);
+
+                return Ok(new { message = "მოხალისის მოთხოვნა უარყოფილია." });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch
+            {
+                return StatusCode(500, new { message = "სერვერზე მოხდა შეცდომა." });
+            }
+        }
     }
 }

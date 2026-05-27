@@ -6,5 +6,10 @@
             Guid organizationId,
             Guid matchId,
             CancellationToken cancellationToken = default);
+
+        Task DeclineVolunteerMatchRequestAsync(
+            Guid organizationId,
+            Guid matchId,
+            CancellationToken cancellationToken = default);
     }
 }
