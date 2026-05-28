@@ -20,8 +20,6 @@ public partial class VolunteerMatchingDbContext : DbContext
 
     public virtual DbSet<FavoriteEvent> FavoriteEvents { get; set; }
 
-    //public virtual DbSet<MatchingSuggestion> MatchingSuggestions { get; set; }
-
     public virtual DbSet<OrganizationProfile> OrganizationProfiles { get; set; }
 
     public virtual DbSet<Tag> Tags { get; set; }
@@ -31,8 +29,6 @@ public partial class VolunteerMatchingDbContext : DbContext
     public virtual DbSet<VolunteerProfile> VolunteerProfiles { get; set; }
 
     public virtual DbSet<VolunteerTag> VolunteerTags { get; set; }
-
-    public DbSet<Notification> Notifications { get; set; }
 
     public DbSet<VolunteerEventMatch> VolunteerEventMatches { get; set; }
 
@@ -214,38 +210,6 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .HasForeignKey(d => d.VolunteerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_VolunteerTags_Volunteer");
-        });
-
-        modelBuilder.Entity<Notification>(entity =>
-        {
-            entity.ToTable("Notifications");
-
-            entity.HasKey(n => n.NotificationId);
-
-            entity.Property(n => n.NotificationId)
-                .HasDefaultValueSql("newsequentialid()");
-
-            entity.Property(n => n.Type)
-                .HasConversion<byte>()
-                .IsRequired();
-
-            entity.Property(n => n.Message)
-                .HasMaxLength(500)
-                .IsRequired();
-
-            entity.Property(n => n.CreatedAt)
-                .HasDefaultValueSql("sysdatetimeoffset()")
-                .IsRequired();
-
-            entity.HasOne(n => n.User)
-                .WithMany()
-                .HasForeignKey(n => n.UserId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasOne(n => n.VolunteerEventMatch)
-                .WithMany()
-                .HasForeignKey(n => n.VolunteerEventMatchId)
-                .OnDelete(DeleteBehavior.NoAction);
         });
 
         modelBuilder.Entity<VolunteerEventMatch>(entity =>

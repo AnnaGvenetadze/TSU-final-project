@@ -125,25 +125,6 @@ CREATE TABLE dbo.FavoriteEvents (
 );
 
 
-CREATE TABLE dbo.MatchingSuggestions (
-    SuggestionId         UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
-    VolunteerId          UNIQUEIDENTIFIER NOT NULL,
-    EventId              UNIQUEIDENTIFIER NOT NULL,
-    Initiator            NVARCHAR(20) NOT NULL,
-    MatchScore           TINYINT NOT NULL,
-    VolunteerApproved    BIT NULL,
-    OrganizationApproved BIT NULL,
-    Status               NVARCHAR(30) NOT NULL,
-    CreatedAt            DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
-    ExpiresAt            DATETIMEOFFSET NULL,
-
-    CONSTRAINT PK_MatchingSuggestions PRIMARY KEY (SuggestionId),
-    CONSTRAINT FK_MS_Volunteer
-        FOREIGN KEY (VolunteerId) REFERENCES dbo.VolunteerProfiles(VolunteerId),
-    CONSTRAINT FK_MS_Event
-        FOREIGN KEY (EventId) REFERENCES dbo.Events(EventId)
-);
-
 ----მხოლოდ ერთი კომენტი -------------- სამომავლო პერსპექტივაში ----------------------------
 --CREATE TABLE dbo.VolunteerComments (
 --    CommentId            UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
@@ -219,33 +200,33 @@ CREATE TABLE dbo.EventTags (
         FOREIGN KEY (TagId)
         REFERENCES dbo.Tags(TagId)
 ); 
+---- მვპ-სთვის აღარაა საჭირო ცალკე ცხრილად რადგან ეს ფუნქციონალი ბოლომდეა ახლა 
+---- მეჩინგ ფუნქციონალზე დამოკიდებული და ადუბლირებს მის ინფოს
+--CREATE TABLE dbo.Notifications (
+--    NotificationId UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
+--    UserId         UNIQUEIDENTIFIER NOT NULL,
+--    VolunteerEventMatchId UNIQUEIDENTIFIER NOT NULL,
+--    Type           TINYINT NOT NULL,
+--    Message        NVARCHAR(500) NOT NULL,
 
-CREATE TABLE dbo.Notifications (
-    NotificationId UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),
-    UserId         UNIQUEIDENTIFIER NOT NULL,
-    VolunteerEventMatchId UNIQUEIDENTIFIER NOT NULL,
-    Type           TINYINT NOT NULL,
-    Message        NVARCHAR(500) NOT NULL,
+--    CreatedAt      DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
 
-    CreatedAt      DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),
+--    CONSTRAINT PK_Notifications PRIMARY KEY (NotificationId),
 
-    CONSTRAINT PK_Notifications PRIMARY KEY (NotificationId),
+--    CONSTRAINT FK_Notifications_Users
+--        FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId),
 
-    CONSTRAINT FK_Notifications_Users
-        FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId),
+--    CONSTRAINT FK_Notifications_VolunteerEventMatches
+--        FOREIGN KEY (VolunteerEventMatchId)
+--        REFERENCES dbo.VolunteerEventMatches(VolunteerEventMatchId),
 
-    CONSTRAINT FK_Notifications_VolunteerEventMatches
-        FOREIGN KEY (VolunteerEventMatchId)
-        REFERENCES dbo.VolunteerEventMatches(VolunteerEventMatchId),
+--    CONSTRAINT CK_Notifications_Type CHECK ([Type] IN (0, 1, 2, 3, 4))
+--);
 
-    CONSTRAINT CK_Notifications_Type CHECK ([Type] IN (0, 1, 2, 3, 4))
-);
-
-CREATE INDEX IX_Notifications_UserId_CreatedAt
-ON dbo.Notifications(UserId, CreatedAt DESC); 
+--CREATE INDEX IX_Notifications_UserId_CreatedAt
+--ON dbo.Notifications(UserId, CreatedAt DESC); 
 
 
---------- ბაზიდან წაშალე ზედმეტი ველი !!! ---------------------
 create table dbo.VolunteerEventMatches
 (
     VolunteerEventMatchId uniqueidentifier not null default newsequentialid(),

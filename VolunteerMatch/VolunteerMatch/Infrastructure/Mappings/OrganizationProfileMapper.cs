@@ -4,9 +4,9 @@ using VolunteerMatch.Domain.Models;
 
 namespace VolunteerMatch.Infrastructure.Mappings
 {
-    public class OrganizationProfileMapping : Profile
+    public class OrganizationProfileMapper : Profile
     {
-        public OrganizationProfileMapping()
+        public OrganizationProfileMapper()
         {
             ValueTransformers.Add<string?>(
                 s => string.IsNullOrWhiteSpace(s) ? null : s.Trim()

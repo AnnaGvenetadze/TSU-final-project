@@ -5,9 +5,9 @@ using VolunteerMatch.Domain.Models;
 
 namespace VolunteerMatch.Infrastructure.Mappings
 {
-    public class EventMappingProfile : Profile
+    public class EventMapper : Profile
     {
-        public EventMappingProfile()
+        public EventMapper()
         {
             ValueTransformers.Add<string?>(
                 s => string.IsNullOrWhiteSpace(s) ? null : s.Trim()
@@ -77,12 +77,6 @@ namespace VolunteerMatch.Infrastructure.Mappings
                 ).ForMember(dest => dest.IsFavorite,
                     opt => opt.Ignore()
                 );
-
-            // TODO: ნოთიფიკაციების მაპერი
-
-            //CreateMap<Notification, GetNotificationDto>()
-            //    .ForMember(dest => dest.Event,
-            //        opt => opt.MapFrom(src => src.Event));
         }
     }
 }

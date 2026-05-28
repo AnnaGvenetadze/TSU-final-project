@@ -36,7 +36,5 @@ public partial class VolunteerProfile
 
     public virtual ICollection<FavoriteEvent> FavoriteEvents { get; set; } = new List<FavoriteEvent>();
 
-    //public virtual ICollection<MatchingSuggestion> MatchingSuggestions { get; set; } = new List<MatchingSuggestion>();
-
     public virtual ICollection<VolunteerTag> VolunteerTags { get; set; } = new List<VolunteerTag>();
 }

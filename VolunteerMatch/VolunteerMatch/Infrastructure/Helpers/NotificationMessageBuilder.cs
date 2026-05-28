@@ -1,17 +1,30 @@
-﻿namespace VolunteerMatch.Infrastructure.Helpers
+﻿using VolunteerMatch.Domain.Constants;
+using VolunteerMatch.Domain.Models;
+
+namespace VolunteerMatch.Infrastructure.Helpers
 {
-    public class NotificationMessageBuilder
+    public static class NotificationMessageBuilder
     {
-        public static string MatchProposedByOrganization(string organizationName, string eventTitle)
-            => $"{organizationName}-მა გამოგიგზავნა შეთავაზება \"{eventTitle}\" ღონისძიებაზე";
+        public static string CreateOrganizationNotificationMessage(
+            VolunteerEventMatch match)
+        {
+            var volunteerName = $"{match.Volunteer.FirstName} {match.Volunteer.LastName}";
+            var eventTitle = match.Event.Title;
 
-        public static string MatchProposedByVolunteer(string volunteerName, string eventTitle)
-            => $"{volunteerName}-მა გამოგიგზავნა შეთავაზება \"{eventTitle}\" ღონისძიებაზე";
+            return (match.Status, match.RequestedByRole) switch
+            {
+                (MatchStatus.Pending, UserRoles.Volunteer) =>
+$"{volunteerName}-მა გამოგიგზავნათ დამეჩვის მოთხოვნა \"{eventTitle}\" ღონისძიებაზე.",
 
-        public static string MatchAcceptedByOrganization(string organizationName, string eventTitle)
-            => $"{organizationName}-მა დაადასტურა მეჩი \"{eventTitle}\" ღონისძიებაზე";
+                (MatchStatus.Accepted, UserRoles.Volunteer) =>
+$"თქვენ დაადასტურეთ {volunteerName}-ის დამეჩვის მოთხოვნა \"{eventTitle}\" ღონისძიებაზე.",
 
-        public static string MatchAcceptedByVolunteer(string volunteerName, string eventTitle)
-            => $"{volunteerName}-მა დაადასტურა მეჩი \"{eventTitle}\" ღონისძიებაზე";
+                (MatchStatus.Accepted, UserRoles.Organization) =>
+$"{volunteerName}-მა დაადასტურა თქვენი დამეჩვის შეთავაზება \"{eventTitle}\" ღონისძიებაზე.",
+
+                _ => 
+"მეჩის სტატუსი განახლებულია."
+            };
+        }
     }
 }
