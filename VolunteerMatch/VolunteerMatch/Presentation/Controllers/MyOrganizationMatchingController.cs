@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VolunteerMatch.Application.Exceptions;
 using VolunteerMatch.Application.Interfaces;
 using VolunteerMatch.Domain.Constants;
 
@@ -52,8 +53,8 @@ namespace VolunteerMatch.Presentation.Controllers
 
         [HttpPost("{matchId:guid}/decline")]
         public async Task<IActionResult> DeclineVolunteerMatchRequest(
-    Guid matchId,
-    CancellationToken cancellationToken)
+            Guid matchId,
+            CancellationToken cancellationToken)
         {
             try
             {
@@ -63,6 +64,137 @@ namespace VolunteerMatch.Presentation.Controllers
                     cancellationToken);
 
                 return Ok(new { message = "მოხალისის მოთხოვნა უარყოფილია." });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch
+            {
+                return StatusCode(500, new { message = "სერვერზე მოხდა შეცდომა." });
+            }
+        }
+
+
+        [HttpPost("generate")]
+        public async Task<IActionResult> GenerateMyMatches(
+                   Guid eventId,
+                   CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _matchingService.GenerateMyMatchesAsync(
+                    CurrentUserId,
+                    eventId,
+                    cancellationToken);
+
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (AiMatchingException ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+            catch
+            {
+                return StatusCode(500, new { message = "სერვერზე მოხდა შეცდომა." });
+            }
+        }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetMyMatches(
+            Guid eventId,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 6,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var result = await _matchingService.GetMyMatchesAsync(
+                    CurrentUserId,
+                    eventId,
+                    page,
+                    pageSize,
+                    cancellationToken);
+
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch
+            {
+                return StatusCode(500, new { message = "სერვერზე მოხდა შეცდომა." });
+            }
+        }
+
+
+
+        [HttpPost("{matchId:guid}/request")]
+        public async Task<IActionResult> RequestMyMatch(
+            Guid eventId,
+            Guid matchId,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _matchingService.RequestMyMatchAsync(
+                    CurrentUserId,
+                    eventId,
+                    matchId,
+                    cancellationToken);
+
+                return Ok(new { message = "მოხალისეს მოთხოვნა წარმატებით გაეგზავნა." });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch
+            {
+                return StatusCode(500, new { message = "სერვერზე მოხდა შეცდომა." });
+            }
+        }
+
+
+
+        [HttpPost("{matchId:guid}/reject")]
+        public async Task<IActionResult> RejectMyMatch(
+            Guid eventId,
+            Guid matchId,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _matchingService.RejectMyMatchAsync(
+                    CurrentUserId,
+                    eventId,
+                    matchId,
+                    cancellationToken);
+
+                return Ok(new { message = "რეკომენდებული მოხალისე უარყოფილია." });
             }
             catch (ArgumentException ex)
             {

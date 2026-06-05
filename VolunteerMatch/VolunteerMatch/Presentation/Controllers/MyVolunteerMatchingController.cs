@@ -141,35 +141,35 @@ namespace VolunteerMatch.Presentation.Controllers
         }
 
 
-        /* თუ მოხალისის გაგზავნილი მეჩ რიქუესთების ფრონტზე ასახვა მოვისურვეთ */
-        [HttpGet("requests")]
-        public async Task<IActionResult> GetMySentMatchRequests(
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 6,
-            CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var result = await _matchingService.GetMyMatchRequestsAsync(
-                    CurrentUserId,
-                    page,
-                    pageSize,
-                    cancellationToken);
+        ///* თუ მოხალისის გაგზავნილი მეჩ რიქუესთების ფრონტზე ასახვა მოვისურვეთ */
+        //[HttpGet("requests")]
+        //public async Task<IActionResult> GetMySentMatchRequests(
+        //    [FromQuery] int page = 1,
+        //    [FromQuery] int pageSize = 6,
+        //    CancellationToken cancellationToken = default)
+        //{
+        //    try
+        //    {
+        //        var result = await _matchingService.GetMyMatchRequestsAsync(
+        //            CurrentUserId,
+        //            page,
+        //            pageSize,
+        //            cancellationToken);
 
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch
-            {
-                return StatusCode(500, new { message = "სერვერზე მოხდა შეცდომა." });
-            }
-        }
+        //        return Ok(result);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //    catch (KeyNotFoundException ex)
+        //    {
+        //        return NotFound(new { message = ex.Message });
+        //    }
+        //    catch
+        //    {
+        //        return StatusCode(500, new { message = "სერვერზე მოხდა შეცდომა." });
+        //    }
+        //}
     }
 }

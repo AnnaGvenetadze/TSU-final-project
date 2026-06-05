@@ -77,6 +77,11 @@ namespace VolunteerMatch.Infrastructure.Mappings
                 ).ForMember(dest => dest.IsFavorite,
                     opt => opt.Ignore()
                 );
+
+            CreateMap<VolunteerEventMatch, GetMatchedVolunteerCardDto>()
+                .ForMember(dest => dest.Volunteer,
+                    opt => opt.MapFrom(src => src.Volunteer)
+                );
         }
     }
 }
