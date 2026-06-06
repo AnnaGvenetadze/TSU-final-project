@@ -141,6 +141,80 @@ namespace VolunteerMatch.Presentation.Controllers
         }
 
 
+
+        [HttpPost("{matchId:guid}/accept")]
+        public async Task<IActionResult> AcceptOrganizationMatchRequest(
+            Guid matchId,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await _matchingService.AcceptOrganizationMatchRequestAsync(
+                    CurrentUserId,
+                    matchId,
+                    cancellationToken);
+
+                return Ok(new
+                {
+                    message = "ორგანიზაციის შეთავაზება წარმატებით დადასტურდა."
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "სერვერზე მოხდა შეცდომა.",
+                    //error = ex.Message,
+                    //innerError = ex.InnerException?.Message
+                });
+            }
+        }
+
+
+
+        [HttpPost("{matchId:guid}/decline")]
+        public async Task<IActionResult> DeclineOrganizationMatchRequest(
+            Guid matchId,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await _matchingService.DeclineOrganizationMatchRequestAsync(
+                    CurrentUserId,
+                    matchId,
+                    cancellationToken);
+
+                return Ok(new
+                {
+                    message = "ორგანიზაციის შეთავაზება უარყოფილია."
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "სერვერზე მოხდა შეცდომა.",
+                    //error = ex.Message,
+                    //innerError = ex.InnerException?.Message
+                });
+            }
+        }
         ///* თუ მოხალისის გაგზავნილი მეჩ რიქუესთების ფრონტზე ასახვა მოვისურვეთ */
         //[HttpGet("requests")]
         //public async Task<IActionResult> GetMySentMatchRequests(

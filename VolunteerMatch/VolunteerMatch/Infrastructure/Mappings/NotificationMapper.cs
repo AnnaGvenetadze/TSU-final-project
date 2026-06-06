@@ -23,6 +23,26 @@ namespace VolunteerMatch.Infrastructure.Mappings
                 .ForMember(
                     dest => dest.Event,
                     opt => opt.MapFrom(src => src.Event));
+            
+
+
+            CreateMap<VolunteerEventMatch, GetMyVolunteerNotificationDto>()
+                .ForMember(
+                    dest => dest.OrganizationId,
+                    opt => opt.MapFrom(src =>
+                        src.Event.OrganizationId))
+                .ForMember(
+                    dest => dest.OrganizationName,
+                    opt => opt.MapFrom(src =>
+                        src.Event.Organization.OrganizationName))
+                .ForMember(
+                    dest => dest.Message,
+                    opt => opt.MapFrom(src =>
+                        NotificationMessageBuilder
+                            .CreateVolunteerNotificationMessage(src)))
+                .ForMember(
+                    dest => dest.Event,
+                    opt => opt.MapFrom(src => src.Event));
         }
     }
 }

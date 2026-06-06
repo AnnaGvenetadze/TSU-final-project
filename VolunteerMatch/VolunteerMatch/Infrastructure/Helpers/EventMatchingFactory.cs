@@ -58,7 +58,9 @@ namespace VolunteerMatch.Infrastructure.Helpers
             {
                 VolunteerId = volunteer.VolunteerId,
                 Skills = volunteer.Skills,
-                Interests = volunteer.Interests
+                Interests = volunteer.Interests,
+                Profession = volunteer.Profession,
+                Experience = volunteer.Experience
             };
         }
 

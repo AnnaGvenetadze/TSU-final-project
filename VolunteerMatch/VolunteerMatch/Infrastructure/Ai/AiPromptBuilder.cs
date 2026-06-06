@@ -135,7 +135,8 @@ Context:
 - These volunteers were already pre-filtered by shared event/volunteer tags.
 - Shared tags only mean the volunteer is a candidate.
 - Shared tags do not automatically mean the volunteer is a strong match.
-- You must still evaluate whether the volunteer's skills fit the event requirements.
+- You must still evaluate whether the volunteer's skills, profession, and experience fit the event requirements.
+- Each volunteer contains only matching-relevant fields: volunteerId, skills, interests, profession, and experience.
 
 Matching rules:
 - Internally score each volunteer from 0 to 100.
@@ -155,34 +156,41 @@ Matching rules:
 
 Scoring priorities:
 - Event requirements and volunteer skills are the most important factor.
+- Volunteer profession and experience are strong supporting factors when they are relevant to the event requirements.
 - Volunteer interests and event tags are secondary.
-- A strong match usually requires at least one clear skill match between volunteer skills and event requirements.
-- Prefer volunteers whose skills explicitly match the event requirements, a close synonym, or a practical task clearly required by the event.
-- If requirements and skills conflict, requirements must win over tags and interests.
-- Shared tags can increase confidence only after skill fit is confirmed.
-- Shared tags must never compensate for missing required skills.
+- A strong match usually requires at least one clear skill match between volunteer skills and event requirements, or strong evidence from profession/experience that the volunteer can satisfy the requirement.
+- Prefer volunteers whose skills, profession, or experience explicitly match the event requirements, a close synonym, or a practical task clearly required by the event.
+- If requirements conflict with skills, profession, experience, interests, or tags, requirements must win.
+- Shared tags can increase confidence only after skill, profession, or experience fit is confirmed.
+- Shared tags must never compensate for missing required skills, relevant profession, or relevant experience.
 - Generic skills such as teamwork, communication, responsibility, motivation, or willingness to help are supportive only.
 - A generic skill alone must not make a volunteer a strong match.
 - For a strong match, the volunteer should satisfy the event's main required skill area, not only generic supporting skills.
 
-Skill matching guidance:
+Skill, profession, and experience matching guidance:
 - Treat a skill as matching a requirement when the requirement asks for the same skill, a close synonym, or a practical task that clearly uses that skill.
 - Do not require exact word-for-word equality. Georgian wording may vary.
 - If a volunteer skill is a general ability and the event requirement describes a practical task that clearly needs that ability, it can count as a match.
-- If the event requires a specific professional skill, tool, certification, or domain expertise, the volunteer must explicitly have that skill or a very close equivalent.
+- Treat profession as supporting evidence only when it is clearly related to the event requirements.
+- Treat experience as strong supporting evidence only when it describes work, tasks, or responsibilities relevant to the event requirements.
+- If the event requires a specific professional skill, tool, certification, or domain expertise, the volunteer must explicitly have that skill or a very close equivalent in skills, profession, or experience.
 - Do not infer specialized skills only from interests or tags.
+- Do not assume that a related profession automatically means the volunteer has every specialized skill in that profession.
+- Do not assume that general experience automatically satisfies specific event requirements.
 
 Rejection rules:
 - Do not return a volunteer only because their tags or interests match the event.
-- If the event requires specialized skills that are not present in the volunteer's skills, do not return that volunteer.
-- If the event requirements ask for specific professional, academic, technical, medical, legal, design, research, analytical, statistical, or tool-based skills, the volunteer must explicitly have those skills or a very close equivalent in Volunteer Skills.
+- Do not return a volunteer only because their profession sounds generally related; profession must support the actual event requirements.
+- Do not return a volunteer only because they have general experience; experience must be relevant to the actual event requirements.
+- If the event requires specialized skills that are not present in the volunteer's skills, profession, or experience, do not return that volunteer.
+- If the event requirements ask for specific professional, academic, technical, medical, legal, design, research, analytical, statistical, or tool-based skills, the volunteer must explicitly have those skills or a very close equivalent in Volunteer Skills, Profession, or Experience.
 - Do not infer specialized skills from interests, tags, main theme, or general motivation.
-- If the event requires research methodology, statistics, academic writing, data analysis, design tools, programming, medical knowledge, legal knowledge, or other specialized expertise, reject the volunteer unless those skills are explicitly present in Volunteer Skills.
+- If the event requires research methodology, statistics, academic writing, data analysis, design tools, programming, medical knowledge, legal knowledge, or other specialized expertise, reject the volunteer unless those skills are explicitly present in Volunteer Skills, Profession, or Experience.
 - If the requirements are vague, generic, or only say that any help/free time is enough, do not treat any volunteer as a strong match only because they are generally willing to help.
-- If the requirements do not clearly need the volunteer's skills, do not return the volunteer.
-- If the event's main requirement is event organization, registration, participant coordination, technical support, design, research, programming, legal work, or another specific work area, the volunteer must explicitly have that specific skill or a very close equivalent.
+- If the requirements do not clearly need the volunteer's skills, profession, or experience, do not return the volunteer.
+- If the event's main requirement is event organization, registration, participant coordination, technical support, design, research, programming, legal work, or another specific work area, the volunteer must explicitly have that specific skill or a very close equivalent in skills, profession, or experience.
 - Do not return a volunteer where the only matching skill is generic teamwork or communication.
-- Do not invent skills, interests, requirements, tags, or volunteer IDs.
+- Do not invent skills, interests, profession, experience, requirements, tags, or volunteer IDs.
 
 Volunteer ID rules:
 - Return only exact volunteerId values from the Volunteers JSON.

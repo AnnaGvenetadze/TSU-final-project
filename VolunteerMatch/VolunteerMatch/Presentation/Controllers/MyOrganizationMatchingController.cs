@@ -150,7 +150,6 @@ namespace VolunteerMatch.Presentation.Controllers
 
         [HttpPost("{matchId:guid}/request")]
         public async Task<IActionResult> RequestMyMatch(
-            Guid eventId,
             Guid matchId,
             CancellationToken cancellationToken)
         {
@@ -158,7 +157,6 @@ namespace VolunteerMatch.Presentation.Controllers
             {
                 await _matchingService.RequestMyMatchAsync(
                     CurrentUserId,
-                    eventId,
                     matchId,
                     cancellationToken);
 
@@ -182,15 +180,13 @@ namespace VolunteerMatch.Presentation.Controllers
 
         [HttpPost("{matchId:guid}/reject")]
         public async Task<IActionResult> RejectMyMatch(
-            Guid eventId,
-            Guid matchId,
-            CancellationToken cancellationToken)
+           Guid matchId,
+           CancellationToken cancellationToken)
         {
             try
             {
                 await _matchingService.RejectMyMatchAsync(
                     CurrentUserId,
-                    eventId,
                     matchId,
                     cancellationToken);
 

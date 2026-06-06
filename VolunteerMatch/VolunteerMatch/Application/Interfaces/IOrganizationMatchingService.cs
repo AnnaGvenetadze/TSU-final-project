@@ -28,13 +28,11 @@ namespace VolunteerMatch.Application.Interfaces
 
         Task RequestMyMatchAsync(
             Guid organizationId,
-            Guid eventId,
             Guid matchId,
             CancellationToken cancellationToken = default);
 
         Task RejectMyMatchAsync(
             Guid organizationId,
-            Guid eventId,
             Guid matchId,
             CancellationToken cancellationToken = default);
 

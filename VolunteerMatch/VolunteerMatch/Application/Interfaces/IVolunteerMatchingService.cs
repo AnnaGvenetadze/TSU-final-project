@@ -5,6 +5,16 @@ namespace VolunteerMatch.Application.Interfaces
 {
     public interface IVolunteerMatchingService
     {
+        Task AcceptOrganizationMatchRequestAsync(
+            Guid volunteerId,
+            Guid matchId,
+            CancellationToken cancellationToken = default);
+
+        Task DeclineOrganizationMatchRequestAsync(
+            Guid volunteerId,
+            Guid matchId,
+            CancellationToken cancellationToken = default);
+
         Task<CreateMatchesResultDto> GenerateMyMatchesAsync(
             Guid currentUserId,
             CancellationToken cancellationToken = default);

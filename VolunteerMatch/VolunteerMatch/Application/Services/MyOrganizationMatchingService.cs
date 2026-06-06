@@ -1,23 +1,248 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using VolunteerMatch.Application.Dtos;
 using VolunteerMatch.Application.Interfaces;
 using VolunteerMatch.Domain.Constants;
+using VolunteerMatch.Domain.Models;
 using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Helpers;
+using VolunteerMatch.Infrastructure.Validators;
 
 namespace VolunteerMatch.Application.Services
 {
     public class MyOrganizationMatchingService : IOrganizationMatchingService
     {
         private readonly VolunteerMatchingDbContext _context;
+        private readonly IAiMatchingClient _aiMatchingClient;
+        private readonly IMapper _mapper;
+        private readonly EventMatchingQueryHelper _eventMatchingQueryHelper;
+        private readonly MatchSaveHelper _matchSaveHelper;
         private readonly MatchCleanupHelper _matchCleanupHelper;
 
         public MyOrganizationMatchingService(
             VolunteerMatchingDbContext context,
+            IAiMatchingClient aiMatchingClient,
+            IMapper mapper,
+            EventMatchingQueryHelper eventMatchingQueryHelper,
+            MatchSaveHelper matchSaveHelper,
             MatchCleanupHelper matchCleanupHelper)
         {
             _context = context;
+            _aiMatchingClient = aiMatchingClient;
+            _mapper = mapper;
+            _eventMatchingQueryHelper = eventMatchingQueryHelper;
+            _matchSaveHelper = matchSaveHelper;
             _matchCleanupHelper = matchCleanupHelper;
         }
+
+
+        public async Task<CreateMatchesResultDto> GenerateMyMatchesAsync(
+           Guid organizationId,
+           Guid eventId,
+           CancellationToken cancellationToken = default)
+        {
+            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(
+                cancellationToken);
+
+            var (eventItem, eventTagIds) =
+                await _eventMatchingQueryHelper.GetEventMatchingInfoAsync(
+                    organizationId,
+                    eventId,
+                    cancellationToken);
+
+            var candidateVolunteers =
+                await _eventMatchingQueryHelper.GetCandidateVolunteersForEventAsync(
+                    eventId,
+                    eventTagIds,
+                    cancellationToken);
+
+            if (candidateVolunteers.Count == 0)
+            {
+                return new CreateMatchesResultDto
+                {
+                    CreatedMatchesCount = 0,
+                    Message = "ამ ეტაპზე ამ ღონისძიებისთვის შესაბამისი ახალი მოხალისეები ვერ მოიძებნა."
+                };
+            }
+
+            var matchedVolunteers = await GetAiMatchedVolunteersAsync(
+                eventItem,
+                candidateVolunteers,
+                cancellationToken);
+
+            if (matchedVolunteers.Count == 0)
+            {
+                return new CreateMatchesResultDto
+                {
+                    CreatedMatchesCount = 0,
+                    Message = "ხელოვნურმა ინტელექტმა შესაბამისი მოხალისეები ვერ შეარჩია."
+                };
+            }
+
+            var matches = EventMatchingFactory.CreateRecommendedMatches(
+                eventId,
+                matchedVolunteers);
+
+            var savedMatches = await _matchSaveHelper.SaveOnlyNewMatchesAsync(
+                matches,
+                cancellationToken);
+
+            if (savedMatches.Count == 0)
+            {
+                return new CreateMatchesResultDto
+                {
+                    CreatedMatchesCount = 0,
+                    Message = "ახალი რეკომენდებული მოხალისეები ვერ მოიძებნა."
+                };
+            }
+
+            return new CreateMatchesResultDto
+            {
+                CreatedMatchesCount = savedMatches.Count,
+                Message = $"{savedMatches.Count} რეკომენდებული მოხალისე წარმატებით მოიძებნა."
+            };
+        }
+
+
+
+        public async Task<PagedResultDto<GetMatchedVolunteerCardDto>> 
+            GetMyMatchesAsync(
+                 Guid organizationId,
+                 Guid eventId,
+                 int page,
+                 int pageSize,
+                 CancellationToken cancellationToken = default)
+        {
+            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(
+                cancellationToken);
+
+            PaginationValidator.Validate(page, pageSize);
+
+            await _eventMatchingQueryHelper.GetEventMatchingInfoAsync(
+                organizationId,
+                eventId,
+                cancellationToken);
+
+            var query = _eventMatchingQueryHelper.GetRecommendedVolunteerMatchesQuery(
+                organizationId,
+                eventId);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var matches = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            var items = _mapper.Map<List<GetMatchedVolunteerCardDto>>(matches);
+
+            return PaginationHelper.CreatePagedResult(
+                items,
+                page,
+                pageSize,
+                totalCount);
+        }
+
+
+
+        public async Task RequestMyMatchAsync(
+            Guid organizationId,
+            Guid matchId,
+            CancellationToken cancellationToken = default)
+        {
+            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(
+                cancellationToken);
+
+            var match = await _context.VolunteerEventMatches
+                .Include(match => match.Event)
+                .FirstOrDefaultAsync(
+                    match =>
+                        match.VolunteerEventMatchId == matchId &&
+                        match.Event.OrganizationId == organizationId,
+                    cancellationToken);
+
+            match = Guard.EnsureFound(match);
+            if (match.Status != MatchStatus.Recommended)
+            {
+                throw new ArgumentException(
+                    "მოთხოვნის გაგზავნა შესაძლებელია მხოლოდ რეკომენდებულ მოხალისეზე.");
+            }
+
+            match.Status = MatchStatus.Pending;
+            match.RequestedByRole = UserRoles.Organization;
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+
+
+        public async Task RejectMyMatchAsync(
+            Guid organizationId,
+            Guid matchId,
+            CancellationToken cancellationToken = default)
+        {
+            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(
+                cancellationToken);
+
+            var match = await _context.VolunteerEventMatches
+                .Include(match => match.Event)
+                .FirstOrDefaultAsync(
+                    match =>
+                        match.VolunteerEventMatchId == matchId &&
+                        match.Event.OrganizationId == organizationId,
+                    cancellationToken);
+
+            match = Guard.EnsureFound(match);
+            if (match.Status != MatchStatus.Recommended)
+            {
+                throw new ArgumentException(
+                    "უარყოფა შესაძლებელია მხოლოდ რეკომენდებული მოხალისის.");
+            }
+
+            match.Status = MatchStatus.Rejected;
+            match.RequestedByRole = UserRoles.Organization;
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+
+
+        public async Task<PagedResultDto<GetMatchedVolunteerCardDto>>
+            GetMyMatchRequestsAsync(
+                Guid organizationId,
+                Guid eventId,
+                int page,
+                int pageSize,
+                CancellationToken cancellationToken = default)
+        {
+            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(
+                cancellationToken);
+
+            PaginationValidator.Validate(page, pageSize);
+
+            await _eventMatchingQueryHelper.GetEventMatchingInfoAsync(
+                organizationId,
+                eventId,
+                cancellationToken);
+
+            var query = _eventMatchingQueryHelper.GetMyMatchRequestsQuery(
+                organizationId,
+                eventId);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var matches = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            var items = _mapper.Map<List<GetMatchedVolunteerCardDto>>(matches);
+
+            return PaginationHelper.CreatePagedResult(
+                items,
+                page,
+                pageSize,
+                totalCount);
+        }
+
 
 
         public async Task AcceptVolunteerMatchRequestAsync(
@@ -44,6 +269,30 @@ namespace VolunteerMatch.Application.Services
                 matchId,
                 MatchStatus.Rejected,
                 cancellationToken);
+        }
+
+
+
+        private async Task<List<VolunteerProfile>> GetAiMatchedVolunteersAsync(
+            Event eventItem,
+            List<VolunteerProfile> candidateVolunteers,
+            CancellationToken cancellationToken)
+        {
+            var aiRequest = EventMatchingFactory.CreateAiBatchRequest(
+                eventItem,
+                candidateVolunteers);
+
+            var aiResponse =
+                await _aiMatchingClient.GetMatchedVolunteerIdsForEventAsync(
+                    aiRequest,
+                    cancellationToken);
+
+            var matchedVolunteerIds = aiResponse.MatchedVolunteerIds
+                .ToHashSet();
+
+            return candidateVolunteers
+                .Where(volunteer => matchedVolunteerIds.Contains(volunteer.VolunteerId))
+                .ToList();
         }
 
 
@@ -76,9 +325,5 @@ namespace VolunteerMatch.Application.Services
             match.Status = newStatus;
             await _context.SaveChangesAsync(cancellationToken);
         }
-
-
-
-
     }
 }

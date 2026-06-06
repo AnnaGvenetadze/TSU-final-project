@@ -284,5 +284,65 @@ namespace VolunteerMatch.Application.Services
                 .Where(eventItem => matchedEventIds.Contains(eventItem.EventId))
                 .ToList();
         }
+
+
+
+        public async Task AcceptOrganizationMatchRequestAsync(
+            Guid volunteerId,
+            Guid matchId,
+            CancellationToken cancellationToken = default)
+        {
+            await RespondToOrganizationMatchRequestAsync(
+                volunteerId,
+                matchId,
+                MatchStatus.Accepted,
+                cancellationToken);
+        }
+
+
+
+        public async Task DeclineOrganizationMatchRequestAsync(
+            Guid volunteerId,
+            Guid matchId,
+            CancellationToken cancellationToken = default)
+        {
+            await RespondToOrganizationMatchRequestAsync(
+                volunteerId,
+                matchId,
+                MatchStatus.Rejected,
+                cancellationToken);
+        }
+
+
+
+        private async Task RespondToOrganizationMatchRequestAsync(
+            Guid volunteerId,
+            Guid matchId,
+            MatchStatus newStatus,
+            CancellationToken cancellationToken = default)
+        {
+            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(
+                cancellationToken);
+
+            var match = await _context.VolunteerEventMatches
+                .Include(match => match.Event)
+                .FirstOrDefaultAsync(
+                    match =>
+                        match.VolunteerEventMatchId == matchId &&
+                        match.VolunteerId == volunteerId,
+                    cancellationToken);
+
+            match = Guard.EnsureFound(match);
+
+            if (match.Status != MatchStatus.Pending ||
+                match.RequestedByRole != UserRoles.Organization)
+            {
+                throw new ArgumentException(
+                    "მოქმედება შესაძლებელია მხოლოდ ორგანიზაციისგან შემოსულ შეთავაზებაზე.");
+            }
+
+            match.Status = newStatus;
+            await _context.SaveChangesAsync(cancellationToken);
+        }
     }
 }
