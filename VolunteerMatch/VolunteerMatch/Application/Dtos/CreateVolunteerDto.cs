@@ -43,16 +43,22 @@ namespace VolunteerMatch.Application.Dtos
         [MaxLength(200, ErrorMessage = "ენების ველი ძალიან გრძელია.")]
         public string Languages { get; set; } = null!;
 
-        [Required(ErrorMessage = "უნარი სავალდებულოა.")]
-        [MaxLength(1000, ErrorMessage = "უნარების ველი ძალიან გრძელია.")]
-        public string Skills { get; set; } = null!;
+        //[Required(ErrorMessage = "უნარი სავალდებულოა.")]
+        //[MaxLength(1000, ErrorMessage = "უნარების ველი ძალიან გრძელია.")]
+        //public string Skills { get; set; } = null!;
 
-        [Required(ErrorMessage = "ინტერესი სავალდებულოა.")]
-        [MaxLength(1000, ErrorMessage = "ინტერესების ველი ძალიან გრძელია.")]
-        public string Interests { get; set; } = null!;
+        //[Required(ErrorMessage = "ინტერესი სავალდებულოა.")]
+        //[MaxLength(1000, ErrorMessage = "ინტერესების ველი ძალიან გრძელია.")]
+        //public string Interests { get; set; } = null!;
 
         [Required(ErrorMessage = "თემატიკა სავალდებულოა.")]
         public List<Guid> SelectedTagIds { get; set; } = new();
+
+        [Required(ErrorMessage = "უნარები სავალდებულოა.")]
+        public required List<Guid> SelectedSkillIds { get; set; }
+
+        [Required(ErrorMessage = "ინტერესები სავალდებულოა.")]
+        public required List<Guid> SelectedInterestIds { get; set; }
     }
 }
 

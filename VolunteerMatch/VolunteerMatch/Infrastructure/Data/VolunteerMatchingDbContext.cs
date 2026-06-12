@@ -32,6 +32,13 @@ public partial class VolunteerMatchingDbContext : DbContext
 
     public DbSet<VolunteerEventMatch> VolunteerEventMatches { get; set; }
 
+    public DbSet<Skill> Skills { get; set; }
+
+    public DbSet<Interest> Interests { get; set; }
+
+    public DbSet<VolunteerSkill> VolunteerSkills { get; set; }
+
+    public DbSet<VolunteerInterest> VolunteerInterests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {// აქ დავამატე ველები და შეზღუდვები
@@ -243,6 +250,61 @@ public partial class VolunteerMatchingDbContext : DbContext
 
             entity.HasIndex(m => new { m.VolunteerId, m.EventId })
                 .IsUnique();
+        });
+        modelBuilder.Entity<Skill>(entity =>
+        {
+            entity.HasKey(skill => skill.SkillId);
+
+            entity.Property(skill => skill.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<Interest>(entity =>
+        {
+            entity.HasKey(interest => interest.InterestId);
+
+            entity.Property(interest => interest.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<VolunteerSkill>(entity =>
+        {
+            entity.HasKey(volunteerSkill => new
+            {
+                volunteerSkill.VolunteerId,
+                volunteerSkill.SkillId
+            });
+
+            entity.HasOne(volunteerSkill => volunteerSkill.Volunteer)
+                .WithMany(volunteer => volunteer.VolunteerSkills)
+                .HasForeignKey(volunteerSkill => volunteerSkill.VolunteerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(volunteerSkill => volunteerSkill.Skill)
+                .WithMany(skill => skill.VolunteerSkills)
+                .HasForeignKey(volunteerSkill => volunteerSkill.SkillId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<VolunteerInterest>(entity =>
+        {
+            entity.HasKey(volunteerInterest => new
+            {
+                volunteerInterest.VolunteerId,
+                volunteerInterest.InterestId
+            });
+
+            entity.HasOne(volunteerInterest => volunteerInterest.Volunteer)
+                .WithMany(volunteer => volunteer.VolunteerInterests)
+                .HasForeignKey(volunteerInterest => volunteerInterest.VolunteerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(volunteerInterest => volunteerInterest.Interest)
+                .WithMany(interest => interest.VolunteerInterests)
+                .HasForeignKey(volunteerInterest => volunteerInterest.InterestId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -95,7 +95,8 @@ builder.Services.AddScoped<MatchCleanupHelper>();
 builder.Services.AddScoped<IOrganizationMatchingService, MyOrganizationMatchingService>();
 builder.Services.AddScoped<EventMatchingQueryHelper>();
 builder.Services.AddScoped<IVolunteerNotificationService, MyVolunteerNotificationService>();
-
+builder.Services.AddScoped<IVolunteerProfileOptionsService, VolunteerProfileOptionsService>();
+builder.Services.AddScoped<IVolunteerProfileSelectionService, VolunteerProfileSelectionService>();
 
 builder.Services.AddAuthentication(options =>
 {

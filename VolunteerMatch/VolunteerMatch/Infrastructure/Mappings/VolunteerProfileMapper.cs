@@ -26,7 +26,23 @@ namespace VolunteerMatch.Infrastructure.Mappings
             // მისწვდეს ისეთ ფილდს რომელიც სხვა ფილდიდან გადის (Email)
             // GetMyVolunteerProfileDto.Email უნდა დაიმაპოს VolunteerProfile.Email-თან
             // გადასაკონვერტირებელი ობიექტის (src == VolunteerProfile) Volunteer ველის მეშვეობით
-            CreateMap<UpdateVolunteerProfileDto, VolunteerProfile>();
+            CreateMap<UpdateVolunteerProfileDto, VolunteerProfile>()
+                .ForMember(
+                    destination => destination.Skills,
+                    option => option.Ignore())
+                .ForMember(
+                    destination => destination.Interests,
+                    option => option.Ignore())
+                .ForMember(
+                    destination => destination.VolunteerSkills,
+                    option => option.Ignore())
+                .ForMember(
+                    destination => destination.VolunteerInterests,
+                    option => option.Ignore())
+                .ForMember(
+                    destination => destination.VolunteerTags,
+                    option => option.Ignore()
+                );
 
             CreateMap<VolunteerProfile, GetVolunteerProfileDto>()
                 .ForMember(
@@ -43,6 +59,18 @@ namespace VolunteerMatch.Infrastructure.Mappings
                 ).ForMember(// თუ src -> dest ობიექტის ფილდის სახელები განსხვავდება იმაპება
                     dest => dest.DateOfBirth,
                     opt => opt.MapFrom(src => src.BirthDate)
+                );
+
+            CreateMap<Skill, SelectOptionDto>()
+                .ForMember(
+                    destination => destination.Id,
+                    option => option.MapFrom(source => source.SkillId)
+                );
+
+            CreateMap<Interest, SelectOptionDto>()
+                .ForMember(
+                    destination => destination.Id,
+                    option => option.MapFrom(source => source.InterestId)
                 );
         }
     }

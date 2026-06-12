@@ -20,6 +20,7 @@ namespace VolunteerMatch.Application.Services
         private readonly IMapper _mapper;
         private readonly IVolunteerTagService _volunteerTagService;
         private readonly ITagValidator _tagValidator;
+        private readonly IVolunteerProfileSelectionService _volunteerProfileSelectionService;
 
         public UserService(
             VolunteerMatchingDbContext context,
@@ -27,7 +28,8 @@ namespace VolunteerMatch.Application.Services
             IConfiguration config,
             IMapper mapper,
             IVolunteerTagService volunteerTagService,
-            ITagValidator tagValidator)
+            ITagValidator tagValidator, 
+            IVolunteerProfileSelectionService volunteerProfileSelectionService)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
@@ -37,6 +39,8 @@ namespace VolunteerMatch.Application.Services
                 throw new ArgumentNullException(nameof(volunteerTagService));
             _tagValidator = tagValidator ??
                 throw new ArgumentNullException(nameof(tagValidator));
+            _volunteerProfileSelectionService = volunteerProfileSelectionService ??
+                throw new ArgumentNullException(nameof(volunteerProfileSelectionService));
         }
 
 
@@ -60,9 +64,17 @@ namespace VolunteerMatch.Application.Services
 
                 profile.VolunteerId = user.UserId;
                 _context.VolunteerProfiles.Add(profile);
+
+                await _volunteerProfileSelectionService
+                    .SaveVolunteerSkillsAndInterestsAsync(
+                        profile,
+                        createDto.SelectedSkillIds,
+                        createDto.SelectedInterestIds);
+
                 await _volunteerTagService
                     .SaveVolunteerTagsAsync(user.UserId, createDto.SelectedTagIds);
 
+                await _context.SaveChangesAsync();
                 await tx.CommitAsync();
 
                 return CreateAuthResponse(user);

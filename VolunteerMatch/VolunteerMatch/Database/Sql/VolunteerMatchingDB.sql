@@ -254,5 +254,17 @@ create table dbo.VolunteerEventMatches
 
     constraint UQ_VolunteerEventMatches_Volunteer_Event
         unique (VolunteerId, EventId)
+); 
+
+CREATE TABLE Skills
+(
+    SkillId UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    Name NVARCHAR(100) NOT NULL
 );
+CREATE TABLE Interests
+(
+    InterestId UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    Name NVARCHAR(100) NOT NULL
+);
+
 

@@ -29,13 +29,13 @@ namespace VolunteerMatch.Application.Dtos
         [StringLength(200, ErrorMessage = "ენები ძალიან გრძელია.")]
         public string Languages { get; set; } = null!;
 
-        [Required(ErrorMessage = "უნარები სავალდებულოა.")]
-        [StringLength(1000, ErrorMessage = "უნარები ძალიან გრძელია.")]
-        public string Skills { get; set; } = null!;
+        //[Required(ErrorMessage = "უნარები სავალდებულოა.")]
+        //[StringLength(1000, ErrorMessage = "უნარები ძალიან გრძელია.")]
+        //public string Skills { get; set; } = null!;
 
-        [Required(ErrorMessage = "ინტერესები სავალდებულოა.")]
-        [StringLength(1000, ErrorMessage = "ინტერესები ძალიან გრძელია.")]
-        public string Interests { get; set; } = null!;
+        //[Required(ErrorMessage = "ინტერესები სავალდებულოა.")]
+        //[StringLength(1000, ErrorMessage = "ინტერესები ძალიან გრძელია.")]
+        //public string Interests { get; set; } = null!;
 
         [StringLength(500, ErrorMessage = "განათლება ძალიან გრძელია.")]
         public string? Education { get; set; }
@@ -59,6 +59,12 @@ namespace VolunteerMatch.Application.Dtos
 
         [Required(ErrorMessage = "თემატიკა სავალდებულოა.")]
         public List<Guid> SelectedTagIds { get; set; } = new();
+
+        [Required(ErrorMessage = "უნარები სავალდებულოა.")]
+        public required List<Guid> SelectedSkillIds { get; set; }
+
+        [Required(ErrorMessage = "ინტერესები სავალდებულოა.")]
+        public required List<Guid> SelectedInterestIds { get; set; }
     }
 }
 

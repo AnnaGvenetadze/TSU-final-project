@@ -10,7 +10,24 @@ public class UserMappingProfile : Profile
             s => string.IsNullOrWhiteSpace(s) ? null : s.Trim()
         );
 
-        CreateMap<CreateVolunteerDto, VolunteerProfile>();
+        CreateMap<CreateVolunteerDto, VolunteerProfile>()
+            .ForMember(
+                destination => destination.Skills,
+                option => option.Ignore())
+            .ForMember(
+                destination => destination.Interests,
+                option => option.Ignore())
+            .ForMember(
+                destination => destination.VolunteerSkills,
+                option => option.Ignore())
+            .ForMember(
+                destination => destination.VolunteerInterests,
+                option => option.Ignore())
+            .ForMember(
+                destination => destination.VolunteerTags,
+                option => option.Ignore()
+            );
+
         CreateMap<CreateOrganizationDto, OrganizationProfile>();
     }
 }
