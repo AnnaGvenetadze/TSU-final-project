@@ -7,7 +7,7 @@ using VolunteerMatch.Domain.Constants;
 namespace VolunteerMatch.Presentation.Controllers
 {
     [ApiController]
-    [Route("api/organizations/me/matches")]
+    [Route("api/organizations/me/events/{eventId}/matches")]
     [Authorize(Roles = UserRoles.Organization)]
     public class MyOrganizationMatchingController : BaseController
     {
@@ -21,7 +21,7 @@ namespace VolunteerMatch.Presentation.Controllers
 
 
 
-        [HttpPost("{matchId:guid}/accept")]
+        [HttpPost("/api/organizations/me/matches/{matchId:guid}/accept")]
         public async Task<IActionResult> AcceptVolunteerMatchRequest(
             Guid matchId,
             CancellationToken cancellationToken)
@@ -51,7 +51,7 @@ namespace VolunteerMatch.Presentation.Controllers
 
 
 
-        [HttpPost("{matchId:guid}/decline")]
+        [HttpPost("/api/organizations/me/matches/{matchId:guid}/decline")]
         public async Task<IActionResult> DeclineVolunteerMatchRequest(
             Guid matchId,
             CancellationToken cancellationToken)
