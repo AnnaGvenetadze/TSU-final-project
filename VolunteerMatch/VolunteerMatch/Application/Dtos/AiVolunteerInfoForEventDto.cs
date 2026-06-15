@@ -1,5 +1,4 @@
-﻿// TODO: VolunteerInfoDto-ად გადაარქმევ და მხოლოდ ამას გამოვიყენებთ ორივე მხარეს
-namespace VolunteerMatch.Application.Dtos
+﻿namespace VolunteerMatch.Application.Dtos
 {
     public class AiVolunteerInfoForEventDto
     {

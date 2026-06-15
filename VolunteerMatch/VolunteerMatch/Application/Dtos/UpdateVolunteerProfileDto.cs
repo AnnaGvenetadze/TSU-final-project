@@ -3,7 +3,6 @@
 namespace VolunteerMatch.Application.Dtos
 {
     // TODO: Email სხვა ადგილიდან უნდა დააფდეითდეს ?
-    // TODO: თეგების, ფავორიტების და მეჩინგ საჯეშენების ლისტი (ნოთიფიკაციებში)?
     public class UpdateVolunteerProfileDto
     {
         [Required(ErrorMessage = "სახელი სავალდებულოა.")]

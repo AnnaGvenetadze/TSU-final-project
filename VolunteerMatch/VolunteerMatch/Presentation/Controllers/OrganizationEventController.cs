@@ -1,5 +1,4 @@
-﻿// TODO: Add endpoints for listing events created by a specific organization and getting details of a specific event created by the organization
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VolunteerMatch.Application.Services;
 using VolunteerMatch.Domain.Constants;
@@ -8,7 +7,6 @@ namespace VolunteerMatch.Presentation.Controllers
 {
     [Route("api/organizations/{organizationId:guid}/events")]
     [ApiController]
-    //[Authorize(Roles = $"{UserRoles.Volunteer},{UserRoles.Organization}")]
     public class OrganizationEventsController : BaseController
     {
         private readonly OrganizationEventsService _organizationEventsService;

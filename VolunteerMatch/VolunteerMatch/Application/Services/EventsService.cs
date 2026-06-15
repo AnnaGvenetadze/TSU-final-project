@@ -78,7 +78,8 @@ namespace VolunteerMatch.Application.Services
                 await _context.Events
                     .AsNoTracking()
                     .Include(eventModel => eventModel.Organization)
-                    .Include(e => e.EventTags)
+                        .ThenInclude(organization => organization.Organization)
+                    .Include(eventModel => eventModel.EventTags)
                     .SingleOrDefaultAsync(eventModel =>
                         eventModel.EventId == eventId &&
                         eventModel.IsActive)

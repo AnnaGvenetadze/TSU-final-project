@@ -1,6 +1,6 @@
 ﻿namespace VolunteerMatch.Application.Dtos
 {
- // TODO: Email დაემატება, სპიკერები დაემატება
+ // TODO: სპიკერები დაემატება
     public class GetEventDetailsDto
     {
         public Guid EventId { get; set; }
@@ -10,7 +10,7 @@
         public required string OrganizationName { get; set; }
 
 
-        //public required string Email { get; set; }
+        public required string Email { get; set; }
 
         public required string Description { get; set; }
 

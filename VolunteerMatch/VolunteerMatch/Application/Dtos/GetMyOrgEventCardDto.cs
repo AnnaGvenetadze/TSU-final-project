@@ -1,5 +1,5 @@
 ﻿namespace VolunteerMatch.Application.Dtos
-{// TODO: Uncomment themes and map it with tag name in auto mapper
+{
     public class GetMyOrgEventCardDto
     {
         public Guid EventId { get; set; }

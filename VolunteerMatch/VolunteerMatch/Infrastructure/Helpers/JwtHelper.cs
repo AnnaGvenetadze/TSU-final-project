@@ -15,7 +15,7 @@ namespace VolunteerMatch.Infrastructure.Helpers
             var issuer = jwtSection["Issuer"] ?? throw new InvalidOperationException("JWT Issuer is missing.");
             var audience = jwtSection["Audience"] ?? throw new InvalidOperationException("JWT Audience is missing.");
 
-            // TODO: Consider adding more claims as needed.
+            // Consider adding more claims as needed.
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),

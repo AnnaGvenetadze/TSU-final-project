@@ -22,10 +22,7 @@ namespace VolunteerMatch.Infrastructure.Mappings
                         src => src.VolunteerTags.Select(vt => vt.TagId)
                         )
                 );
-            // Volunteer ველი არაა GetMyVolunteerProfileDto ამიტომ თუ მას უნდა
-            // მისწვდეს ისეთ ფილდს რომელიც სხვა ფილდიდან გადის (Email)
-            // GetMyVolunteerProfileDto.Email უნდა დაიმაპოს VolunteerProfile.Email-თან
-            // გადასაკონვერტირებელი ობიექტის (src == VolunteerProfile) Volunteer ველის მეშვეობით
+            
             CreateMap<UpdateVolunteerProfileDto, VolunteerProfile>()
                 .ForMember(
                     destination => destination.Skills,
@@ -46,10 +43,14 @@ namespace VolunteerMatch.Infrastructure.Mappings
 
             CreateMap<VolunteerProfile, GetVolunteerProfileDto>()
                 .ForMember(
+                    dest => dest.Email,
+                    opt => opt.MapFrom(src => src.Volunteer.Email)
+                )
+                .ForMember(
                     dest => dest.VolunteerTagIds,
                     opt => opt.MapFrom(
                         src => src.VolunteerTags.Select(vt => vt.TagId)
-                        )
+                    )
                 );
 
             CreateMap<VolunteerProfile, SearchVolunteerItemDto>()

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace VolunteerMatch.Application.Dtos
-{// TODO: აქ იმეილი ახალი უნდა ჩაიწეროს თუ წამოვიღო მიმდინარე ორგანიზაციიდან ?
+{
  // TODO: სპიკერებიც დაემატება  
     public class CreateEventDetailsDto
     {

@@ -1,5 +1,4 @@
 ﻿// Private endpoints for creating, updating, and listing events created by the organization
-// TODO: GET api/organizations/me/matches/events
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VolunteerMatch.Application.Dtos;
