@@ -5,7 +5,6 @@ using VolunteerMatch.Application.Dtos.Matching;
 using VolunteerMatch.Application.Interfaces;
 using VolunteerMatch.Domain.Constants;
 using VolunteerMatch.Domain.Models;
-using VolunteerMatch.Infrastructure.Ai;
 using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Helpers;
 using VolunteerMatch.Infrastructure.Validators;
@@ -22,6 +21,7 @@ namespace VolunteerMatch.Application.Services
         private readonly FavoritesHelper _favoritesHelper;
         private readonly MatchSaveHelper _matchSaveHelper;
         private readonly MatchCleanupHelper _matchCleanupHelper;
+        private readonly IEventCapacityService _eventCapacityService;
 
         public MyVolunteerMatchingService(
             VolunteerMatchingDbContext context,
@@ -31,16 +31,25 @@ namespace VolunteerMatch.Application.Services
             MatchingQueryHelper matchingQueryHelper,
             FavoritesHelper favoritesHelper,
             MatchSaveHelper matchSaveHelper,
-            MatchCleanupHelper matchCleanupHelper)
+            MatchCleanupHelper matchCleanupHelper,
+            IEventCapacityService eventCapacityService)
         {
-            _context = context;
-            _aiMatchingClient = aiMatchingClient;
-            _aiMatchingLogger = aiMatchingLogger;
-            _mapper = mapper;
-            _matchingQueryHelper = matchingQueryHelper;
-            _favoritesHelper = favoritesHelper;
-            _matchSaveHelper = matchSaveHelper;
-            _matchCleanupHelper = matchCleanupHelper;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _aiMatchingClient = aiMatchingClient 
+                ?? throw new ArgumentNullException(nameof(aiMatchingClient));
+            _aiMatchingLogger = aiMatchingLogger 
+                ?? throw new ArgumentNullException(nameof(aiMatchingLogger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _matchingQueryHelper = matchingQueryHelper 
+                ?? throw new ArgumentNullException(nameof(matchingQueryHelper));
+            _favoritesHelper = favoritesHelper 
+                ?? throw new ArgumentNullException(nameof(favoritesHelper));
+            _matchSaveHelper = matchSaveHelper 
+                ?? throw new ArgumentNullException(nameof(matchSaveHelper));
+            _matchCleanupHelper = matchCleanupHelper 
+                ?? throw new ArgumentNullException(nameof(matchCleanupHelper));
+            _eventCapacityService = eventCapacityService 
+                ?? throw new ArgumentNullException(nameof(eventCapacityService));
         }
 
 
@@ -115,22 +124,20 @@ namespace VolunteerMatch.Application.Services
 
 
 
-        public async Task<PagedResultDto<GetMatchedEventCardDto>> GetMyMatchesAsync(
+        public async Task<PagedResultDto<GetMatchedEventCardDto>> 
+        GetMyMatchesAsync(
             Guid currentUserId,
             int page,
             int pageSize,
             CancellationToken cancellationToken = default)
         {
-            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(
-                    cancellationToken);
+            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(cancellationToken);
 
             PaginationValidator.Validate(page, pageSize);
             Guard.EnsureFound(
                 await _context.VolunteerProfiles
                     .AsNoTracking()
-                    .AnyAsync(
-                        volunteer => volunteer.VolunteerId == currentUserId,
-                        cancellationToken)
+                    .AnyAsync(volunteer => volunteer.VolunteerId == currentUserId, cancellationToken)
             );
 
             var query = _matchingQueryHelper.GetRecommendedEventMatchesQuery(
@@ -168,17 +175,20 @@ namespace VolunteerMatch.Application.Services
                 cancellationToken);
 
             var match = await _context.VolunteerEventMatches
+                .Include(match => match.Event)
                 .FirstOrDefaultAsync(
-                    match =>
-                        match.VolunteerEventMatchId == matchId &&
-                        match.VolunteerId == volunteerId,
-                    cancellationToken);
+                    match => match.VolunteerEventMatchId == matchId &&
+                        match.VolunteerId == volunteerId, cancellationToken);
 
             match = Guard.EnsureFound(match);
             if (match.Status != MatchStatus.Recommended)
             {
                 throw new ArgumentException("მოთხოვნის გაგზავნა შესაძლებელია მხოლოდ რეკომენდებულ ღონისძიებაზე.");
             }
+            await _eventCapacityService.EnsureNotFilledAsync(
+                match.EventId,
+                match.Event.VolunteersAmount,
+                cancellationToken);
 
             match.Status = MatchStatus.Pending;
             match.RequestedByRole = UserRoles.Volunteer;
@@ -339,6 +349,13 @@ namespace VolunteerMatch.Application.Services
             {
                 throw new ArgumentException(
                     "მოქმედება შესაძლებელია მხოლოდ ორგანიზაციისგან შემოსულ შეთავაზებაზე.");
+            }
+            if (newStatus == MatchStatus.Accepted)
+            {
+                await _eventCapacityService.EnsureNotFilledAsync(
+                    match.EventId,
+                    match.Event.VolunteersAmount,
+                    cancellationToken);
             }
 
             match.Status = newStatus;

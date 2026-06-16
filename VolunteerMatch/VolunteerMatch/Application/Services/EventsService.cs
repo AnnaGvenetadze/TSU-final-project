@@ -6,6 +6,9 @@ using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Application.Dtos;
 using AutoMapper.QueryableExtensions;
 using VolunteerMatch.Domain.Models;
+using VolunteerMatch.Domain.Constants;
+using VolunteerMatch.Application.Interfaces;
+using System.Threading;
 
 namespace VolunteerMatch.Application.Services
 {
@@ -13,11 +16,14 @@ namespace VolunteerMatch.Application.Services
     {
         private readonly VolunteerMatchingDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IEventCapacityService _eventCapacityService;
 
-        public EventsService(VolunteerMatchingDbContext context, IMapper mapper)
+        public EventsService(VolunteerMatchingDbContext context, IMapper mapper, IEventCapacityService eventCapacityService)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _eventCapacityService = eventCapacityService 
+                ?? throw new ArgumentNullException(nameof(eventCapacityService));
         }
 
 
@@ -85,7 +91,19 @@ namespace VolunteerMatch.Application.Services
                         eventModel.IsActive)
             );
 
-            return _mapper.Map<GetEventDetailsDto>(eventEntity);
+            var acceptedVolunteersCount = await _context.VolunteerEventMatches
+                .AsNoTracking()
+                .CountAsync(match =>
+                    match.EventId == eventId &&
+                    match.Status == MatchStatus.Accepted);
+
+            var dto = _mapper.Map<GetEventDetailsDto>(eventEntity);
+            dto.AcceptedVolunteersCount = await _eventCapacityService
+                .GetAcceptedVolunteersCountAsync(eventId, default);
+
+            dto.IsFilled = dto.AcceptedVolunteersCount >= dto.VolunteersAmount;
+
+            return dto;
         }
 
         private IQueryable<Event> GetActiveEventsQuery()

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using VolunteerMatch.Application.Dtos;
 using VolunteerMatch.Application.Interfaces;
 using VolunteerMatch.Domain.Constants;
@@ -18,6 +19,7 @@ namespace VolunteerMatch.Application.Services
         private readonly EventMatchingQueryHelper _eventMatchingQueryHelper;
         private readonly MatchSaveHelper _matchSaveHelper;
         private readonly MatchCleanupHelper _matchCleanupHelper;
+        private readonly IEventCapacityService _eventCapacityService;
 
         public MyOrganizationMatchingService(
             VolunteerMatchingDbContext context,
@@ -25,14 +27,21 @@ namespace VolunteerMatch.Application.Services
             IMapper mapper,
             EventMatchingQueryHelper eventMatchingQueryHelper,
             MatchSaveHelper matchSaveHelper,
-            MatchCleanupHelper matchCleanupHelper)
+            MatchCleanupHelper matchCleanupHelper, 
+            IEventCapacityService eventCapacityService)
         {
-            _context = context;
-            _aiMatchingClient = aiMatchingClient;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _aiMatchingClient = aiMatchingClient 
+                ?? throw new ArgumentNullException(nameof(aiMatchingClient));
             _mapper = mapper;
-            _eventMatchingQueryHelper = eventMatchingQueryHelper;
-            _matchSaveHelper = matchSaveHelper;
-            _matchCleanupHelper = matchCleanupHelper;
+            _eventMatchingQueryHelper = eventMatchingQueryHelper
+                ?? throw new ArgumentNullException(nameof(eventMatchingQueryHelper));
+            _matchSaveHelper = matchSaveHelper
+                ?? throw new ArgumentNullException(nameof(matchSaveHelper));
+            _matchCleanupHelper = matchCleanupHelper
+                ?? throw new ArgumentNullException(nameof(matchCleanupHelper));
+            _eventCapacityService = eventCapacityService
+                ?? throw new ArgumentNullException(nameof(eventCapacityService));
         }
 
 
@@ -164,9 +173,12 @@ namespace VolunteerMatch.Application.Services
             match = Guard.EnsureFound(match);
             if (match.Status != MatchStatus.Recommended)
             {
-                throw new ArgumentException(
-                    "მოთხოვნის გაგზავნა შესაძლებელია მხოლოდ რეკომენდებულ მოხალისეზე.");
+                throw new ArgumentException("მოთხოვნის გაგზავნა შესაძლებელია მხოლოდ რეკომენდებულ მოხალისეზე.");
             }
+            await _eventCapacityService.EnsureNotFilledAsync(
+                match.EventId,
+                match.Event.VolunteersAmount,
+                cancellationToken);
 
             match.Status = MatchStatus.Pending;
             match.RequestedByRole = UserRoles.Organization;
@@ -194,8 +206,7 @@ namespace VolunteerMatch.Application.Services
             match = Guard.EnsureFound(match);
             if (match.Status != MatchStatus.Recommended)
             {
-                throw new ArgumentException(
-                    "უარყოფა შესაძლებელია მხოლოდ რეკომენდებული მოხალისის.");
+                throw new ArgumentException("უარყოფა შესაძლებელია მხოლოდ რეკომენდებული მოხალისის.");
             }
 
             match.Status = MatchStatus.Rejected;
@@ -318,8 +329,14 @@ namespace VolunteerMatch.Application.Services
             if (match.Status != MatchStatus.Pending ||
                 match.RequestedByRole != UserRoles.Volunteer)
             {
-                throw new ArgumentException(
-                    "მოქმედება შესაძლებელია მხოლოდ მოხალისისგან შემოსულ მოთხოვნაზე.");
+                throw new ArgumentException("მოქმედება შესაძლებელია მხოლოდ მოხალისისგან შემოსულ მოთხოვნაზე.");
+            }
+            if (newStatus == MatchStatus.Accepted)
+            {
+                await _eventCapacityService.EnsureNotFilledAsync(
+                    match.EventId,
+                    match.Event.VolunteersAmount,
+                    cancellationToken);
             }
 
             match.Status = newStatus;

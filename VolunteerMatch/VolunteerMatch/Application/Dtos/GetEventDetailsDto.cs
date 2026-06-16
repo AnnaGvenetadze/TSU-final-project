@@ -9,12 +9,17 @@
 
         public required string OrganizationName { get; set; }
 
-
         public required string Email { get; set; }
 
         public required string Description { get; set; }
 
         public required string Requirements { get; set; }
+
+        public int VolunteersAmount { get; set; }
+
+        public int AcceptedVolunteersCount { get; set; }
+
+        public bool IsFilled { get; set; }
 
         public required string Location { get; set; }
 
