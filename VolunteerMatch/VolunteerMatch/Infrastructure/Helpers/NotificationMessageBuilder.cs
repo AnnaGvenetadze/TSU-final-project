@@ -14,16 +14,16 @@ namespace VolunteerMatch.Infrastructure.Helpers
             return (match.Status, match.RequestedByRole) switch
             {
                 (MatchStatus.Pending, UserRoles.Volunteer) =>
-$"{volunteerName}-მა გამოგიგზავნათ დამეჩვის მოთხოვნა \"{eventTitle}\" ღონისძიებაზე.",
+$"ახალი შესაბამისობის მოთხოვნა მოხალისისგან: {volunteerName}. ღონისძიება: \"{eventTitle}\".",
 
                 (MatchStatus.Accepted, UserRoles.Volunteer) =>
-$"თქვენ დაადასტურეთ {volunteerName}-ის დამეჩვის მოთხოვნა \"{eventTitle}\" ღონისძიებაზე.",
+$"შესაბამისობის მოთხოვნა დადასტურებულია. მოხალისე: {volunteerName}. ღონისძიება: \"{eventTitle}\".",
 
                 (MatchStatus.Accepted, UserRoles.Organization) =>
-$"{volunteerName}-მა დაადასტურა თქვენი დამეჩვის შეთავაზება \"{eventTitle}\" ღონისძიებაზე.",
+$"თქვენი შესაბამისობის შეთავაზება დადასტურდა. მოხალისე: {volunteerName}. ღონისძიება: \"{eventTitle}\".",
 
-                _ => 
-"მეჩის სტატუსი განახლებულია."
+                _ =>
+"შესაბამისობის სტატუსი განახლებულია."
             };
         }
 
@@ -38,16 +38,16 @@ $"{volunteerName}-მა დაადასტურა თქვენი დ�
             return (match.Status, match.RequestedByRole) switch
             {
                 (MatchStatus.Pending, UserRoles.Organization) =>
-$"{organizationName}-მა გამოგიგზავნათ დამეჩვის შეთავაზება \"{eventTitle}\" ღონისძიებაზე.",
+$"ახალი შესაბამისობის შეთავაზება ორგანიზაციისგან: {organizationName}. ღონისძიება: \"{eventTitle}\".",
 
                 (MatchStatus.Accepted, UserRoles.Organization) =>
-$"თქვენ დაადასტურეთ {organizationName}-ის დამეჩვის შეთავაზება \"{eventTitle}\" ღონისძიებაზე.",
+$"შესაბამისობის შეთავაზება დადასტურებულია. ორგანიზაცია: {organizationName}. ღონისძიება: \"{eventTitle}\".",
 
                 (MatchStatus.Accepted, UserRoles.Volunteer) =>
-$"{organizationName}-მა დაადასტურა თქვენი დამეჩვის მოთხოვნა \"{eventTitle}\" ღონისძიებაზე.",
+$"თქვენი შესაბამისობის მოთხოვნა დადასტურდა. ორგანიზაცია: {organizationName}. ღონისძიება: \"{eventTitle}\".",
 
                 _ =>
-"მეჩის სტატუსი განახლებულია."
+"შესაბამისობის სტატუსი განახლებულია."
             };
         }
     }
