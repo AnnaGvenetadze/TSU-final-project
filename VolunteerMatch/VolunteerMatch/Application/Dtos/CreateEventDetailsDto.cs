@@ -41,16 +41,10 @@ namespace VolunteerMatch.Application.Dtos
         [StringLength(1000, ErrorMessage = "ბენეფიტები ძალიან გრძელია.")]
         public string Benefits { get; set; } = null!;
 
-        [Url(ErrorMessage = "ბმულის ფორმატი არასწორია.")]
-        [StringLength(500, ErrorMessage = "ბმული ძალიან გრძელია.")]
         public string? MainPhotoUrl { get; set; }
 
-        [Url(ErrorMessage = "ბმულის ფორმატი არასწორია.")]
-        [StringLength(500, ErrorMessage = "ბმული ძალიან გრძელია.")]
         public string? Photo2Url { get; set; }
 
-        [Url(ErrorMessage = "ბმულის ფორმატი არასწორია.")]
-        [StringLength(500, ErrorMessage = "ბმული ძალიან გრძელია.")]
         public string? Photo3Url { get; set; }
 
         [StringLength(1000, ErrorMessage = "დამატებითი ინფორმაცია ძალიან გრძელია.")]

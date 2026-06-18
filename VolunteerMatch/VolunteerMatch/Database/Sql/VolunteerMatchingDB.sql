@@ -71,9 +71,9 @@ CREATE TABLE dbo.Events (
     VolunteersAmount    INT NOT NULL,
     Benefits            NVARCHAR(1000) NOT NULL,
     --SpeakersJsons        NVARCHAR(MAX) NULL, --წაიშალა, მოსაფიქრებელია
-    MainPhotoUrl        NVARCHAR(500) NULL,
-    Photo2Url           NVARCHAR(500) NULL,
-    Photo3Url           NVARCHAR(500) NULL,
+    MainPhotoUrl        NVARCHAR(MAX) NULL,
+    Photo2Url           NVARCHAR(MAX) NULL,
+    Photo3Url           NVARCHAR(MAX) NULL,
     AdditionalInfo      NVARCHAR(1000) NULL,
     IsActive            BIT NOT NULL DEFAULT 1,
     CreatedAt           DATETIMEOFFSET NOT NULL DEFAULT SYSDATETIMEOFFSET(),

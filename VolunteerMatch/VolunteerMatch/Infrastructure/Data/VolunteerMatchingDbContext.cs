@@ -80,17 +80,14 @@ public partial class VolunteerMatchingDbContext : DbContext
             entity.Property(e => e.Benefits)
                 .HasMaxLength(1000);
 
-            //entity.Property(e => e.SpeakersJson)
-            //    .HasColumnType("nvarchar(max)");
-
             entity.Property(e => e.MainPhotoUrl)
-                .HasMaxLength(500);
+                .HasColumnType("nvarchar(max)");
 
             entity.Property(e => e.Photo2Url)
-                .HasMaxLength(500);
+                .HasColumnType("nvarchar(max)");
 
             entity.Property(e => e.Photo3Url)
-                .HasMaxLength(500);
+                .HasColumnType("nvarchar(max)");
 
             entity.Property(e => e.AdditionalInfo)
                 .HasMaxLength(1000);
