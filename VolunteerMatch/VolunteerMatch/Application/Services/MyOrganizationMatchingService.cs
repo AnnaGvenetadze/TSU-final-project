@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 using VolunteerMatch.Application.Dtos;
 using VolunteerMatch.Application.Interfaces;
 using VolunteerMatch.Domain.Constants;

@@ -49,7 +49,7 @@ CREATE TABLE dbo.OrganizationProfiles (
     OrganizationName NVARCHAR(200) NOT NULL,
     Description      NVARCHAR(MAX) NOT NULL,
     LinkedInUrl		 NVARCHAR(300) NULL,
-	ProfilePhotoUrl NVARCHAR(500) NULL, 
+	ProfilePhotoUrl NVARCHAR(MAX) NULL, 
 
     CONSTRAINT PK_OrganizationProfiles PRIMARY KEY (OrganizationId),
     CONSTRAINT FK_OrganizationProfiles_Users

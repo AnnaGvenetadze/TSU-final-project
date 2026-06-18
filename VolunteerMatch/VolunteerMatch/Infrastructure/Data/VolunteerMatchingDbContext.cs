@@ -153,7 +153,7 @@ public partial class VolunteerMatchingDbContext : DbContext
             entity.Property(e => e.OrganizationId).ValueGeneratedNever();
             entity.Property(e => e.LinkedInUrl).HasMaxLength(300);
             entity.Property(e => e.OrganizationName).HasMaxLength(200);
-            entity.Property(e => e.ProfilePhotoUrl).HasMaxLength(500);
+            entity.Property(e => e.ProfilePhotoUrl).HasColumnType("nvarchar(max)");
 
             entity.HasOne(d => d.Organization).WithOne(p => p.OrganizationProfile)
                 .HasForeignKey<OrganizationProfile>(d => d.OrganizationId)
