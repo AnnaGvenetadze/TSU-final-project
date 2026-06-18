@@ -32,6 +32,10 @@
 
         public string? Description { get; set; }
 
-        public required List<Guid> VolunteerTagIds { get; set; } = new();
+        public required List<Guid> VolunteerTagIds { get; set; }
+
+        //public required List<Guid> SelectedSkillIds { get; set; }
+
+        //public required List<Guid> SelectedInterestIds { get; set; }
     }
 }

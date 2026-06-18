@@ -33,7 +33,7 @@ CREATE TABLE dbo.VolunteerProfiles (
     Interests       NVARCHAR(MAX) NOT NULL,
 	Description     NVARCHAR(MAX) NULL,
 	LinkedInUrl		NVARCHAR(300) NULL,
-    ProfilePhotoUrl NVARCHAR(500) NULL,
+    ProfilePhotoUrl NVARCHAR(MAX) NULL,
     Technologies    NVARCHAR(500) NULL,
     Experience      NVARCHAR(MAX) NULL,
 	Education		NVARCHAR(500) NULL,

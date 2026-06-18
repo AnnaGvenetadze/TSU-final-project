@@ -39,8 +39,6 @@ namespace VolunteerMatch.Application.Dtos
         [StringLength(500, ErrorMessage = "განათლება ძალიან გრძელია.")]
         public string? Education { get; set; }
 
-        [Url(ErrorMessage = "ბმულის ფორმატი არასწორია.")]
-        [StringLength(500, ErrorMessage = "ბმული ძალიან გრძელია.")]
         public string? ProfilePhotoUrl { get; set; }
 
         [Url(ErrorMessage = "ბმულის ფორმატი არასწორია.")]

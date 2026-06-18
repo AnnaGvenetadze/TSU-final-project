@@ -191,7 +191,7 @@ public partial class VolunteerMatchingDbContext : DbContext
             entity.Property(e => e.LastName).HasMaxLength(100);
             entity.Property(e => e.Profession).HasMaxLength(200);
             entity.Property(e => e.Education).HasMaxLength(500);
-            entity.Property(e => e.ProfilePhotoUrl).HasMaxLength(500);
+            entity.Property(e => e.ProfilePhotoUrl).HasColumnType("nvarchar(max)");
             entity.Property(e => e.LinkedInUrl).HasMaxLength(300);
             entity.Property(e => e.Technologies).HasMaxLength(500);
 
