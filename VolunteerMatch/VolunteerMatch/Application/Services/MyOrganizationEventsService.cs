@@ -6,6 +6,7 @@ using VolunteerMatch.Infrastructure.Validators;
 using VolunteerMatch.Application.Dtos;
 using VolunteerMatch.Domain.Models;
 using VolunteerMatch.Application.Interfaces;
+using System.Threading;
 
 
 namespace VolunteerMatch.Application.Services
@@ -17,19 +18,22 @@ namespace VolunteerMatch.Application.Services
         private readonly IEventTagService _eventTagService;
         private readonly ITagValidator _tagValidator;
         private readonly MatchCleanupHelper _matchCleanupHelper;
+        private readonly IEventCapacityService _eventCapacityService;
 
         public MyOrganizationEventsService(
             VolunteerMatchingDbContext context,
             IMapper mapper,
             IEventTagService eventTagService,
             ITagValidator tagValidator,
-            MatchCleanupHelper matchCleanupHelper)
+            MatchCleanupHelper matchCleanupHelper,
+            IEventCapacityService eventCapacityService)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _eventTagService = eventTagService ?? throw new ArgumentNullException(nameof(eventTagService));
             _tagValidator = tagValidator ?? throw new ArgumentNullException(nameof(tagValidator));
             _matchCleanupHelper = matchCleanupHelper ?? throw new ArgumentNullException(nameof(matchCleanupHelper));
+            _eventCapacityService = eventCapacityService ?? throw new ArgumentNullException(nameof(eventCapacityService));
         }
 
 
@@ -77,14 +81,20 @@ namespace VolunteerMatch.Application.Services
                 .Include(eventModel => eventModel.Organization)
                     .ThenInclude(organizationProfile =>
                         organizationProfile.Organization)
-                .Include(e => e.EventTags)
+                .Include(eventModel => eventModel.EventTags)
                 .SingleOrDefaultAsync(eventModel =>
                     eventModel.EventId == eventId &&
                     eventModel.OrganizationId == organizationId &&
                     eventModel.IsActive)
                 );
+            var dto = _mapper.Map<GetMyOrgEventDetailsDto>(eventEntity);
 
-            return _mapper.Map<GetMyOrgEventDetailsDto>(eventEntity);
+            dto.AcceptedVolunteersCount = 
+                await _eventCapacityService.GetAcceptedVolunteersCountAsync(eventId);
+
+            dto.IsFilled = dto.AcceptedVolunteersCount >= dto.VolunteersAmount;
+
+            return dto;
         }
 
         public async Task UpdateMyEventAsync(Guid organizationId, Guid eventId, UpdateEventDetailsDto updateDto)

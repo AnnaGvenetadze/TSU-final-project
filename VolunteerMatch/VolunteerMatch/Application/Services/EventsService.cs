@@ -6,9 +6,8 @@ using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Application.Dtos;
 using AutoMapper.QueryableExtensions;
 using VolunteerMatch.Domain.Models;
-using VolunteerMatch.Domain.Constants;
 using VolunteerMatch.Application.Interfaces;
-using System.Threading;
+
 
 namespace VolunteerMatch.Application.Services
 {
@@ -91,15 +90,9 @@ namespace VolunteerMatch.Application.Services
                         eventModel.IsActive)
             );
 
-            var acceptedVolunteersCount = await _context.VolunteerEventMatches
-                .AsNoTracking()
-                .CountAsync(match =>
-                    match.EventId == eventId &&
-                    match.Status == MatchStatus.Accepted);
-
             var dto = _mapper.Map<GetEventDetailsDto>(eventEntity);
             dto.AcceptedVolunteersCount = await _eventCapacityService
-                .GetAcceptedVolunteersCountAsync(eventId, default);
+                .GetAcceptedVolunteersCountAsync(eventId);
 
             dto.IsFilled = dto.AcceptedVolunteersCount >= dto.VolunteersAmount;
 

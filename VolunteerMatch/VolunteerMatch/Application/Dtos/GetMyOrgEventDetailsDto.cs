@@ -1,5 +1,5 @@
 ﻿namespace VolunteerMatch.Application.Dtos
-{// TODO: ConfirmedVolunteersAmount
+{
  // TODO: სპიკერები დაემატება
     public class GetMyOrgEventDetailsDto
     {
@@ -29,7 +29,9 @@
 
         public int VolunteersAmount { get; set; }
 
-        // public int ConfirmedVolunteersAmount { get; set; }
+        public int AcceptedVolunteersCount { get; set; }
+
+        public bool IsFilled { get; set; }
 
         public required string Benefits { get; set; }
 

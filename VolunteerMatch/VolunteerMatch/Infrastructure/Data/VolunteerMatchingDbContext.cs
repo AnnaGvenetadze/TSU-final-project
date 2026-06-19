@@ -248,6 +248,7 @@ public partial class VolunteerMatchingDbContext : DbContext
             entity.HasIndex(m => new { m.VolunteerId, m.EventId })
                 .IsUnique();
         });
+
         modelBuilder.Entity<Skill>(entity =>
         {
             entity.HasKey(skill => skill.SkillId);

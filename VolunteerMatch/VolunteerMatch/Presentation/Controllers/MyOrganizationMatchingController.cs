@@ -140,9 +140,9 @@ namespace VolunteerMatch.Presentation.Controllers
             {
                 return NotFound(new { message = ex.Message });
             }
-            catch
+            catch(Exception ex)
             {
-                return StatusCode(500, new { message = "სერვერზე მოხდა შეცდომა." });
+                return StatusCode(500, new { message = ex.Message});//"სერვერზე მოხდა შეცდომა." });
             }
         }
 

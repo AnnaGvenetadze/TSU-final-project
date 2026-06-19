@@ -49,8 +49,7 @@ namespace VolunteerMatch.Application.Services
            Guid eventId,
            CancellationToken cancellationToken = default)
         {
-            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync(
-                cancellationToken);
+            await _matchCleanupHelper.DeleteInactiveOrExpiredMatchesAsync();
 
             var (eventItem, eventTagIds) =
                 await _eventMatchingQueryHelper.GetEventMatchingInfoAsync(
@@ -113,7 +112,7 @@ namespace VolunteerMatch.Application.Services
 
 
 
-        public async Task<PagedResultDto<GetMatchedVolunteerCardDto>> 
+        public async Task<PagedResultDto<GetMatchedVolunteerCardDto>>
             GetMyMatchesAsync(
                  Guid organizationId,
                  Guid eventId,
@@ -126,10 +125,24 @@ namespace VolunteerMatch.Application.Services
 
             PaginationValidator.Validate(page, pageSize);
 
-            await _eventMatchingQueryHelper.GetEventMatchingInfoAsync(
+            var (eventItem, _) = await _eventMatchingQueryHelper.GetEventMatchingInfoAsync(
                 organizationId,
                 eventId,
                 cancellationToken);
+
+            var isFilled = await _eventCapacityService.IsFilledAsync(
+                eventId,
+                eventItem.VolunteersAmount,
+                cancellationToken);
+
+            if (isFilled)
+            {
+                return PaginationHelper.CreatePagedResult(
+                    new List<GetMatchedVolunteerCardDto>(),
+                    page,
+                    pageSize,
+                    0);
+            }
 
             var query = _eventMatchingQueryHelper.GetRecommendedVolunteerMatchesQuery(
                 organizationId,

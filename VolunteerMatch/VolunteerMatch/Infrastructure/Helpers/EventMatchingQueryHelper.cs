@@ -13,7 +13,7 @@ namespace VolunteerMatch.Infrastructure.Helpers
 
         public EventMatchingQueryHelper(VolunteerMatchingDbContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
 
@@ -21,7 +21,7 @@ namespace VolunteerMatch.Infrastructure.Helpers
             GetEventMatchingInfoAsync(
                 Guid organizationId,
                 Guid eventId,
-                CancellationToken cancellationToken)
+                CancellationToken cancellationToken = default)
         {
             var eventItem = await _context.Events
                 .Include(eventModel => eventModel.EventTags)
@@ -61,7 +61,7 @@ namespace VolunteerMatch.Infrastructure.Helpers
         public async Task<List<VolunteerProfile>> GetCandidateVolunteersForEventAsync(
             Guid eventId,
             List<Guid> eventTagIds,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             return await _context.VolunteerProfiles
                 .Include(volunteer => volunteer.VolunteerTags)
