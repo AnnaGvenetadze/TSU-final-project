@@ -20,4 +20,6 @@ public partial class User
     public virtual OrganizationProfile? OrganizationProfile { get; set; }
 
     public virtual VolunteerProfile? VolunteerProfile { get; set; }
+
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
 }

@@ -40,6 +40,8 @@ public partial class VolunteerMatchingDbContext : DbContext
 
     public DbSet<VolunteerInterest> VolunteerInterests { get; set; }
 
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {// აქ დავამატე ველები და შეზღუდვები
         modelBuilder.Entity<Event>(entity =>
@@ -303,6 +305,30 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .WithMany(interest => interest.VolunteerInterests)
                 .HasForeignKey(volunteerInterest => volunteerInterest.InterestId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(refreshToken => refreshToken.RefreshTokenId);
+
+            entity.Property(refreshToken => refreshToken.TokenHash)
+                .IsRequired()
+                .HasMaxLength(150);
+
+            entity.Property(refreshToken => refreshToken.ExpiresAt)
+                .IsRequired();
+
+            entity.Property(refreshToken => refreshToken.CreatedAt)
+                .IsRequired();
+
+            entity.HasIndex(refreshToken => refreshToken.TokenHash)
+                .IsUnique();
+
+            entity.HasIndex(refreshToken => refreshToken.UserId);
+
+            entity.HasOne(refreshToken => refreshToken.User)
+                .WithMany()
+                .HasForeignKey(refreshToken => refreshToken.UserId);
         });
 
         OnModelCreatingPartial(modelBuilder);
