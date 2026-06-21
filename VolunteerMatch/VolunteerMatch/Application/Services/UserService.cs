@@ -136,7 +136,7 @@ namespace VolunteerMatch.Application.Services
         }
 
 
-        public async Task<AuthResponseDto> AuthenticateUserAsync(LoginUserDto loginDto)
+        public async Task<AuthResponseDto> LoginUserAsync(LoginUserDto loginDto)
         {
             ArgumentNullException.ThrowIfNull(loginDto);
 
@@ -157,6 +157,83 @@ namespace VolunteerMatch.Application.Services
         }
 
 
+
+        public async Task LogoutAsync(RefreshTokenRequestDto requestDto)
+        {
+            ArgumentNullException.ThrowIfNull(requestDto);
+
+            if (string.IsNullOrWhiteSpace(requestDto.RefreshToken))
+                return;
+
+            var refreshTokenHash = RefreshTokenHelper.Hash(requestDto.RefreshToken);
+
+            var refreshToken = await _context.RefreshTokens
+                .SingleOrDefaultAsync(refreshToken =>
+                    refreshToken.TokenHash == refreshTokenHash);
+
+            if (refreshToken is null || refreshToken.RevokedAt is not null)
+                return;
+
+            refreshToken.RevokedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+        }
+
+
+        public async Task<AuthResponseDto> RefreshAccessTokenAsync(
+            RefreshTokenRequestDto requestDto)
+        {
+            ArgumentNullException.ThrowIfNull(requestDto);
+            if (string.IsNullOrWhiteSpace(requestDto.RefreshToken))
+                throw new UnauthorizedAccessException();
+            
+            var now = DateTime.UtcNow;
+            var oldRefreshTokenHash = RefreshTokenHelper.Hash(requestDto.RefreshToken);
+            
+            await using var tx = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var oldRefreshToken = await _context.RefreshTokens
+                    .Include(refreshToken => refreshToken.User)
+                    .SingleOrDefaultAsync(refreshToken =>
+                        refreshToken.TokenHash == oldRefreshTokenHash);
+
+                if (oldRefreshToken is null ||
+                    !RefreshTokenHelper.IsActive(oldRefreshToken, now))
+                {
+                    throw new UnauthorizedAccessException();
+                }
+                oldRefreshToken.RevokedAt = now;
+
+                var newRefreshTokenString = RefreshTokenHelper.Generate();
+                var newRefreshTokenHash = RefreshTokenHelper.Hash(newRefreshTokenString);
+                var newRefreshToken = 
+                        RefreshTokenHelper.CreateEntity(
+                                oldRefreshToken.UserId,
+                                newRefreshTokenHash,
+                                oldRefreshToken.ExpiresAt
+                        );
+
+                _context.RefreshTokens.Add(newRefreshToken);
+                var newAccessToken = JwtHelper.GenerateToken(oldRefreshToken.User, _config);
+
+                await _context.SaveChangesAsync();
+                await tx.CommitAsync();
+
+                return CreateAuthResponse(
+                    oldRefreshToken.User,
+                    newAccessToken,
+                    newRefreshTokenString);
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                throw;
+            }
+        }
+
+
+
         private User CreateUser(string email, string password, string role)
         {
             // Guid.Empty უბრალოდ placeholder-ია სანამ DB ჩაწერს ნამდვილ GUID-ს.
@@ -175,20 +252,27 @@ namespace VolunteerMatch.Application.Services
         {
             var accessToken = JwtHelper.GenerateToken(user, _config);
 
-            var refreshToken = RefreshTokenHelper.Generate();
-            var refreshTokenHash = RefreshTokenHelper.Hash(refreshToken);
+            var refreshTokenString = RefreshTokenHelper.Generate();
+            var refreshTokenHash = RefreshTokenHelper.Hash(refreshTokenString);
+            var refreshToken = 
+                    RefreshTokenHelper.CreateEntity(
+                            user.UserId, 
+                            refreshTokenHash,
+                            DateTime.UtcNow.AddDays(7)
+                    );
 
-            var refreshTokenEntity = new RefreshToken
-            {
-                UserId = user.UserId,
-                TokenHash = refreshTokenHash,
-                ExpiresAt = DateTime.UtcNow.AddDays(7),
-                RevokedAt = null
-            };
-
-            _context.RefreshTokens.Add(refreshTokenEntity);
+            _context.RefreshTokens.Add(refreshToken);
             await _context.SaveChangesAsync();
 
+            return CreateAuthResponse(user, accessToken, refreshTokenString);
+        }
+
+
+        private AuthResponseDto CreateAuthResponse(
+            User user,
+            string accessToken,
+            string refreshToken)
+        {
             return new AuthResponseDto
             {
                 AccessToken = accessToken,

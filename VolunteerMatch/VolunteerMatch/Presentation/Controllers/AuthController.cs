@@ -6,7 +6,7 @@ using VolunteerMatch.Application.Services;
 namespace VolunteerMatch.Presentation.Controllers
 {
     [ApiController]
-    [Route("api")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly UserService _userService;
@@ -81,7 +81,7 @@ namespace VolunteerMatch.Presentation.Controllers
         {   // 400 - Bad Request (model validation failed)
             try
             {
-                var response = await _userService.AuthenticateUserAsync(loginDto);
+                var response = await _userService.LoginUserAsync(loginDto);
                 response.Message = "მომხმარებელი წარმატებით ავტორიზდა.";
 
                 return Ok(response);
@@ -93,6 +93,56 @@ namespace VolunteerMatch.Presentation.Controllers
             catch (Exception ex)
             {
                 //return StatusCode(500, "სერვერზე მოხდა შეცდომა.");
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    inner = ex.InnerException?.Message
+                });
+            }
+        }
+
+
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequestDto requestDto)
+        {
+            try
+            {
+                var response = await _userService.RefreshAccessTokenAsync(requestDto);
+                response.Message = "ტოკენები წარმატებით განახლდა.";
+
+                return Ok(response);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized(new { message = "Refresh token არასწორია ან ვადა გაუვიდა." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    inner = ex.InnerException?.Message
+                });
+            }
+        }
+
+
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequestDto requestDto)
+        {
+            try
+            {
+                await _userService.LogoutAsync(requestDto);
+
+                return Ok(new
+                {
+                    message = "მომხმარებელი წარმატებით გამოვიდა სისტემიდან."
+                });
+            }
+            catch (Exception ex)
+            {
                 return StatusCode(500, new
                 {
                     message = ex.Message,
