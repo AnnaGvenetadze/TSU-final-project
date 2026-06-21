@@ -319,7 +319,7 @@ public partial class VolunteerMatchingDbContext : DbContext
                 .IsRequired();
 
             entity.Property(refreshToken => refreshToken.CreatedAt)
-                .IsRequired();
+                .HasDefaultValueSql("SYSUTCDATETIME()");
 
             entity.HasIndex(refreshToken => refreshToken.TokenHash)
                 .IsUnique();
@@ -327,8 +327,9 @@ public partial class VolunteerMatchingDbContext : DbContext
             entity.HasIndex(refreshToken => refreshToken.UserId);
 
             entity.HasOne(refreshToken => refreshToken.User)
-                .WithMany()
-                .HasForeignKey(refreshToken => refreshToken.UserId);
+                    .WithMany(user => user.RefreshTokens)
+                    .HasForeignKey(refreshToken => refreshToken.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
         });
 
         OnModelCreatingPartial(modelBuilder);

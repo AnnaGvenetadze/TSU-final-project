@@ -14,6 +14,7 @@ using VolunteerMatch.Infrastructure.Ai;
 using VolunteerMatch.Infrastructure.Data;
 using VolunteerMatch.Infrastructure.Validators;
 using VolunteerMatch.Infrastructure.Helpers;
+using VolunteerMatch.Domain.Constants;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -124,11 +125,11 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization(options => {
     // policy for organization
     options.AddPolicy("OrganizationPolicy",
-        policy => policy.RequireClaim(ClaimTypes.Role, "ორგანიზაცია"));
+        policy => policy.RequireClaim(ClaimTypes.Role, UserRoles.Organization));
 
     // policy for volunteer
     options.AddPolicy("VolunteerPolicy",
-        policy => policy.RequireClaim(ClaimTypes.Role, "მოხალისე"));
+        policy => policy.RequireClaim(ClaimTypes.Role, UserRoles.Volunteer));
 });
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

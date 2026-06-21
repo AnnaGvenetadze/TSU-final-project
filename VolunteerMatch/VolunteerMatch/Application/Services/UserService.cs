@@ -10,6 +10,7 @@ using VolunteerMatch.Infrastructure.Helpers;
 using VolunteerMatch.Infrastructure.Validators;
 using VolunteerMatch.Application.Interfaces;
 
+
 namespace VolunteerMatch.Application.Services
 {
     public class UserService
@@ -28,7 +29,7 @@ namespace VolunteerMatch.Application.Services
             IConfiguration config,
             IMapper mapper,
             IVolunteerTagService volunteerTagService,
-            ITagValidator tagValidator, 
+            ITagValidator tagValidator,
             IVolunteerProfileSelectionService volunteerProfileSelectionService)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -75,9 +76,12 @@ namespace VolunteerMatch.Application.Services
                     .SaveVolunteerTagsAsync(user.UserId, createDto.SelectedTagIds);
 
                 await _context.SaveChangesAsync();
+                var response = await CreateAuthResponseAsync(user);
+                // რეფრეშ ტოკენი თუ არ დაინსერთდა ვერ დავარეგისტრირებთ,
+                // ესეც ამ ტრანზაქციაში უნდა
                 await tx.CommitAsync();
 
-                return CreateAuthResponse(user);
+                return response;
             }
             catch (DbUpdateException ex)
             {
@@ -114,9 +118,11 @@ namespace VolunteerMatch.Application.Services
                 _context.OrganizationProfiles.Add(profile);
 
                 await _context.SaveChangesAsync();
+                var response = await CreateAuthResponseAsync(user);
+
                 await tx.CommitAsync();
 
-                return CreateAuthResponse(user);
+                return response;
             }
             catch (DbUpdateException ex)
             {
@@ -147,7 +153,7 @@ namespace VolunteerMatch.Application.Services
             user.LastLoginAt = DateTimeOffset.UtcNow;
             await _context.SaveChangesAsync();
 
-            return CreateAuthResponse(user);
+            return await CreateAuthResponseAsync(user);
         }
 
 
@@ -165,15 +171,30 @@ namespace VolunteerMatch.Application.Services
         }
 
 
-        private AuthResponseDto CreateAuthResponse(User user)
+        private async Task<AuthResponseDto> CreateAuthResponseAsync(User user)
         {
-            var token = JwtHelper.GenerateToken(user, _config);
+            var accessToken = JwtHelper.GenerateToken(user, _config);
+
+            var refreshToken = RefreshTokenHelper.Generate();
+            var refreshTokenHash = RefreshTokenHelper.Hash(refreshToken);
+
+            var refreshTokenEntity = new RefreshToken
+            {
+                UserId = user.UserId,
+                TokenHash = refreshTokenHash,
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                RevokedAt = null
+            };
+
+            _context.RefreshTokens.Add(refreshTokenEntity);
+            await _context.SaveChangesAsync();
 
             return new AuthResponseDto
             {
-                AccessToken = token,
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
                 UserId = user.UserId,
-                Role = user.Role,
+                Role = user.Role
             };
         }
     }

@@ -278,7 +278,7 @@ CREATE TABLE dbo.RefreshTokens
     CreatedAt DATETIME2(0) NOT NULL DEFAULT SYSUTCDATETIME(),
 
     CONSTRAINT FK_RefreshTokens_Users
-        FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId)
+        FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId) ON DELETE CASCADE
 );
 
 CREATE UNIQUE INDEX IX_RefreshTokens_TokenHash
